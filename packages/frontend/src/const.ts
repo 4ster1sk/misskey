@@ -90,6 +90,7 @@ export const ROLE_POLICIES = [
 	'canUpdateBioMedia',
 	'pinLimit',
 	'antennaLimit',
+	'antennaNotesLimit',
 	'wordMuteLimit',
 	'webhookLimit',
 	'clipLimit',

@@ -4791,6 +4791,7 @@ export type components = {
       canUpdateBioMedia: boolean;
       pinLimit: number;
       antennaLimit: number;
+      antennaNotesLimit: number;
       wordMuteLimit: number;
       webhookLimit: number;
       clipLimit: number;

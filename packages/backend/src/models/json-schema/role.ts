@@ -240,6 +240,10 @@ export const packedRolePoliciesSchema = {
 			type: 'integer',
 			optional: false, nullable: false,
 		},
+		antennaNotesLimit: {
+			type: 'integer',
+			optional: false, nullable: false,
+		},
 		wordMuteLimit: {
 			type: 'integer',
 			optional: false, nullable: false,
