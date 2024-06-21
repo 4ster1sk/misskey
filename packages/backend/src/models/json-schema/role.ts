@@ -276,6 +276,10 @@ export const packedRolePoliciesSchema = {
 			type: 'integer',
 			optional: false, nullable: false,
 		},
+		fileSizeLimit: {
+			type: 'integer',
+			optional: false, nullable: false,
+		},
 	},
 } as const;
 

@@ -6674,6 +6674,10 @@ export interface Locale extends ILocale {
              * ドライブ容量
              */
             "driveCapacity": string;
+			/**
+			 * ファイルサイズ上限
+			 */
+			"fileSizeLimit": string;
             /**
              * ファイルにNSFWを常に付与
              */
