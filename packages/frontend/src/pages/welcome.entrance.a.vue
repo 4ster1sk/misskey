@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <div v-if="meta" class="rsqzvsbo">
 	<MkFeaturedPhotos class="bg"/>
-	<XTimeline class="tl"/>
+	<!--<XTimeline class="tl"/>-->
 	<div class="shape1"></div>
 	<div class="shape2"></div>
 	<div class="logo-wrapper">
@@ -142,9 +142,8 @@ misskeyApiGet('federation/instances', {
 			margin-right: 8px;
 		}
 
-		@media (max-width: 1200px) {
-			display: none;
-		}
+		display: none;
+		
 	}
 
 	> .contents {
@@ -153,9 +152,7 @@ misskeyApiGet('federation/instances', {
 		margin-left: 128px;
 		padding: 100px 0 100px 0;
 
-		@media (max-width: 1200px) {
-			margin: auto;
-		}
+		margin: auto;
 	}
 
 	> .federation {
