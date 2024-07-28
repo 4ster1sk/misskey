@@ -25,7 +25,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, defineAsyncComponent } from 'vue';
 import { getProxiedImageUrl, getStaticImageUrl } from '@/scripts/media-proxy.js';
 import { defaultStore } from '@/store.js';
 import { customEmojisMap } from '@/custom-emojis.js';
@@ -35,6 +35,8 @@ import { copyToClipboard } from '@/scripts/copy-to-clipboard.js';
 import * as sound from '@/scripts/sound.js';
 import { i18n } from '@/i18n.js';
 import MkCustomEmojiDetailedDialog from '@/components/MkCustomEmojiDetailedDialog.vue';
+import { $i } from '@/account.js';
+import { importEmojiMeta } from '@/scripts/import-emoji.js';
 
 const props = defineProps<{
 	name: string;
@@ -88,14 +90,27 @@ function onClick(ev: MouseEvent) {
 		os.popupMenu([{
 			type: 'label',
 			text: `:${props.name}:`,
-		}, {
+		}, ...((customEmojis.value.find(it => it.name === customEmojiName.value)?.name ?? null) ? [{
 			text: i18n.ts.copy,
 			icon: 'ti ti-copy',
 			action: () => {
 				copyToClipboard(`:${props.name}:`);
-				os.success();
+				os.toast(i18n.ts.copied, 'copied');
 			},
-		}, ...(props.menuReaction && react ? [{
+		}] : []), ...(props.host && $i && ($i.isAdmin || $i.policies.canManageCustomEmojis) ? [{
+			text: i18n.ts.import,
+			icon: 'ti ti-plus',
+			action: async() => {
+				let emoji = await os.apiWithDialog('admin/emoji/steal', {
+					name: customEmojiName.value,
+					host: props.host,
+				});
+				emoji = await importEmojiMeta(emoji, props.host);
+				os.popup(defineAsyncComponent(() => import('@/pages/emoji-edit-dialog.vue')), {
+					emoji: emoji,
+				});
+			},
+		}] : []), ...(props.menuReaction && react ? [{
 			text: i18n.ts.doReaction,
 			icon: 'ti ti-plus',
 			action: () => {
