@@ -86,6 +86,7 @@ import { misskeyApi } from '@/scripts/misskey-api.js';
 import { i18n } from '@/i18n.js';
 import { definePageMetadata } from '@/scripts/page-metadata.js';
 import { importEmojiMeta } from '@/scripts/import-emoji.js';
+import MkCustomEmojiDetailedDialog from '@/components/MkCustomEmojiDetailedDialog.vue';
 
 const emojisPaginationComponent = shallowRef<InstanceType<typeof MkPagination>>();
 
@@ -167,6 +168,16 @@ const importEmoji = async(emoji) => {
 	edit(res);
 };
 
+const aboutEmoji = async(emoji) => {
+	let remoteEmoji = { ...await importEmojiMeta(emoji, emoji.host) };
+	remoteEmoji.name = `${remoteEmoji.name}@${remoteEmoji.host}`;
+	const { dispose } = os.popup(MkCustomEmojiDetailedDialog, {
+		emoji: remoteEmoji,
+	}, {
+		closed: () => dispose(),
+	})
+};
+
 const remoteMenu = (emoji, ev: MouseEvent) => {
 	os.popupMenu([{
 		type: 'label',
@@ -175,6 +186,10 @@ const remoteMenu = (emoji, ev: MouseEvent) => {
 		text: i18n.ts.import,
 		icon: 'ti ti-plus',
 		action: () => { importEmoji(emoji); },
+	}, {
+		text: i18n.ts.about,
+		icon: 'ti ti-info-circle',
+		action: () => { aboutEmoji(emoji); },
 	}], ev.currentTarget ?? ev.target);
 };
 
