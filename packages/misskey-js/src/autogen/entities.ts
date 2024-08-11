@@ -140,6 +140,7 @@ export type AntennasShowRequest = operations['antennas___show']['requestBody']['
 export type AntennasShowResponse = operations['antennas___show']['responses']['200']['content']['application/json'];
 export type AntennasUpdateRequest = operations['antennas___update']['requestBody']['content']['application/json'];
 export type AntennasUpdateResponse = operations['antennas___update']['responses']['200']['content']['application/json'];
+export type ApFetchOutboxRequest = operations['ap___fetch-outbox']['requestBody']['content']['application/json'];
 export type ApGetRequest = operations['ap___get']['requestBody']['content']['application/json'];
 export type ApGetResponse = operations['ap___get']['responses']['200']['content']['application/json'];
 export type ApShowRequest = operations['ap___show']['requestBody']['content']['application/json'];

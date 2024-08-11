@@ -15,13 +15,13 @@ import { UtilityService } from '@/core/UtilityService.js';
 import { bindThis } from '@/decorators.js';
 import { LoggerService } from '@/core/LoggerService.js';
 import type Logger from '@/logger.js';
-import { isCollectionOrOrderedCollection } from './type.js';
+import { IdentifiableError } from '@/misc/identifiable-error.js';
+import { isCollectionOrOrderedCollection, isIOrderedCollectionPage } from './type.js';
 import { ApDbResolverService } from './ApDbResolverService.js';
 import { ApRendererService } from './ApRendererService.js';
 import { ApRequestService } from './ApRequestService.js';
-import type { IObject, ICollection, IOrderedCollection } from './type.js';
-import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { FetchAllowSoftFailMask } from './misc/check-against-url.js';
+import type { IObject, ICollection, IOrderedCollection, IOrderedCollectionPage } from './type.js';
 
 export class Resolver {
 	private history: Set<string>;
@@ -73,6 +73,19 @@ export class Resolver {
 	}
 
 	@bindThis
+	public async resolveOrderedCollectionPage(value: string | IObject): Promise<IOrderedCollectionPage> {
+		const collection = typeof value === 'string'
+			? await this.resolve(value)
+			: value;
+
+		if (isIOrderedCollectionPage(collection)) {
+			return collection;
+		} else {
+			throw new Error(`unrecognized collection type: ${collection.type}`);
+		}
+	}
+
+	@bindThis
 	public async resolve(value: string | IObject, allowSoftfail: FetchAllowSoftFailMask = FetchAllowSoftFailMask.Strict): Promise<IObject> {
 		if (typeof value !== 'string') {
 			return value;
@@ -119,7 +132,7 @@ export class Resolver {
 		) {
 			throw new IdentifiableError('72180409-793c-4973-868e-5a118eb5519b', 'invalid response');
 		}
-		
+
 		return object;
 	}
 
