@@ -9,7 +9,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<i class="ti ti-list"></i><span style="margin-left: 8px;">{{ column.name }}</span>
 	</template>
 
-	<MkTimeline v-if="column.listId" ref="timeline" src="list" :list="column.listId" :withRenotes="withRenotes" @note="onNote"/>
+	<MkTimeline
+		v-if="column.listId"
+		ref="timeline"
+		:key="column.listId + withRenotes + onlyFiles"
+		src="list"
+		:list="column.listId"
+		:withRenotes="withRenotes"
+		:onlyFiles="onlyFiles"
+		@note="onNote"
+	/>
 </XColumn>
 </template>
 
@@ -35,6 +44,7 @@ const props = defineProps<{
 
 const timeline = shallowRef<InstanceType<typeof MkTimeline>>();
 const withRenotes = ref(props.column.withRenotes ?? true);
+const onlyFiles = ref(props.column.onlyFiles ?? false);
 const soundSetting = ref<SoundStore>(props.column.soundSetting ?? { type: null, volume: 1 });
 
 if (props.column.listId == null) {
@@ -44,6 +54,12 @@ if (props.column.listId == null) {
 watch(withRenotes, v => {
 	updateColumn(props.column.id, {
 		withRenotes: v,
+	});
+});
+
+watch(onlyFiles, v => {
+	updateColumn(props.column.id, {
+		onlyFiles: v,
 	});
 });
 
@@ -110,6 +126,11 @@ const menu: MenuItem[] = [
 		type: 'switch',
 		text: i18n.ts.showRenotes,
 		ref: withRenotes,
+	},
+	{
+		type: 'switch',
+		text: i18n.ts.fileAttachedOnly,
+		ref: onlyFiles,
 	},
 	{
 		icon: 'ti ti-bell',
