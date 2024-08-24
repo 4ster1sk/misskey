@@ -40,7 +40,7 @@ export function uploadFile(
 
 	if (folder && typeof folder === 'object') folder = folder.id;
 
-	if (file.size > instance.maxFileSize) {
+	if (file.size > $i.policies.fileSizeLimit * 1024 * 1024) {
 		alert({
 			type: 'error',
 			title: i18n.ts.failedToUpload,
