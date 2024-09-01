@@ -18,7 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<MkButton :link="true" to="/my/antennas/create" primary :class="$style.add"><i class="ti ti-plus"></i> {{ i18n.ts.add }}</MkButton>
 
 			<div v-if="antennas.length > 0" class="_gaps">
-				<MkA v-for="antenna in antennas" :key="antenna.id" :class="$style.antenna" :to="`/my/antennas/${antenna.id}`">
+				<MkA v-for="antenna in antennas" :key="antenna.id" class="_panel" :class="$style.antenna" :to="`/timeline/antenna/${antenna.id}`">
 					<div class="name">{{ antenna.name }}</div>
 				</MkA>
 			</div>
@@ -56,7 +56,7 @@ const headerActions = computed(() => [{
 const headerTabs = computed(() => []);
 
 definePageMetadata(() => ({
-	title: i18n.ts.manageAntennas,
+	title: i18n.ts.antennas,
 	icon: 'ti ti-antenna',
 }));
 
