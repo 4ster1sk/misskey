@@ -8,7 +8,7 @@ import { awaitAll } from '@/misc/prelude/await-all.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
 import { DI } from '@/di-symbols.js';
-import type { UsersRepository, NotesRepository, FollowingsRepository, DriveFilesRepository, NoteReactionsRepository, PageLikesRepository, NoteFavoritesRepository, PollVotesRepository } from '@/models/index.js';
+import type { UsersRepository, NotesRepository, FollowingsRepository, DriveFilesRepository, NoteReactionsRepository, PageLikesRepository, NoteFavoritesRepository, PollVotesRepository } from '@/models/_.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
