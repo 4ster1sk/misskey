@@ -4,7 +4,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<MkModalWindow ref="dialogEl" @close="cancel()" @closed="$emit('closed')">
+<MkWindow
+	ref="dialogEl"
+	:initialHeight="500"
+	:canResize="true"
+	@close="cancel()"
+	@closed="emit('closed')"
+>
 	<template #header>:{{ emoji.name }}:</template>
 	<template #default>
 		<MkSpacer>
@@ -12,6 +18,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<div :class="$style.emojiImgWrapper">
 					<MkCustomEmoji :name="emoji.name" :normal="true" :useOriginalSize="true" style="height: 100%;"></MkCustomEmoji>
 				</div>
+				<MkKeyValue v-if="licenseToTop">
+					<template #key>{{ i18n.ts.license }}</template>
+					<template #value><Mfm :text="emoji.license ?? i18n.ts.none"/></template>
+				</MkKeyValue>
 				<MkKeyValue :copy="`:${emoji.name}:`">
 					<template #key>{{ i18n.ts.name }}</template>
 					<template #value>{{ emoji.name }}</template>
@@ -39,7 +49,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<template #key>{{ i18n.ts.localOnly }}</template>
 					<template #value>{{ emoji.localOnly ? i18n.ts.yes : i18n.ts.no }}</template>
 				</MkKeyValue>
-				<MkKeyValue>
+				<MkKeyValue v-if="!licenseToTop">
 					<template #key>{{ i18n.ts.license }}</template>
 					<template #value><Mfm :text="emoji.license ?? i18n.ts.none"/></template>
 				</MkKeyValue>
@@ -52,7 +62,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</div>
 		</MkSpacer>
 	</template>
-</MkModalWindow>
+</MkWindow>
 </template>
 
 <script lang="ts" setup>
@@ -60,12 +70,15 @@ import * as Misskey from 'misskey-js';
 import { defineProps, shallowRef } from 'vue';
 import MkLink from '@/components/MkLink.vue';
 import { i18n } from '@/i18n.js';
-import MkModalWindow from '@/components/MkModalWindow.vue';
+import MkWindow from '@/components/MkWindow.vue';
 import MkKeyValue from '@/components/MkKeyValue.vue';
 
-const props = defineProps<{
-  emoji: Misskey.entities.EmojiDetailed,
-}>();
+const props = withDefaults(defineProps<{
+    emoji: Misskey.entities.EmojiDetailed;
+    licenseToTop: boolean;
+  }>(), {
+	licenseToTop: false,
+});
 
 const emit = defineEmits<{
 	(ev: 'ok', cropped: Misskey.entities.DriveFile): void;
@@ -73,7 +86,7 @@ const emit = defineEmits<{
 	(ev: 'closed'): void;
 }>();
 
-const dialogEl = shallowRef<InstanceType<typeof MkModalWindow>>();
+const dialogEl = shallowRef<InstanceType<typeof MkWindow>>();
 
 function cancel() {
 	emit('cancel');
