@@ -49,18 +49,24 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</div>
 
-	<div v-if="isMobile" :class="$style.nav">
-		<button :class="$style.navButton" class="_button" @click="drawerMenuShowing = true"><i :class="$style.navButtonIcon" class="ti ti-menu-2"></i><span v-if="menuIndicated" :class="$style.navButtonIndicator"><i class="_indicatorCircle"></i></span></button>
-		<button :class="$style.navButton" class="_button" @click="mainRouter.push('/')"><i :class="$style.navButtonIcon" class="ti ti-home"></i></button>
-		<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/notifications')">
-			<i :class="$style.navButtonIcon" class="ti ti-bell"></i>
-			<span v-if="$i?.hasUnreadNotification" :class="$style.navButtonIndicator">
-				<span class="_indicateCounter" :class="$style.itemIndicateValueIcon">{{ $i.unreadNotificationsCount > 99 ? '99+' : $i.unreadNotificationsCount }}</span>
-			</span>
-		</button>
-		<button :class="$style.postButton" class="_button" @click="os.post()"><i :class="$style.navButtonIcon" class="ti ti-pencil"></i></button>
+	<div v-if="isMobile" ref="navFooter" :class="$style.nav">
+		<div :class="$style.navScrollable">
+			<button :class="$style.navButton" class="_button" @click="drawerMenuShowing = true"><i :class="$style.navButtonIcon" class="ti ti-menu-2"></i><span v-if="menuIndicated" :class="$style.navButtonIndicator"><i class="_indicatorCircle"></i></span></button>
+			<button :class="$style.navButton" class="_button" @click="mainRouter.push('/')"><i :class="$style.navButtonIcon" class="ti ti-home"></i></button>
+			<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/notifications')">
+				<i :class="$style.navButtonIcon" class="ti ti-bell"></i>
+				<span v-if="$i?.hasUnreadNotification" :class="$style.navButtonIndicator">
+					<span class="_indicateCounter" :class="$style.itemIndicateValueIcon">{{ $i.unreadNotificationsCount > 99 ? '99+' : $i.unreadNotificationsCount }}</span>
+				</span>
+			</button>
+			<button :class="$style.navButton" class="_button" @click="chooseList"><i :class="$style.navButtonIcon" class="ti ti-list"></i></button>
+			<button :class="$style.navButton" class="_button" @click="chooseAntenna"><i :class="$style.navButtonIcon" class="ti ti-antenna"></i></button>
+			<button :class="$style.navButton" class="_button" @click="chooseChannel"><i :class="$style.navButtonIcon" class="ti ti-device-tv"></i></button>
+			<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/favorites')"><i :class="$style.navButtonIcon" class="ti ti-star"></i></button>
+			<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/clips')"><i :class="$style.navButtonIcon" class="ti ti-paperclip"></i></button>
+		</div>
+		<button :class="$style.postButton" class="_button" style="position: sticky;" @click="os.post()"><i :class="$style.navButtonIcon" class="ti ti-pencil"></i></button>
 	</div>
-
 	<Transition
 		:enterActiveClass="defaultStore.state.animation ? $style.transition_menuDrawerBg_enterActive : ''"
 		:leaveActiveClass="defaultStore.state.animation ? $style.transition_menuDrawerBg_leaveActive : ''"
@@ -119,6 +125,8 @@ import XDirectColumn from '@/ui/deck/direct-column.vue';
 import XRoleTimelineColumn from '@/ui/deck/role-timeline-column.vue';
 import { mainRouter } from '@/router/main.js';
 import { MenuItem } from '@/types/menu.js';
+import { miLocalStorage } from '@/local-storage.js';
+import { antennasCache, userListsCache, favoritedChannelsCache } from '@/cache.js';
 const XStatusBars = defineAsyncComponent(() => import('@/ui/_common_/statusbars.vue'));
 const XAnnouncements = defineAsyncComponent(() => import('@/ui/_common_/announcements.vue'));
 
@@ -254,6 +262,70 @@ async function deleteProfile() {
 	deleteProfile_(deckStore.state.profile);
 	deckStore.set('profile', 'default');
 	unisonReload();
+}
+
+async function chooseList(ev: MouseEvent): Promise<void> {
+	const lists = await userListsCache.fetch();
+	const items: MenuItem[] = [
+		...lists.map(list => ({
+			type: 'link' as const,
+			text: list.name,
+			to: `/timeline/list/${list.id}`,
+		})),
+		(lists.length === 0 ? undefined : { type: 'divider' }),
+		{
+			type: 'link' as const,
+			icon: 'ti ti-plus',
+			text: i18n.ts.createNew,
+			to: '/my/lists',
+		},
+	];
+	os.popupMenu(items, ev.currentTarget ?? ev.target);
+}
+
+async function chooseAntenna(ev: MouseEvent): Promise<void> {
+	const antennas = await antennasCache.fetch();
+	const items: MenuItem[] = [
+		...antennas.map(antenna => ({
+			type: 'link' as const,
+			text: antenna.name,
+			indicate: antenna.hasUnreadNote,
+			to: `/timeline/antenna/${antenna.id}`,
+		})),
+		(antennas.length === 0 ? undefined : { type: 'divider' }),
+		{
+			type: 'link' as const,
+			icon: 'ti ti-plus',
+			text: i18n.ts.createNew,
+			to: '/my/antennas',
+		},
+	];
+	os.popupMenu(items, ev.currentTarget ?? ev.target);
+}
+
+async function chooseChannel(ev: MouseEvent): Promise<void> {
+	const channels = await favoritedChannelsCache.fetch();
+	const items: MenuItem[] = [
+		...channels.map(channel => {
+			const lastReadedAt = miLocalStorage.getItemAsJson(`channelLastReadedAt:${channel.id}`) ?? null;
+			const hasUnreadNote = (lastReadedAt && channel.lastNotedAt) ? Date.parse(channel.lastNotedAt) > lastReadedAt : !!(!lastReadedAt && channel.lastNotedAt);
+
+			return {
+				type: 'link' as const,
+				text: channel.name,
+				indicate: hasUnreadNote,
+				to: `/channels/${channel.id}`,
+			};
+		}),
+		(channels.length === 0 ? undefined : { type: 'divider' }),
+		{
+			type: 'link' as const,
+			icon: 'ti ti-plus',
+			text: i18n.ts.createNew,
+			to: '/channels',
+		},
+	];
+	os.popupMenu(items, ev.currentTarget ?? ev.target);
 }
 </script>
 
@@ -422,16 +494,24 @@ body {
 	z-index: 1000;
 	bottom: 0;
 	left: 0;
-	padding: 12px 12px max(12px, env(safe-area-inset-bottom, 0px)) 12px;
-	display: grid;
-	grid-template-columns: 1fr 1fr 1fr 1fr;
-	grid-gap: 8px;
+	padding: 6px 12px max(6px, env(safe-area-inset-bottom, 0px)) 12px;
+  display: flex;
 	width: 100%;
 	box-sizing: border-box;
-	-webkit-backdrop-filter: var(--blur, blur(32px));
-	backdrop-filter: var(--blur, blur(32px));
+	-webkit-backdrop-filter: var(--blur, blur(24px));
+	backdrop-filter: var(--blur, blur(24px));
 	background-color: var(--header);
 	border-top: solid 0.5px var(--divider);
+}
+
+.navScrollable {
+		display: flex;
+		grid-gap: 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-grow: 1;
+		box-sizing: border-box;
+		scrollbar-width: none;
 }
 
 .navButton {
@@ -444,6 +524,7 @@ body {
 	border-radius: 100%;
 	background: var(--panel);
 	color: var(--fg);
+	flex-shrink: 0;
 
 	&:hover {
 		background: var(--panelHighlight);
