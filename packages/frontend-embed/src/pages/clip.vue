@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <div>
-	<MkLoading v-if="loading"/>
+	<EmLoading v-if="loading"/>
 	<EmTimelineContainer v-else-if="clip" :showHeader="embedParams.header">
 		<template #header>
 			<div :class="$style.clipHeader">
@@ -43,14 +43,15 @@ import { ref, computed, shallowRef, inject } from 'vue';
 import * as Misskey from 'misskey-js';
 import { scrollToTop } from '@@/js/scroll.js';
 import type { Paging } from '@/components/EmPagination.vue';
+import EmLoading from '@/components/EmLoading.vue';
 import EmNotes from '@/components/EmNotes.vue';
 import XNotFound from '@/pages/not-found.vue';
 import EmTimelineContainer from '@/components/EmTimelineContainer.vue';
 import { misskeyApi } from '@/misskey-api.js';
 import { i18n } from '@/i18n.js';
 import { serverMetadata } from '@/server-metadata.js';
-import { url, instanceName } from '@/config.js';
-import { isLink } from '@/to-be-shared/is-link.js';
+import { url, instanceName } from '@@/js/config.js';
+import { isLink } from '@@/js/is-link.js';
 import { defaultEmbedParams } from '@@/js/embed-page.js';
 import { DI } from '@/di.js';
 
@@ -134,7 +135,7 @@ misskeyApi('clips/show', {
 
 	.instanceIcon {
 		height: 24px;
-		border-radius: 4px;
+		border-radius: 3px;
 	}
 }
 </style>
