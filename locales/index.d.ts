@@ -1305,6 +1305,10 @@ export interface Locale extends ILocale {
      */
     "driveSearchbarPlaceholder": string;
     /**
+     * {query}は見つかりません
+     */
+    "driveSearchNotFound": ParameterizedString<"query">;
+    /**
      * ファイル名
      */
     "fileName": string;

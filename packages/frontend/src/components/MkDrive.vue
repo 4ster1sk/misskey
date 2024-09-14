@@ -91,8 +91,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</div>
 			<div v-if="files.length == 0 && folders.length == 0 && !fetching" :class="$style.empty">
 				<div v-if="draghover">{{ i18n.ts['empty-draghover'] }}</div>
-				<div v-if="!draghover && folder == null"><strong>{{ i18n.ts.emptyDrive }}</strong><br/>{{ i18n.ts['empty-drive-description'] }}</div>
-				<div v-if="!draghover && folder != null">{{ i18n.ts.emptyFolder }}</div>
+				<div v-if="!draghover && folder == null && lastSearchQuery === ''"><strong>{{ i18n.ts.emptyDrive }}</strong><br/>{{ i18n.ts['empty-drive-description'] }}</div>
+				<div v-if="!draghover && folder != null && lastSearchQuery === ''">{{ i18n.ts.emptyFolder }}</div>
+				<div v-if="!draghover && lastSearchQuery !== ''"><strong>{{ i18n.tsx.driveSearchNotFound({query: lastSearchQuery}) }}</strong></div>
 			</div>
 		</div>
 		<MkLoading v-if="fetching"/>
@@ -120,6 +121,7 @@ import { uploadFile, uploads } from '@/scripts/upload.js';
 import { claimAchievement } from '@/scripts/achievements.js';
 
 const searchQuery = ref('');
+const lastSearchQuery = ref('');
 
 const props = withDefaults(defineProps<{
 	initialFolder?: Misskey.entities.DriveFolder;
@@ -549,6 +551,7 @@ async function fetch() {
 	moreFolders.value = false;
 	moreFiles.value = false;
 	fetching.value = true;
+	lastSearchQuery.value = searchQuery.value.toString().trim();
 
 	const foldersMax = 30;
 	const filesMax = 30;
@@ -556,7 +559,7 @@ async function fetch() {
 	const foldersPromise = misskeyApi('drive/folders', {
 		folderId: folder.value ? folder.value.id : null,
 		limit: foldersMax + 1,
-		searchQuery: searchQuery.value.toString().trim(),
+		searchQuery: lastSearchQuery.value,
 	}).then(fetchedFolders => {
 		if (fetchedFolders.length === foldersMax + 1) {
 			moreFolders.value = true;
@@ -569,7 +572,7 @@ async function fetch() {
 		folderId: folder.value ? folder.value.id : null,
 		type: props.type,
 		limit: filesMax + 1,
-		searchQuery: searchQuery.value.toString().trim(),
+		searchQuery: lastSearchQuery.value,
 	}).then(fetchedFiles => {
 		if (fetchedFiles.length === filesMax + 1) {
 			moreFiles.value = true;
