@@ -4,13 +4,13 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
+import { Brackets } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { DriveFilesRepository } from '@/models/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { sqlLikeEscape } from '@/misc/sql-like-escape.js';
-import { Brackets } from 'typeorm';
 
 export const meta = {
 	tags: ['drive'],
@@ -39,7 +39,7 @@ export const paramDef = {
 		folderId: { type: 'string', format: 'misskey:id', nullable: true, default: null },
 		type: { type: 'string', nullable: true, pattern: /^[a-zA-Z\/\-*]+$/.toString().slice(1, -1) },
 		sort: { type: 'string', nullable: true, enum: ['+createdAt', '-createdAt', '+name', '-name', '+size', '-size', null] },
-		searchQuery: { type: 'string', default: '' }
+		searchQuery: { type: 'string', default: '' },
 	},
 	required: [],
 } as const;
@@ -64,7 +64,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			if (ps.searchQuery.length > 0) {
-				const args = { searchQuery: `%${sqlLikeEscape(ps.searchQuery)}%` };
+				const args = { searchQuery: `%${sqlLikeEscape(ps.searchQuery.slice(0, 512))}%` };
 				query.andWhere(new Brackets((qb) => {
 					qb
 						.where('file.name ILIKE :searchQuery', args)
