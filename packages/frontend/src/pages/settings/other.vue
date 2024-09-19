@@ -100,7 +100,7 @@ import { defaultStore } from '@/store.js';
 import { signout, signinRequired } from '@/account.js';
 import { i18n } from '@/i18n.js';
 import { definePageMetadata } from '@/scripts/page-metadata.js';
-import { unisonReload } from '@/scripts/unison-reload.js';
+import { reloadAsk } from '@/scripts/reload-ask.js';
 import FormSection from '@/components/form/section.vue';
 
 const $i = signinRequired();
@@ -134,16 +134,6 @@ async function deleteAccount() {
 	await signout();
 }
 
-async function reloadAsk() {
-	const { canceled } = await os.confirm({
-		type: 'info',
-		text: i18n.ts.reloadToApplySetting,
-	});
-	if (canceled) return;
-
-	unisonReload();
-}
-
 async function updateRepliesAll(withReplies: boolean) {
 	const { canceled } = await os.confirm({
 		type: 'warning',
@@ -157,7 +147,7 @@ async function updateRepliesAll(withReplies: boolean) {
 watch([
 	enableCondensedLineForAcct,
 ], async () => {
-	await reloadAsk();
+	await reloadAsk({ reason: i18n.ts.reloadToApplySetting, unison: true });
 });
 
 const headerActions = computed(() => []);
