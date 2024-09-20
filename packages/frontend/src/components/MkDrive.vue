@@ -32,8 +32,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 		<div :class="$style.navMenu">
 			<!-- "Search drive via alt text or file names" -->
-			<MkInput v-model="searchQuery" :large="true" :autofocus="true" type="search" :placeholder="i18n.ts.driveSearchbarPlaceholder" @enter="fetch">
-				<template #prefix><i class="ph-magnifying-glass ph-bold ph-lg"></i></template>
+			<MkInput v-model="searchQuery" :large="true" :autofocus="true" type="search" @enter.prevent="fetch">
+				<template #prefix><i class="ti ti-search"></i></template>
 			</MkInput>
 
 			<button class="_button" :class="$style.navMenu" @click="showMenu"><i class="ti ti-dots"></i></button>
