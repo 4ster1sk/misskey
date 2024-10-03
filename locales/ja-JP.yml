@@ -2753,3 +2753,8 @@ _embedCodeGen:
   generateCode: "埋め込みコードを作成"
   codeGenerated: "コードが生成されました"
   codeGeneratedDescription: "生成されたコードをウェブサイトに貼り付けてご利用ください。"
+_searchSite:
+  google: "Google"
+  bing: "Bing"
+  duckduckgo: "DuckDuckGo"
+  yahoo: "Yahoo! Japan"

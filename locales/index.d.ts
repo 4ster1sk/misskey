@@ -10330,6 +10330,24 @@ export interface Locale extends ILocale {
          */
         "codeGeneratedDescription": string;
     };
+    "_searchSite": {
+        /**
+         * Google
+         */
+        "google": string;
+        /**
+         * Bing
+         */
+        "bing": string;
+        /**
+         * DuckDuckGo
+         */
+        "duckduckgo": string;
+        /**
+         * Yahoo! Japan
+         */
+        "yahoo": string;
+    };
 }
 declare const locales: {
     [lang: string]: Locale;

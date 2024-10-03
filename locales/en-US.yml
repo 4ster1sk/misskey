@@ -2643,3 +2643,8 @@ _contextMenu:
   app: "Application"
   appWithShift: "Application with shift key"
   native: "Native"
+_searchSite:
+  google: "Google"
+  bing: "Bing"
+  duckduckgo: "DuckDuckGo"
+  yahoo: "Yahoo! Japan"
