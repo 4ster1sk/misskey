@@ -13,6 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { i18n } from '@/i18n.js';
+import { defaultStore } from '@/store.js';
 
 const props = defineProps<{
 	q: string;
@@ -22,8 +23,30 @@ const query = ref(props.q);
 
 const search = () => {
 	const sp = new URLSearchParams();
-	sp.append('q', query.value);
-	window.open(`https://www.google.com/search?${sp.toString()}`, '_blank', 'noopener');
+	if (defaultStore.state.searchSite === 'yahoo') {
+		sp.append('p', query.value);
+	} else {
+		sp.append('q', query.value);
+	}
+
+	let url = '';
+
+	switch (defaultStore.state.searchSite) {
+		case 'bing':
+			url = `https://www.bing.com/search?${sp.toString()}`;
+			break;
+		case 'duckduckgo':
+			url = `https://duckduckgo.com/?${sp.toString()}`;
+			break;
+		case 'google':
+			url = `https://www.google.com/search?${sp.toString()}`;
+			break;
+		case 'yahoo':
+			url = `https://search.yahoo.co.jp/search?${sp.toString()}`;
+			break;
+	}
+
+	window.open(url, '_blank', 'noopener');
 };
 </script>
 

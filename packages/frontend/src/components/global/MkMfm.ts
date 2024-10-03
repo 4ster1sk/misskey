@@ -6,6 +6,7 @@
 import { VNode, h, SetupContext, provide } from 'vue';
 import * as mfm from 'mfm-js';
 import * as Misskey from 'misskey-js';
+import { host } from '@@/js/config.js';
 import MkUrl from '@/components/global/MkUrl.vue';
 import MkTime from '@/components/global/MkTime.vue';
 import MkLink from '@/components/MkLink.vue';
@@ -14,10 +15,9 @@ import MkEmoji from '@/components/global/MkEmoji.vue';
 import MkCustomEmoji from '@/components/global/MkCustomEmoji.vue';
 import MkCode from '@/components/MkCode.vue';
 import MkCodeInline from '@/components/MkCodeInline.vue';
-import MkGoogle from '@/components/MkGoogle.vue';
+import MkSearch from '@/components/MkSearch.vue';
 import MkSparkle from '@/components/MkSparkle.vue';
 import MkA, { MkABehavior } from '@/components/global/MkA.vue';
-import { host } from '@@/js/config.js';
 import { defaultStore } from '@/store.js';
 
 function safeParseFloat(str: unknown): number | null {
@@ -451,7 +451,7 @@ export default function (props: MfmProps, { emit }: { emit: SetupContext<MfmEven
 			}
 
 			case 'search': {
-				return [h(MkGoogle, {
+				return [h(MkSearch, {
 					key: Math.random(),
 					q: token.props.query,
 				})];

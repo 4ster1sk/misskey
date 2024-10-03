@@ -2691,3 +2691,8 @@ _embedCodeGen:
   generateCode: "Generate embed code"
   codeGenerated: "The code has been generated"
   codeGeneratedDescription: "Paste the generated code into your website to embed the content."
+_searchSite:
+  google: "Google"
+  bing: "Bing"
+  duckduckgo: "DuckDuckGo"
+  yahoo: "Yahoo! Japan"

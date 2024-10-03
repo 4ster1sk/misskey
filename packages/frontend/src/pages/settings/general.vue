@@ -231,6 +231,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<option value="S">{{ i18n.ts._hemisphere.S }}</option>
 				<template #caption>{{ i18n.ts._hemisphere.caption }}</template>
 			</MkRadios>
+			<MkSelect v-model="searchSite">
+				<template #label>{{ i18n.ts.search }}</template>
+				<option value="google">{{ i18n.ts._searchSite.google }}</option>
+				<option value="bing">{{ i18n.ts._searchSite.bing }}</option>
+				<option value="duckduckgo">{{ i18n.ts._searchSite.duckduckgo }}</option>
+				<option value="yahoo">{{ i18n.ts._searchSite.yahoo }}</option>
+			</MkSelect>
 			<MkFolder>
 				<template #label>{{ i18n.ts.additionalEmojiDictionary }}</template>
 				<div class="_buttons">
@@ -320,6 +327,7 @@ const useNativeUIForVideoAudioPlayer = computed(defaultStore.makeGetterSetter('u
 const alwaysConfirmFollow = computed(defaultStore.makeGetterSetter('alwaysConfirmFollow'));
 const confirmWhenRevealingSensitiveMedia = computed(defaultStore.makeGetterSetter('confirmWhenRevealingSensitiveMedia'));
 const contextMenu = computed(defaultStore.makeGetterSetter('contextMenu'));
+const searchSite = computed(defaultStore.makeGetterSetter('searchSite'));
 
 watch(lang, () => {
 	miLocalStorage.setItem('lang', lang.value as string);
@@ -364,6 +372,7 @@ watch([
 	alwaysConfirmFollow,
 	confirmWhenRevealingSensitiveMedia,
 	contextMenu,
+	searchSite,
 ], async () => {
 	await reloadAsk({ reason: i18n.ts.reloadToApplySetting, unison: true });
 });
