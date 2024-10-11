@@ -336,14 +336,14 @@ definePageMetadata(() => ({
 .ogwlenmc {
 	> .local {
 		.empty {
-			margin: var(--margin);
+			margin: var(--MI-margin);
 		}
 
 		.ldhfsamy {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 			grid-gap: 12px;
-			margin: var(--margin) 0;
+			margin: var(--MI-margin) 0;
 
 			> .emoji {
 				display: flex;
@@ -388,14 +388,14 @@ definePageMetadata(() => ({
 
 	> .remote {
 		.empty {
-			margin: var(--margin);
+			margin: var(--MI-margin);
 		}
 
 		.ldhfsamy {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 			grid-gap: 12px;
-			margin: var(--margin) 0;
+			margin: var(--MI-margin) 0;
 
 			> .emoji {
 				display: flex;
