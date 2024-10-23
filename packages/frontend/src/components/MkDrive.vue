@@ -169,7 +169,12 @@ const ilFilesObserver = new IntersectionObserver(
 	(entries) => entries.some((entry) => entry.isIntersecting) && !fetching.value && moreFiles.value && fetchMoreFiles(),
 );
 
+const sortModeSelect = ref('+createdAt');
+
 watch(folder, () => emit('cd', folder.value));
+watch(sortModeSelect, () => {
+	fetch();
+});
 
 function onStreamDriveFileCreated(file: Misskey.entities.DriveFile) {
 	addFile(file, true);
@@ -572,6 +577,7 @@ async function fetch() {
 		folderId: folder.value ? folder.value.id : null,
 		type: props.type,
 		limit: filesMax + 1,
+		sort: sortModeSelect.value,
 		searchQuery: lastSearchQuery.value,
 	}).then(fetchedFiles => {
 		if (fetchedFiles.length === filesMax + 1) {
@@ -623,6 +629,7 @@ function fetchMoreFiles() {
 		type: props.type,
 		untilId: files.value.at(-1)?.id,
 		limit: max + 1,
+		sort: sortModeSelect.value,
 		searchQuery: searchQuery.value.toString().trim(),
 	}).then(files => {
 		if (files.length === max + 1) {
@@ -657,6 +664,43 @@ function getMenu() {
 	}, { type: 'divider' }, {
 		text: folder.value ? folder.value.name : i18n.ts.drive,
 		type: 'label',
+	});
+
+	menu.push({
+		type: 'parent',
+		text: i18n.ts.sort,
+		icon: 'ti ti-arrows-sort',
+		children: [{
+			text: `${i18n.ts.registeredDate} (${i18n.ts.descendingOrder})`,
+			icon: 'ti ti-sort-descending-letters',
+			action: () => { sortModeSelect.value = '+createdAt'; },
+			active: sortModeSelect.value === '+createdAt',
+		}, {
+			text: `${i18n.ts.registeredDate} (${i18n.ts.ascendingOrder})`,
+			icon: 'ti ti-sort-ascending-letters',
+			action: () => { sortModeSelect.value = '-createdAt'; },
+			active: sortModeSelect.value === '-createdAt',
+		}, {
+			text: `${i18n.ts.size} (${i18n.ts.descendingOrder})`,
+			icon: 'ti ti-sort-descending-letters',
+			action: () => { sortModeSelect.value = '+size'; },
+			active: sortModeSelect.value === '+size',
+		}, {
+			text: `${i18n.ts.size} (${i18n.ts.ascendingOrder})`,
+			icon: 'ti ti-sort-ascending-letters',
+			action: () => { sortModeSelect.value = '-size'; },
+			active: sortModeSelect.value === '-size',
+		}, {
+			text: `${i18n.ts.name} (${i18n.ts.descendingOrder})`,
+			icon: 'ti ti-sort-descending-letters',
+			action: () => { sortModeSelect.value = '+name'; },
+			active: sortModeSelect.value === '+name',
+		}, {
+			text: `${i18n.ts.name} (${i18n.ts.ascendingOrder})`,
+			icon: 'ti ti-sort-ascending-letters',
+			action: () => { sortModeSelect.value = '-name'; },
+			active: sortModeSelect.value === '-name',
+		}],
 	});
 
 	if (folder.value) {
