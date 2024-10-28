@@ -5222,6 +5222,10 @@ export interface Locale extends ILocale {
      * アカウントを選択してください
      */
     "pleaseSelectAccount": string;
+    /**
+     * 利用可能なロール
+     */
+    "availableRoles": string;
     "_accountSettings": {
         /**
          * コンテンツの表示にログインを必須にする
@@ -10586,6 +10590,28 @@ export interface Locale extends ILocale {
          * Yahoo! Japan
          */
         "yahoo": string;
+		};
+    "_selfXssPrevention": {
+        /**
+         * 警告
+         */
+        "warning": string;
+        /**
+         * 「この画面に何か貼り付けろ」はすべて詐欺です。
+         */
+        "title": string;
+        /**
+         * ここに何かを貼り付けると、悪意のあるユーザーにアカウントを乗っ取られたり、個人情報を盗まれたりする可能性があります。
+         */
+        "description1": string;
+        /**
+         * 貼り付けようとしているものが何なのかを正確に理解していない場合は、%c今すぐ作業を中止してこのウィンドウを閉じてください。
+         */
+        "description2": string;
+        /**
+         * 詳しくはこちらをご確認ください。 {link}
+         */
+        "description3": ParameterizedString<"link">;
     };
 }
 declare const locales: {
