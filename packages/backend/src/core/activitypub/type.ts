@@ -126,7 +126,9 @@ export interface IOrderedCollectionPage extends IObject {
 	type: 'OrderedCollectionPage';
 	partOf: string;
 	totalItems?: number;
-	orderedItems: ApObject[];
+	first?: IObject | string;
+	orderedItems?: IObject[];
+	items?: IObject[];
 	prev: string;
 	next: string;
 }
