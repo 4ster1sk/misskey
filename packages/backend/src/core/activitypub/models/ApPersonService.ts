@@ -257,7 +257,7 @@ export class ApPersonService implements OnModuleInit {
 			if (Array.isArray(img)) {
 				img = img.find(item => item && item.url) ?? null;
 			}
-			
+
 			// if we have an explicitly missing image, return an
 			// explicitly-null set of values
 			if ((img == null) || (typeof img === 'object' && img.url == null)) {
@@ -349,7 +349,8 @@ export class ApPersonService implements OnModuleInit {
 				throw new Error('unexpected schema of person url: ' + url);
 			}
 
-			if (this.utilityService.punyHost(url) !== this.utilityService.punyHost(person.id)) {
+			if ((this.utilityService.punyHost(url) !== this.utilityService.punyHost(person.id)) &&
+			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(person.id) === 'threads.net')) {
 				throw new Error(`person url <> uri host mismatch: ${url} <> ${person.id}`);
 			}
 		}
@@ -552,7 +553,8 @@ export class ApPersonService implements OnModuleInit {
 				throw new Error('unexpected schema of person url: ' + url);
 			}
 
-			if (this.utilityService.punyHost(url) !== this.utilityService.punyHost(person.id)) {
+			if ((this.utilityService.punyHost(url) !== this.utilityService.punyHost(person.id)) &&
+			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(person.id) === 'threads.net')) {
 				throw new Error(`person url <> uri host mismatch: ${url} <> ${person.id}`);
 			}
 		}
