@@ -160,7 +160,8 @@ export class ApNoteService {
 			}
 
 			if ((this.utilityService.punyHost(url) !== this.utilityService.punyHost(note.id)) &&
-			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(note.id) === 'threads.net')) {
+			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(note.id) === 'threads.net') &&
+			!(this.utilityService.punyHost(url) === 'fed.brid.gy' && this.utilityService.punyHost(note.id) === 'bsky.brid.gy')) {
 				throw new Error(`note url & uri host mismatch: note url: ${url}, note uri: ${note.id}`);
 			}
 		}

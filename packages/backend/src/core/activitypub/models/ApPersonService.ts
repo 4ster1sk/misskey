@@ -350,7 +350,8 @@ export class ApPersonService implements OnModuleInit {
 			}
 
 			if ((this.utilityService.punyHost(url) !== this.utilityService.punyHost(person.id)) &&
-			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(person.id) === 'threads.net')) {
+			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(person.id) === 'threads.net') &&
+			!(this.utilityService.punyHost(url) === 'fed.brid.gy' && this.utilityService.punyHost(person.id) === 'bsky.brid.gy')) {
 				throw new Error(`person url <> uri host mismatch: ${url} <> ${person.id}`);
 			}
 		}
@@ -554,7 +555,8 @@ export class ApPersonService implements OnModuleInit {
 			}
 
 			if ((this.utilityService.punyHost(url) !== this.utilityService.punyHost(person.id)) &&
-			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(person.id) === 'threads.net')) {
+			!(this.utilityService.punyHost(url) === 'www.threads.net' && this.utilityService.punyHost(person.id) === 'threads.net') &&
+			!(this.utilityService.punyHost(url) === 'fed.brid.gy' && this.utilityService.punyHost(person.id) === 'bsky.brid.gy')) {
 				throw new Error(`person url <> uri host mismatch: ${url} <> ${person.id}`);
 			}
 		}
