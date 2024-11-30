@@ -88,7 +88,7 @@ export class CustomEmojiService implements OnApplicationShutdown {
 			this.localEmojisCache.refresh();
 
 			this.globalEventService.publishBroadcastStream('emojiAdded', {
-				emoji: await this.emojiEntityService.packDetailed(emoji.id),
+				emoji: await this.emojiEntityService.packDetailed(emoji),
 			});
 
 			if (moderator) {
