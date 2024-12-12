@@ -2835,3 +2835,7 @@ _selfXssPrevention:
 _followRequest:
   recieved: "受け取った申請"
   sent: "送った申請"
+
+_customizeFeature:
+  title: "独自機能"
+  disableSignup: "Signupの無効化"
