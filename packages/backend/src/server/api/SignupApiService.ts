@@ -129,6 +129,11 @@ export class SignupApiService {
 
 		let ticket: MiRegistrationTicket | null = null;
 
+		if (this.meta.disableSignup) {
+			reply.code(400);
+			return;
+		}
+
 		if (this.meta.disableRegistration) {
 			if (invitationCode == null || typeof invitationCode !== 'string') {
 				reply.code(400);
