@@ -29,7 +29,7 @@ import type { MiRemoteUser } from '@/models/User.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { AbuseReportService } from '@/core/AbuseReportService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
-import { getApHrefNullable, getApId, getApIds, getApType, isAccept, isActor, isAdd, isAnnounce, isBlock, isCollection, isCollectionOrOrderedCollection, isCreate, isDelete, isFlag, isFollow, isLike, isMove, isPost, isReject, isRemove, isTombstone, isUndo, isUpdate, validActor, validPost } from './type.js';
+import { getApHrefNullable, getApId, getApIds, getApType, getApUrl, isAccept, isActor, isAdd, isAnnounce, isBlock, isCollection, isCollectionOrOrderedCollection, isCreate, isDelete, isFlag, isFollow, isLike, isMove, isPost, isReject, isRemove, isTombstone, isUndo, isUpdate, validActor, validPost } from './type.js';
 import { ApNoteService } from './models/ApNoteService.js';
 import { ApLoggerService } from './ApLoggerService.js';
 import { ApDbResolverService } from './ApDbResolverService.js';
@@ -280,8 +280,9 @@ export class ApInboxService {
 	@bindThis
 	private async announce(actor: MiRemoteUser, activity: IAnnounce, resolver?: Resolver): Promise<string | void> {
 		const uri = getApId(activity);
+		const url = getApUrl(activity);
 
-		this.logger.info(`Announce: ${uri}`);
+		this.logger.info(`Announce: ${uri} / ${url}`);
 
 		// eslint-disable-next-line no-param-reassign
 		resolver ??= this.apResolverService.createResolver();
@@ -303,6 +304,7 @@ export class ApInboxService {
 	@bindThis
 	private async announceNote(actor: MiRemoteUser, activity: IAnnounce, target: IPost, resolver?: Resolver): Promise<string | void> {
 		const uri = getApId(activity);
+		const url = getApUrl(activity);
 
 		if (actor.isSuspended) {
 			return;
@@ -355,6 +357,7 @@ export class ApInboxService {
 				visibility: activityAudience.visibility,
 				visibleUsers: activityAudience.visibleUsers,
 				uri,
+				url: url,
 			});
 		} finally {
 			unlock();

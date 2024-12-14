@@ -62,6 +62,12 @@ export function getApId(value: string | IObject): string {
 	throw new Error('cannot detemine id');
 }
 
+export function getApUrl(value: string | IActivity): string | null {
+	if (typeof value === 'string') return value;
+	if (typeof value.object === 'string') return value.object;
+	return null;
+}
+
 /**
  * Get ActivityStreams Object type
  *
