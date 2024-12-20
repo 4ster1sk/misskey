@@ -16,7 +16,7 @@ import { bindThis } from '@/decorators.js';
 import { LoggerService } from '@/core/LoggerService.js';
 import type Logger from '@/logger.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
-import { isCollectionOrOrderedCollection, isIOrderedCollectionPage } from './type.js';
+import { isCollectionOrOrderedCollection, isIOrderedCollectionPage, isOrderedCollection } from './type.js';
 import { ApDbResolverService } from './ApDbResolverService.js';
 import { ApRendererService } from './ApRendererService.js';
 import { ApRequestService } from './ApRequestService.js';
@@ -69,6 +69,19 @@ export class Resolver {
 			return collection;
 		} else {
 			throw new IdentifiableError('f100eccf-f347-43fb-9b45-96a0831fb635', `unrecognized collection type: ${collection.type}`);
+		}
+	}
+
+	@bindThis
+	public async resolveOrderedCollection(value: string | IObject): Promise<IOrderedCollection> {
+		const collection = typeof value === 'string'
+			? await this.resolve(value)
+			: value;
+
+		if (isOrderedCollection(collection)) {
+			return collection;
+		} else {
+			throw new Error(`unrecognized collection type: ${collection.type}`);
 		}
 	}
 
