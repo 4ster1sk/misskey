@@ -10,8 +10,10 @@ import { QueueService } from '@/core/QueueService.js';
 import { bindThis } from '@/decorators.js';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
+import type Logger from '@/logger.js';
 import { QUEUE, baseQueueOptions } from '@/queue/const.js';
 import type { OnApplicationShutdown } from '@nestjs/common';
+import { LoggerService } from '@/core/LoggerService.js';
 
 const ev = new Xev();
 
@@ -19,14 +21,17 @@ const interval = 10000;
 
 @Injectable()
 export class QueueStatsService implements OnApplicationShutdown {
+	private logger: Logger;
 	private intervalId: NodeJS.Timeout;
 
 	constructor(
 		@Inject(DI.config)
 		private config: Config,
 
+		private loggerService: LoggerService,
 		private queueService: QueueService,
 	) {
+		this.logger = this.loggerService.getLogger('queue status');
 	}
 
 	/**
@@ -72,6 +77,9 @@ export class QueueStatsService implements OnApplicationShutdown {
 					delayed: inboxJobCounts.delayed,
 				},
 			};
+
+			this.logger.info(`Deliver active: ${stats.deliver.active}, delayed: ${stats.deliver.delayed}, waiting: ${stats.deliver.waiting}`);
+			this.logger.info(`Inbox active: ${stats.inbox.active}, delayed: ${stats.inbox.delayed}, waiting: ${stats.inbox.waiting}`);
 
 			ev.emit('queueStats', stats);
 
