@@ -759,7 +759,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 	}
 
 	@bindThis
-	private isQuote(note: Option & { renote: MiNote }): note is Option & { renote: MiNote } & (
+	private isQuote(note: Option): note is Option & { renote: MiNote } & (
 		{ text: string } | { cw: string } | { reply: MiNote } | { poll: IPoll } | { files: MiDriveFile[] }
 	) {
 		// NOTE: SYNC WITH misc/is-quote.ts
