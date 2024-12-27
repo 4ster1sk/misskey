@@ -447,7 +447,7 @@ export class ApInboxService {
 			const exist = await this.apNoteService.fetchNote(note);
 			if (exist) return 'skip: note exists';
 
-			await this.apNoteService.createNote(note, actor, resolver, silent);
+			await this.apNoteService.createNote(note, actor, resolver, silent, true);
 			return 'ok';
 		} catch (err) {
 			if (err instanceof StatusError && !err.isRetryable) {

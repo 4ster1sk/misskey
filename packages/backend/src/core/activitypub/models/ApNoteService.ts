@@ -123,7 +123,7 @@ export class ApNoteService {
 	 * Noteを作成します。
 	 */
 	@bindThis
-	public async createNote(value: string | IObject, actor?: MiRemoteUser, resolver?: Resolver, silent = false): Promise<MiNote | null> {
+	public async createNote(value: string | IObject, actor?: MiRemoteUser, resolver?: Resolver, silent = false, checkDelay = false): Promise<MiNote | null> {
 		// eslint-disable-next-line no-param-reassign
 		if (resolver == null) resolver = this.apResolverService.createResolver();
 
@@ -315,6 +315,11 @@ export class ApNoteService {
 		});
 
 		const apEmojis = emojis.map(emoji => emoji.name);
+
+		if (checkDelay && note.published) {
+			const delay = Date.now() - new Date(note.published).getTime();
+			this.logger.info(`Note Received	host: ${actor.host}, delay: ${delay}ms`);
+		}
 
 		try {
 			return await this.noteCreateService.create(actor, {
