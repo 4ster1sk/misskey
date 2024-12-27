@@ -29,6 +29,8 @@ import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { bindThis } from '@/decorators.js';
 import { IActivity } from '@/core/activitypub/type.js';
 import { isQuote, isRenote } from '@/misc/is-renote.js';
+import type Logger from '@/logger.js';
+import { LoggerService } from '@/core/LoggerService.js';
 import * as Acct from '@/misc/acct.js';
 import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions, FastifyBodyParser } from 'fastify';
 import type { FindOptionsWhere } from 'typeorm';
@@ -38,6 +40,8 @@ const LD_JSON = 'application/ld+json; profile="https://www.w3.org/ns/activitystr
 
 @Injectable()
 export class ActivityPubServerService {
+	private logger: Logger;
+
 	constructor(
 		@Inject(DI.config)
 		private config: Config,
@@ -72,8 +76,10 @@ export class ActivityPubServerService {
 		private queueService: QueueService,
 		private userKeypairService: UserKeypairService,
 		private queryService: QueryService,
+		private loggerService: LoggerService,
 	) {
 		//this.createServer = this.createServer.bind(this);
+		this.logger = this.loggerService.getLogger('activityPubServerService');
 	}
 
 	@bindThis
@@ -161,6 +167,12 @@ export class ActivityPubServerService {
 				reply.code(401);
 				return;
 			}
+		}
+
+		if (request.headers.date) {
+			const delay = Date.now() - new Date(request.headers.date).getTime();
+			const host = this.utilityService.toPuny(new URL(signature.keyId).hostname);
+			this.logger.info(`Inbox host: ${host}, delay: ${delay}ms`);
 		}
 
 		this.queueService.inbox(request.body as IActivity, signature);
