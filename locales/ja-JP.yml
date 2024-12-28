@@ -2858,3 +2858,8 @@ _remoteLookupErrors:
   _noSuchObject:
     title: "見つかりません"
     description: "要求されたリソースは見つかりませんでした。URIをもう一度お確かめください。"
+
+_mismatchUriHosts:
+  title: "URLとURIが異なるサーバーの許可設定"
+  url: "URL"
+  uri: "URI"

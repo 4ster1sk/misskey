@@ -5227,6 +5227,7 @@ export type operations = {
             urlPreviewSummaryProxyUrl: string | null;
             federation: string;
             federationHosts: string[];
+            mismatchUriHosts: string[];
           };
         };
       };
@@ -9606,6 +9607,7 @@ export type operations = {
           federation?: 'all' | 'none' | 'specified';
           federationHosts?: string[];
           disableSignup?: boolean;
+          mismatchUriHosts?: string[];
         };
       };
     };
