@@ -10602,7 +10602,7 @@ export interface Locale extends ILocale {
          * Yahoo! Japan
          */
         "yahoo": string;
-		};
+    };
     "_selfXssPrevention": {
         /**
          * 警告
@@ -10644,7 +10644,7 @@ export interface Locale extends ILocale {
          * Signupの無効化
          */
         "disableSignup": string;
-		};
+    };
     "_remoteLookupErrors": {
         "_federationNotAllowed": {
             /**
