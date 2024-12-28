@@ -97,6 +97,11 @@ export class MiMeta {
 	public mediaSilencedHosts: string[];
 
 	@Column('varchar', {
+		length: 1024, array: true, default: '{}',
+	})
+	public mismatchUriHosts: string[];
+
+	@Column('varchar', {
 		length: 1024,
 		nullable: true,
 	})

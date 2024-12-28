@@ -5223,6 +5223,7 @@ export type operations = {
             urlPreviewSummaryProxyUrl: string | null;
             federation: string;
             federationHosts: string[];
+            mismatchUriHosts: string[];
           };
         };
       };
@@ -9601,6 +9602,7 @@ export type operations = {
           /** @enum {string} */
           federation?: 'all' | 'none' | 'specified';
           federationHosts?: string[];
+          mismatchUriHosts?: string[];
         };
       };
     };
