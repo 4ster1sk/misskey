@@ -235,6 +235,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</div>
 				</MkFolder>
 
+				<FormLink to="/admin/mismatch-uri-hosts">{{ i18n.ts._mismatchUriHosts.title }}</FormLink>
+
 				<MkFolder>
 					<template #icon><i class="ti ti-ghost"></i></template>
 					<template #label>{{ i18n.ts.proxyAccount }}</template>
@@ -274,6 +276,7 @@ import MkKeyValue from '@/components/MkKeyValue.vue';
 import { useForm } from '@/scripts/use-form.js';
 import MkFormFooter from '@/components/MkFormFooter.vue';
 import MkRadios from '@/components/MkRadios.vue';
+import FormLink from '@/components/form/link.vue';
 
 const meta = await misskeyApi('admin/meta');
 
