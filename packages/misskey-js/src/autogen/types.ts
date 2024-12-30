@@ -3547,6 +3547,15 @@ export type paths = {
      */
     post: operations['users___show'];
   };
+  '/users/stats': {
+    /**
+     * users/stats
+     * @description Show statistics about a user.
+     *
+     * **Credential required**: *No*
+     */
+    post: operations['users___stats'];
+  };
   '/users/achievements': {
     /**
      * users/achievements
@@ -4977,6 +4986,7 @@ export type components = {
       defaultLightTheme: string | null;
       disableRegistration: boolean;
       disableSignup: boolean;
+      requireSigninToViewRemoteUsers: boolean;
       emailRequiredForSignup: boolean;
       enableHcaptcha: boolean;
       hcaptchaSiteKey: string | null;
@@ -5107,6 +5117,7 @@ export type operations = {
         content: {
           'application/json': {
             disableSignup: boolean;
+            requireSigninToViewRemoteUsers: boolean;
             cacheRemoteFiles: boolean;
             cacheRemoteSensitiveFiles: boolean;
             emailRequiredForSignup: boolean;
@@ -9607,6 +9618,7 @@ export type operations = {
           federation?: 'all' | 'none' | 'specified';
           federationHosts?: string[];
           disableSignup?: boolean;
+          requireSigninToViewRemoteUsers?: boolean;
           mismatchUriHosts?: string[];
         };
       };
@@ -13974,6 +13986,8 @@ export type operations = {
           type?: string | null;
           /** @enum {string|null} */
           sort?: '+createdAt' | '-createdAt' | '+name' | '-name' | '+size' | '-size' | null;
+          /** @default */
+          searchQuery?: string;
         };
       };
     };
@@ -14573,6 +14587,8 @@ export type operations = {
            * @default null
            */
           folderId?: string | null;
+          /** @default */
+          searchQuery?: string;
         };
       };
     };
@@ -27102,6 +27118,8 @@ export type operations = {
           username?: string;
           /** @description The local host is represented with `null`. */
           host?: string | null;
+          /** @default true */
+          detailed?: boolean;
         };
       };
     };
@@ -27109,7 +27127,83 @@ export type operations = {
       /** @description OK (with results) */
       200: {
         content: {
-          'application/json': components['schemas']['UserDetailed'] | components['schemas']['UserDetailed'][];
+          'application/json': components['schemas']['UserLite'] | components['schemas']['UserDetailed'] | components['schemas']['UserLite'][] | components['schemas']['UserDetailed'][];
+        };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * users/stats
+   * @description Show statistics about a user.
+   *
+   * **Credential required**: *No*
+   */
+  users___stats: {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: misskey:id */
+          userId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': {
+            notesCount: number;
+            repliesCount: number;
+            renotesCount: number;
+            repliedCount: number;
+            renotedCount: number;
+            pollVotesCount: number;
+            pollVotedCount: number;
+            localFollowingCount: number;
+            remoteFollowingCount: number;
+            localFollowersCount: number;
+            remoteFollowersCount: number;
+            followingCount: number;
+            followersCount: number;
+            sentReactionsCount: number;
+            receivedReactionsCount: number;
+            noteFavoritesCount: number;
+            pageLikesCount: number;
+            pageLikedCount: number;
+            driveFilesCount: number;
+            /** @description Drive usage in bytes */
+            driveUsage: number;
+          };
         };
       };
       /** @description Client error */

@@ -10644,6 +10644,10 @@ export interface Locale extends ILocale {
          * Signupの無効化
          */
         "disableSignup": string;
+        /**
+         * リモートユーザーの表示はログインを必須にする
+         */
+        "requireSigninToViewRemoteUsers": string;
     };
     "_remoteLookupErrors": {
         "_federationNotAllowed": {
