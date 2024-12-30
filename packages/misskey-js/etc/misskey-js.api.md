@@ -1782,6 +1782,8 @@ declare namespace entities {
         UsersSearchResponse,
         UsersShowRequest,
         UsersShowResponse,
+        UsersStatsRequest,
+        UsersStatsResponse,
         UsersAchievementsRequest,
         UsersAchievementsResponse,
         UsersUpdateMemoRequest,
@@ -3406,6 +3408,12 @@ type UsersShowRequest = operations['users___show']['requestBody']['content']['ap
 
 // @public (undocumented)
 type UsersShowResponse = operations['users___show']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type UsersStatsRequest = operations['users___stats']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type UsersStatsResponse = operations['users___stats']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type UsersUpdateMemoRequest = operations['users___update-memo']['requestBody']['content']['application/json'];
