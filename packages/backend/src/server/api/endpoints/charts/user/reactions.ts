@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { getJsonSchema } from '@/core/chart/core.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import PerUserReactionsChart from '@/core/chart/charts/per-user-reactions.js';
 import { schema } from '@/core/chart/charts/entities/per-user-reactions.js';
+import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
+import { CacheService } from '@/core/CacheService.js';
 
 export const meta = {
 	tags: ['charts', 'users', 'reactions'],
@@ -32,9 +35,18 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+		private cacheService: CacheService,
 		private perUserReactionsChart: PerUserReactionsChart,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (me == null && this.serverSettings.requireSigninToViewRemoteUsers) {
+				const user = await this.cacheService.findUserById(ps.userId);
+				if (user.host != null) {
+					return await this.perUserReactionsChart.getEmpty(ps.span, ps.limit);
+				}
+			}
 			return await this.perUserReactionsChart.getChart(ps.span, ps.limit, ps.offset ? new Date(ps.offset) : null, ps.userId);
 		});
 	}

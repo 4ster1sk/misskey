@@ -2839,6 +2839,7 @@ _followRequest:
 _customizeFeature:
   title: "独自機能"
   disableSignup: "Signupの無効化"
+  requireSigninToViewRemoteUsers: "リモートユーザーの表示はログインを必須にする"
 
 _remoteLookupErrors:
   _federationNotAllowed:

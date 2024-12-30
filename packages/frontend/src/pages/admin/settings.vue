@@ -263,6 +263,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<MkSwitch v-model="customFeatureForm.state.disableSignup">
 							<template #label>{{ i18n.ts._customizeFeature.disableSignup }}<span v-if="customFeatureForm.modifiedStates.disableSignup" class="_modified">{{ i18n.ts.modified }}</span></template>
 						</MkSwitch>
+						<MkSwitch v-model="customFeatureForm.state.requireSigninToViewRemoteUsers">
+							<template #label>{{ i18n.ts._customizeFeature.requireSigninToViewRemoteUsers }}<span v-if="customFeatureForm.modifiedStates.requireSigninToViewRemoteUsers" class="_modified">{{ i18n.ts.modified }}</span></template>
+						</MkSwitch>
 					</div>
 				</MkFolder>
 			</div>
@@ -345,9 +348,11 @@ const filesForm = useForm({
 
 const customFeatureForm = useForm({
 	disableSignup: meta.disableSignup,
+	requireSigninToViewRemoteUsers: meta.requireSigninToViewRemoteUsers,
 }, async (state) => {
 	await os.apiWithDialog('admin/update-meta', {
 		disableSignup: state.disableSignup,
+		requireSigninToViewRemoteUsers: state.requireSigninToViewRemoteUsers,
 	});
 	fetchInstance(true);
 });

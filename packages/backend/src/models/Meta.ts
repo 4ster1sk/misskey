@@ -668,4 +668,9 @@ export class MiMeta {
 		default: false,
 	})
 	public disableSignup: boolean;
+
+	@Column('boolean', {
+		default: false,
+	})
+	public requireSigninToViewRemoteUsers: boolean;
 }
