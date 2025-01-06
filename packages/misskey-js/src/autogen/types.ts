@@ -11296,11 +11296,6 @@ export type operations = {
            * @default false
            */
           wait?: boolean;
-          /**
-           * @description Outbox取得の際にRenoteも対象にします
-           * @default false
-           */
-          includeAnnounce?: boolean;
         };
       };
     };
