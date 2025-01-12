@@ -16,6 +16,7 @@ import { CacheService } from '@/core/CacheService.js';
 import { MiLocalUser } from '@/models/User.js';
 import { UserService } from '@/core/UserService.js';
 import { ChannelFollowingService } from '@/core/ChannelFollowingService.js';
+import { LoggerService } from '@/core/LoggerService.js';
 import { AuthenticateService, AuthenticationError } from './AuthenticateService.js';
 import MainStreamConnection from './stream/Connection.js';
 import { ChannelsService } from './stream/ChannelsService.js';
@@ -41,6 +42,7 @@ export class StreamingApiServerService {
 		private notificationService: NotificationService,
 		private usersService: UserService,
 		private channelFollowingService: ChannelFollowingService,
+		private loggerService: LoggerService,
 	) {
 	}
 
@@ -100,6 +102,7 @@ export class StreamingApiServerService {
 				this.notificationService,
 				this.cacheService,
 				this.channelFollowingService,
+				this.loggerService,
 				user, app,
 			);
 
