@@ -265,6 +265,11 @@ export const packedMetaLiteSchema = {
 			optional: false, nullable: false,
 			default: 'local',
 		},
+		federation: {
+			type: 'string',
+			enum: ['all', 'specified', 'none'],
+			optional: false, nullable: false,
+		},
 	},
 } as const;
 
