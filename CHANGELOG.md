@@ -1,3 +1,40 @@
+## Unreleased
+
+### General
+- Feat: アクセストークン発行時に通知するように
+
+### Client
+- Enhance: 投稿フォームの「迷惑になる可能性があります」のダイアログを表示する条件においてCWを考慮するように
+- Enhance: アンテナ、リスト等の名前をカラム名のデフォルト値にするように `#13992`
+- Enhance: クライアントエラー画面の多言語対応
+- Enhance: 開発者モードでメニューからファイルIDをコピー出来るように `#15441'
+- Fix: コンディショナルロールを手動で割り当てできる導線を削除 `#13529`
+
+### Server
+- Fix: `following/invalidate`でフォロワーを解除しようとしているユーザーの情報を返すように
+
+
+## 2025.2.0
+
+### General
+- Fix: Docker のビルドに失敗する問題を修正  
+  (Cherry-picked from https://activitypub.software/TransFem-org/Sharkey/-/merge_requests/883)
+
+### Client
+- Fix: パスキーでパスワードレスログインが出来ない問題を修正
+- Fix: 一部環境でセンシティブなファイルを含むノートの非表示が効かない問題 
+- Fix: データセーバー有効時にもユーザーページの「ファイル」タブで画像が読み込まれてしまう問題を修正
+- Fix: MFMの `sparkle` エフェクトが正しく表示されない問題を修正
+- Fix: ページのURLにスラッシュが含まれている場合にページが正しく表示されない問題を修正
+- Fix: デッキのプロファイルが新規作成できない問題を修正
+- Fix: セキュリティに関する修正
+- ローカライゼーションの更新
+- Playが実装されたため、ページ機能の「ソースを見る」は削除されました
+
+### Server
+- Enhance: ページのURLに使用可能な文字を限定するように
+- Fix: 個別お知らせページのmetaタグ出力の条件が間違っていたのを修正
+
 ## 2025.1.0
 
 ### Note
@@ -12,6 +49,7 @@
 	* β版として公開のため、旧画面も引き続き利用可能です
 
 ### Client
+- Feat: 投稿フォームで画像をプレビュー可能に
 - Enhance: PC画面でチャンネルが複数列で表示されるように  
   (Cherry-picked from https://github.com/Otaku-Social/maniakey/pull/13)
 - Enhance: 照会に失敗した場合、その理由を表示するように
@@ -49,6 +87,8 @@
 - Fix: 非ログイン時のサーバー概要画面のメニューボタンが押せないことがあるのを修正  
   (Cherry-picked from https://activitypub.software/TransFem-org/Sharkey/-/merge_requests/656)
 - Fix: URLにはじめから`#pswp`が含まれている場合に画像ビューワーがブラウザの戻るボタンで閉じられない問題を修正
+- Fix: ロール作成画面で設定できるアイコンデコレーションの最大取付個数を16に制限
+- Fix: Firefox Nightlyなどでアイコンが読み込めない問題を修正
 
 ### Server
 - Enhance: pg_bigmが利用できるよう、ノートの検索をILIKE演算子でなくLIKE演算子でLOWER()をかけたテキストに対して行うように
