@@ -976,7 +976,7 @@ export type Endpoints = {
 	'users/stats': { req: UsersStatsRequest; res: UsersStatsResponse };
 	'users/update-memo': { req: UsersUpdateMemoRequest; res: EmptyResponse };
 	'v2/admin/emoji/list': { req: V2AdminEmojiListRequest; res: V2AdminEmojiListResponse };
-}
+};
 
 /**
  * NOTE: The content-type for all endpoints not listed here is application/json.
