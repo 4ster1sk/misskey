@@ -85,6 +85,7 @@ function generateDummyUser(override?: Partial<MiUser>): MiUser {
 		host: null,
 		inbox: null,
 		sharedInbox: null,
+		outbox: null,
 		featured: null,
 		uri: null,
 		followersUri: null,
