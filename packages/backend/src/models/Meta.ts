@@ -673,4 +673,10 @@ export class MiMeta {
 		default: false,
 	})
 	public requireSigninToViewRemoteUsers: boolean;
+
+	@Column('varchar', {
+		length: 64,
+		nullable: true,
+	})
+	public googleAnalyticsMeasurementId: string | null;
 }
