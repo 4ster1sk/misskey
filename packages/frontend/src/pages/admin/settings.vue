@@ -240,15 +240,17 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<MkFolder>
 					<template #icon><i class="ti ti-ghost"></i></template>
 					<template #label>{{ i18n.ts.proxyAccount }}</template>
+					<template v-if="proxyAccountForm.modified.value" #footer>
+						<MkFormFooter :form="proxyAccountForm"/>
+					</template>
 
 					<div class="_gaps">
 						<MkInfo>{{ i18n.ts.proxyAccountDescription }}</MkInfo>
-						<MkKeyValue>
-							<template #key>{{ i18n.ts.proxyAccount }}</template>
-							<template #value>{{ proxyAccount ? `@${proxyAccount.username}` : i18n.ts.none }}</template>
-						</MkKeyValue>
 
-						<MkButton primary @click="chooseProxyAccount">{{ i18n.ts.selectAccount }}</MkButton>
+						<MkTextarea v-model="proxyAccountForm.state.description" :max="500" tall mfmAutocomplete :mfmPreview="true">
+							<template #label>{{ i18n.ts._profile.description }}</template>
+							<template #caption>{{ i18n.ts._profile.youCanIncludeHashtags }}</template>
+						</MkTextarea>
 					</div>
 				</MkFolder>
 
@@ -275,7 +277,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { ref, computed, reactive } from 'vue';
 import XHeader from './_header_.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkInput from '@/components/MkInput.vue';
@@ -297,7 +299,7 @@ import FormLink from '@/components/form/link.vue';
 
 const meta = await misskeyApi('admin/meta');
 
-const proxyAccount = ref(meta.proxyAccountId ? await misskeyApi('users/show', { userId: meta.proxyAccountId }) : null);
+const proxyAccount = await misskeyApi('users/show', { userId: meta.proxyAccountId });
 
 const infoForm = useForm({
 	name: meta.name ?? '',
@@ -409,16 +411,14 @@ const federationForm = useForm({
 	fetchInstance(true);
 });
 
-function chooseProxyAccount() {
-	os.selectUser({ localOnly: true }).then(user => {
-		proxyAccount.value = user;
-		os.apiWithDialog('admin/update-meta', {
-			proxyAccountId: user.id,
-		}).then(() => {
-			fetchInstance(true);
-		});
+const proxyAccountForm = useForm({
+	description: proxyAccount.description,
+}, async (state) => {
+	await os.apiWithDialog('admin/update-proxy-account', {
+		description: state.description,
 	});
-}
+	fetchInstance(true);
+});
 
 const headerTabs = computed(() => []);
 
