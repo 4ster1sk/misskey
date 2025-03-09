@@ -113,12 +113,12 @@ import XFolder from '@/components/MkDrive.folder.vue';
 import XFile from '@/components/MkDrive.file.vue';
 import MkInput from '@/components/MkInput.vue';
 import * as os from '@/os.js';
-import { misskeyApi } from '@/scripts/misskey-api.js';
+import { misskeyApi } from '@/utility/misskey-api.js';
 import { useStream } from '@/stream.js';
-import { defaultStore } from '@/store.js';
 import { i18n } from '@/i18n.js';
-import { uploadFile, uploads } from '@/scripts/upload.js';
-import { claimAchievement } from '@/scripts/achievements.js';
+import { uploadFile, uploads } from '@/utility/upload.js';
+import { claimAchievement } from '@/utility/achievements.js';
+import { prefer } from '@/preferences.js';
 
 const searchQuery = ref('');
 const lastSearchQuery = ref('');
@@ -154,7 +154,7 @@ const selectedFiles = ref<Misskey.entities.DriveFile[]>([]);
 const selectedFolders = ref<Misskey.entities.DriveFolder[]>([]);
 const uploadings = uploads;
 const connection = useStream().useChannel('drive');
-const keepOriginal = ref<boolean>(defaultStore.state.keepOriginalUploading); // 外部渡しが多いので$refは使わないほうがよい
+const keepOriginal = ref<boolean>(prefer.s.keepOriginalUploading); // 外部渡しが多いので$refは使わないほうがよい
 
 // ドロップされようとしているか
 const draghover = ref(false);
@@ -733,7 +733,7 @@ function onContextmenu(ev: MouseEvent) {
 }
 
 onMounted(() => {
-	if (defaultStore.state.enableInfiniteScroll && loadMoreFiles.value) {
+	if (prefer.s.enableInfiniteScroll && loadMoreFiles.value) {
 		nextTick(() => {
 			ilFilesObserver.observe(loadMoreFiles.value?.$el);
 		});
@@ -754,7 +754,7 @@ onMounted(() => {
 });
 
 onActivated(() => {
-	if (defaultStore.state.enableInfiniteScroll) {
+	if (prefer.s.enableInfiniteScroll) {
 		nextTick(() => {
 			ilFilesObserver.observe(loadMoreFiles.value?.$el);
 		});

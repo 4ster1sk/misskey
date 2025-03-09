@@ -52,15 +52,15 @@ import XHeader from './_header_.vue';
 import * as os from '@/os.js';
 import { fetchInstance, instance } from '@/instance.js';
 import { i18n } from '@/i18n.js';
-import { definePageMetadata } from '@/scripts/page-metadata.js';
+import { definePageMetadata } from '@/utility/page-metadata.js';
 import MkButton from '@/components/MkButton.vue';
 import MkInput from '@/components/MkInput.vue';
-import { misskeyApi } from '@/scripts/misskey-api.js';
+import { misskeyApi } from '@/utility/misskey-api.js';
 import FormSuspense from '@/components/form/suspense.vue';
 
 interface IHostPair {
-  url: string;
-  uri: string;
+	url: string;
+	uri: string;
 }
 
 const Sortable = defineAsyncComponent(() => import('vuedraggable').then(x => x.default));
