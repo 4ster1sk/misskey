@@ -32,7 +32,7 @@ import * as Misskey from 'misskey-js';
 import MkTimeline from '@/components/MkTimeline.vue';
 import { scroll } from '@@/js/scroll.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
-import { definePageMetadata } from '@/utility/page-metadata.js';
+import { definePage } from '@/page.js';
 import { i18n } from '@/i18n.js';
 import { useRouter } from '@/router/supplier.js';
 import * as os from '@/os.js';
@@ -111,7 +111,7 @@ const headerActions = computed(() => list.value ? [
 
 const headerTabs = computed(() => []);
 
-definePageMetadata(() => ({
+definePage(() => ({
 	title: list.value ? list.value.name : i18n.ts.lists,
 	icon: 'ti ti-list',
 }));

@@ -122,7 +122,7 @@ import number from '@/filters/number.js';
 import bytes from '@/filters/bytes.js';
 import { $i } from '@/account.js';
 import { i18n } from '@/i18n.js';
-import { definePageMetadata } from '@/utility/page-metadata.js';
+import { definePage } from '@/page.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 
 const stats = ref<any>({});
@@ -139,7 +139,7 @@ const headerActions = computed(() => []);
 
 const headerTabs = computed(() => []);
 
-definePageMetadata(() => ({
+definePage(() => ({
 	title: i18n.ts.accountInfo,
 	icon: 'ti ti-info-circle',
 }));

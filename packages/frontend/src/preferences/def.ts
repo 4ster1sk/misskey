@@ -8,6 +8,7 @@ import { hemisphere } from '@@/js/intl-const.js';
 import type { Theme } from '@/theme.js';
 import type { SoundType } from '@/utility/sound.js';
 import type { Plugin } from '@/plugin.js';
+import type { DeviceKind } from '@/utility/device-kind.js';
 import { DEFAULT_DEVICE_KIND } from '@/utility/device-kind.js';
 
 /** サウンド設定 */
@@ -35,7 +36,19 @@ export const PREF_DEF = {
 		accountDependent: true,
 		default: null as string | null,
 	},
+	widgets: {
+		accountDependent: true,
+		default: [] as {
+			name: string;
+			id: string;
+			place: string | null;
+			data: Record<string, any>;
+		}[],
+	},
 
+	overridedDeviceKind: {
+		default: null as DeviceKind | null,
+	},
 	themes: {
 		default: [] as Theme[],
 	},

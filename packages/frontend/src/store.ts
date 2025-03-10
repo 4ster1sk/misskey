@@ -15,40 +15,6 @@ import { miLocalStorage } from '@/local-storage.js';
 import { Storage } from '@/pizzax.js';
 import { DEFAULT_DEVICE_KIND } from '@/utility/device-kind.js';
 
-interface PostFormAction {
-	title: string,
-	handler: <T>(form: T, update: (key: unknown, value: unknown) => void) => void;
-}
-
-interface UserAction {
-	title: string,
-	handler: (user: Misskey.entities.UserDetailed) => void;
-}
-
-interface NoteAction {
-	title: string,
-	handler: (note: Misskey.entities.Note) => void;
-}
-
-interface NoteViewInterruptor {
-	handler: (note: Misskey.entities.Note) => unknown;
-}
-
-interface NotePostInterruptor {
-	handler: (note: FIXME) => unknown;
-}
-
-interface PageViewInterruptor {
-	handler: (page: Misskey.entities.Page) => unknown;
-}
-
-export const postFormActions: PostFormAction[] = [];
-export const userActions: UserAction[] = [];
-export const noteActions: NoteAction[] = [];
-export const noteViewInterruptors: NoteViewInterruptor[] = [];
-export const notePostInterruptors: NotePostInterruptor[] = [];
-export const pageViewInterruptors: PageViewInterruptor[] = [];
-
 /**
  * 「状態」を管理するストア(not「設定」)
  */
@@ -102,15 +68,6 @@ export const store = markRaw(new Storage('base', {
 		where: 'device',
 		default: false,
 	},
-	widgets: {
-		where: 'account',
-		default: [] as {
-			name: string;
-			id: string;
-			place: string | null;
-			data: Record<string, any>;
-		}[],
-	},
 	tl: {
 		where: 'deviceAccount',
 		default: {
@@ -123,10 +80,6 @@ export const store = markRaw(new Storage('base', {
 				onlyFiles: false,
 			},
 		},
-	},
-	overridedDeviceKind: {
-		where: 'device',
-		default: null as DeviceKind | null,
 	},
 	darkMode: {
 		where: 'device',
@@ -187,6 +140,19 @@ export const store = markRaw(new Storage('base', {
 	},
 
 	//#region TODO: そのうち消す (preferに移行済み)
+	widgets: {
+		where: 'account',
+		default: [] as {
+			name: string;
+			id: string;
+			place: string | null;
+			data: Record<string, any>;
+		}[],
+	},
+	overridedDeviceKind: {
+		where: 'device',
+		default: null as DeviceKind | null,
+	},
 	defaultSideView: {
 		where: 'device',
 		default: false,
