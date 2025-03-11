@@ -36,7 +36,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</div>
 			<div :class="$style.sideMenu">
 				<div :class="$style.sideMenuTop">
-					<button v-tooltip.noDelay.left="`${i18n.ts._deck.profile}: ${store.s['deck.profile']}`" :class="$style.sideMenuButton" class="_button" @click="changeProfile"><i class="ti ti-caret-down"></i></button>
+					<button v-tooltip.noDelay.left="`${i18n.ts._deck.profile}: ${prefer.s['deck.profile']}`" :class="$style.sideMenuButton" class="_button" @click="switchProfileMenu"><i class="ti ti-caret-down"></i></button>
 					<button v-tooltip.noDelay.left="i18n.ts._deck.deleteProfile" :class="$style.sideMenuButton" class="_button" @click="deleteProfile"><i class="ti ti-trash"></i></button>
 				</div>
 				<div :class="$style.sideMenuMiddle">
@@ -109,7 +109,6 @@ import * as os from '@/os.js';
 import { navbarItemDef } from '@/navbar.js';
 import { $i } from '@/account.js';
 import { i18n } from '@/i18n.js';
-import { unisonReload } from '@/utility/unison-reload.js';
 import { deviceKind } from '@/utility/device-kind.js';
 import { prefer } from '@/preferences.js';
 import XMainColumn from '@/ui/deck/main-column.vue';
@@ -125,8 +124,7 @@ import XRoleTimelineColumn from '@/ui/deck/role-timeline-column.vue';
 import { mainRouter } from '@/router/main.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { antennasCache, userListsCache, favoritedChannelsCache } from '@/cache.js';
-import { store } from '@/store.js';
-import { columnTypes, forceSaveDeck, getProfiles, loadDeck, addColumn as addColumnToStore, deleteProfile as deleteProfile_ } from '@/deck.js';
+import { columns, layout, columnTypes, switchProfileMenu, addColumn as addColumnToStore, deleteProfile as deleteProfile_ } from '@/deck.js';
 const XStatusBars = defineAsyncComponent(() => import('@/ui/_common_/statusbars.vue'));
 const XAnnouncements = defineAsyncComponent(() => import('@/ui/_common_/announcements.vue'));
 
@@ -145,7 +143,7 @@ const columnComponents = {
 
 mainRouter.navHook = (path, flag): boolean => {
 	if (flag === 'forcePage') return false;
-	const noMainColumn = !store.s['deck.columns'].some(x => x.type === 'main');
+	const noMainColumn = !columns.value.some(x => x.type === 'main');
 	if (prefer.s['deck.navWindow'] || noMainColumn) {
 		os.pageWindow(path);
 		return true;
@@ -168,8 +166,6 @@ watch(route, () => {
 });
 */
 
-const columns = store.r['deck.columns'];
-const layout = store.r['deck.layout'];
 const menuIndicated = computed(() => {
 	if ($i == null) return false;
 	for (const def in navbarItemDef) {
@@ -218,64 +214,18 @@ function onWheel(ev: WheelEvent) {
 document.documentElement.style.overflowY = 'hidden';
 document.documentElement.style.scrollBehavior = 'auto';
 
-loadDeck();
-
-function changeProfile(ev: MouseEvent) {
-	let items: MenuItem[] = [{
-		text: store.s['deck.profile'],
-		active: true,
-		action: () => {},
-	}];
-	getProfiles().then(profiles => {
-		items.push(...(profiles.filter(k => k !== store.s['deck.profile']).map(k => ({
-			text: k,
-			action: () => {
-				store.set('deck.profile', k);
-				unisonReload();
-			},
-		}))), { type: 'divider' as const }, {
-			text: i18n.ts._deck.newProfile,
-			icon: 'ti ti-plus',
-			action: async () => {
-				const { canceled, result: name } = await os.inputText({
-					title: i18n.ts._deck.profile,
-					minLength: 1,
-				});
-
-				if (canceled || name == null) return;
-
-				os.promiseDialog((async () => {
-					await store.set('deck.profile', name);
-					await forceSaveDeck();
-				})(), () => {
-					unisonReload();
-				});
-			},
-		});
-	}).then(() => {
-		os.popupMenu(items, ev.currentTarget ?? ev.target);
-	});
-}
-
 async function deleteProfile() {
+	if (prefer.s['deck.profile'] == null) return;
+
 	const { canceled } = await os.confirm({
 		type: 'warning',
-		text: i18n.tsx.deleteAreYouSure({ x: store.s['deck.profile'] }),
+		text: i18n.tsx.deleteAreYouSure({ x: prefer.s['deck.profile'] }),
 	});
 	if (canceled) return;
 
-	os.promiseDialog((async () => {
-		if (store.s['deck.profile'] === 'default') {
-			await store.set('deck.columns', []);
-			await store.set('deck.layout', []);
-			await forceSaveDeck();
-		} else {
-			await deleteProfile_(store.s['deck.profile']);
-		}
-		await store.set('deck.profile', 'default');
-	})(), () => {
-		unisonReload();
-	});
+	await deleteProfile_(prefer.s['deck.profile']);
+
+	os.success();
 }
 
 async function chooseList(ev: MouseEvent): Promise<void> {
