@@ -67,16 +67,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script lang="ts" setup>
 import * as Misskey from 'misskey-js';
-import { shallowRef } from 'vue';
+import { useTemplateRef } from 'vue';
 import MkLink from '@/components/MkLink.vue';
 import { i18n } from '@/i18n.js';
 import MkWindow from '@/components/MkWindow.vue';
 import MkKeyValue from '@/components/MkKeyValue.vue';
 
 const props = withDefaults(defineProps<{
-    emoji: Misskey.entities.EmojiDetailed;
-    licenseToTop: boolean;
-  }>(), {
+	emoji: Misskey.entities.EmojiDetailed;
+	licenseToTop: boolean;
+}>(), {
 	licenseToTop: false,
 });
 
@@ -86,7 +86,7 @@ const emit = defineEmits<{
 	(ev: 'closed'): void;
 }>();
 
-const dialogEl = shallowRef<InstanceType<typeof MkWindow>>();
+const dialogEl = useTemplateRef('dialogEl');
 
 function cancel() {
 	emit('cancel');

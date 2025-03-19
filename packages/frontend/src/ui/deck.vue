@@ -98,7 +98,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, defineAsyncComponent, ref, watch, shallowRef } from 'vue';
+import { computed, defineAsyncComponent, ref, useTemplateRef } from 'vue';
 import { v4 as uuid } from 'uuid';
 import XCommon from './_common_/common.vue';
 import type { MenuItem } from '@/types/menu.js';
@@ -121,7 +121,7 @@ import XWidgetsColumn from '@/ui/deck/widgets-column.vue';
 import XMentionsColumn from '@/ui/deck/mentions-column.vue';
 import XDirectColumn from '@/ui/deck/direct-column.vue';
 import XRoleTimelineColumn from '@/ui/deck/role-timeline-column.vue';
-import { mainRouter } from '@/router/main.js';
+import { mainRouter } from '@/router.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { antennasCache, userListsCache, favoritedChannelsCache } from '@/cache.js';
 import { columns, layout, columnTypes, switchProfileMenu, addColumn as addColumnToStore, deleteProfile as deleteProfile_ } from '@/deck.js';
@@ -178,7 +178,7 @@ function showSettings() {
 	os.pageWindow('/settings/deck');
 }
 
-const columnsEl = shallowRef<HTMLElement>();
+const columnsEl = useTemplateRef('columnsEl');
 
 const addColumn = async (ev) => {
 	const { canceled, result: column } = await os.select({
