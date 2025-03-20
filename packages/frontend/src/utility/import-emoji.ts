@@ -1,7 +1,7 @@
 export async function importEmojiMeta(emoji, host:string) {
 	emoji.category = '取得失敗';
 	try {
-		const json = await(await fetch('https://' + host + '/api/emoji?name=' + emoji.name)).json();
+		const json = await(await window.fetch('https://' + host + '/api/emoji?name=' + emoji.name)).json();
 		emoji.category = '';
 		const from_json = (key: string) => {
 			try {
