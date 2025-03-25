@@ -332,6 +332,9 @@ export const PREF_DEF = {
 	makeEveryTextElementsSelectable: {
 		default: DEFAULT_DEVICE_KIND === 'desktop',
 	},
+	showNavbarSubButtons: {
+		default: true,
+	},
 	plugins: {
 		default: [] as Plugin[],
 	},
@@ -372,6 +375,13 @@ export const PREF_DEF = {
 	},
 	'deck.columnAlign': {
 		default: 'left' as 'left' | 'right' | 'center',
+	},
+
+	'chat.showSenderName': {
+		default: false,
+	},
+	'chat.sendOnEnter': {
+		default: false,
 	},
 
 	'game.dropAndFusion': {

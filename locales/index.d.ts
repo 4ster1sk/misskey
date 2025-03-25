@@ -5362,6 +5362,14 @@ export interface Locale extends ILocale {
      * チャット
      */
     "chat": string;
+    /**
+     * 旧設定情報を移行
+     */
+    "migrateOldSettings": string;
+    /**
+     * 通常これは自動で行われていますが、何らかの理由により上手く移行されなかった場合は手動で移行処理をトリガーできます。現在の設定情報は上書きされます。
+     */
+    "migrateOldSettings_description": string;
     "_chat": {
         /**
          * まだメッセージはありません
@@ -5429,6 +5437,10 @@ export interface Locale extends ILocale {
          */
         "inviteUser": string;
         /**
+         * 送信した招待
+         */
+        "sentInvitations": string;
+        /**
          * 参加
          */
         "join": string;
@@ -5453,9 +5465,21 @@ export interface Locale extends ILocale {
          */
         "home": string;
         /**
+         * 送信
+         */
+        "send": string;
+        /**
+         * 改行
+         */
+        "newline": string;
+        /**
          * このルームをミュート
          */
         "muteThisRoom": string;
+        /**
+         * ルームを削除
+         */
+        "deleteRoom": string;
         /**
          * このユーザーとのチャットを開始できません
          */
@@ -5610,6 +5634,28 @@ export interface Locale extends ILocale {
          * 有効にすると、一部のシチュエーションでのユーザビリティが低下する場合があります。
          */
         "makeEveryTextElementsSelectable_description": string;
+        /**
+         * ナビゲーションバーに副ボタンを表示
+         */
+        "showNavbarSubButtons": string;
+        /**
+         * オンのとき
+         */
+        "ifOn": string;
+        /**
+         * オフのとき
+         */
+        "ifOff": string;
+        "_chat": {
+            /**
+             * 送信者の名前を表示
+             */
+            "showSenderName": string;
+            /**
+             * Enterで送信
+             */
+            "sendOnEnter": string;
+        };
     };
     "_preferencesProfile": {
         /**
@@ -9858,6 +9904,10 @@ export interface Locale extends ILocale {
          */
         "roleAssigned": string;
         /**
+         * チャットルームへ招待されました
+         */
+        "chatRoomInvitationReceived": string;
+        /**
          * プッシュ通知の更新をしました
          */
         "emptyPushNotificationMessage": string;
@@ -9966,6 +10016,10 @@ export interface Locale extends ILocale {
              * ロールが付与された
              */
             "roleAssigned": string;
+            /**
+             * チャットルームへ招待された
+             */
+            "chatRoomInvitationReceived": string;
             /**
              * 実績の獲得
              */
@@ -10495,6 +10549,10 @@ export interface Locale extends ILocale {
          * ギャラリーの投稿を削除
          */
         "deleteGalleryPost": string;
+        /**
+         * チャットルームを削除
+         */
+        "deleteChatRoom": string;
         /**
          * プロキシアカウントの説明を更新
          */
