@@ -5647,6 +5647,10 @@ export interface Locale extends ILocale {
          */
         "makeEveryTextElementsSelectable_description": string;
         /**
+         * アイコンをスクロールに追従させる
+         */
+        "useStickyIcons": string;
+        /**
          * ナビゲーションバーに副ボタンを表示
          */
         "showNavbarSubButtons": string;
