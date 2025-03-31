@@ -16,23 +16,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<StackingRouterView v-if="prefer.s['experimental.stackingRouterView']" :class="$style.content"/>
 		<RouterView v-else :class="$style.content"/>
 		<div v-if="isMobile" ref="navFooter" :class="$style.nav">
-			<div :class="$style.navScrollable">
-				<button :class="$style.navButton" class="_button" @click="drawerMenuShowing = true"><i :class="$style.navButtonIcon" class="ti ti-menu-2"></i><span v-if="menuIndicated" :class="$style.navButtonIndicator" class="_blink"><i class="_indicatorCircle"></i></span></button>
-				<button :class="$style.navButton" class="_button" @click="mainRouter.push('/')"><i :class="$style.navButtonIcon" class="ti ti-home"></i></button>
-				<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/notifications')">
-					<i :class="$style.navButtonIcon" class="ti ti-bell"></i>
-					<span v-if="$i?.hasUnreadNotification" :class="$style.navButtonIndicator" class="_blink">
-						<span class="_indicateCounter" :class="$style.itemIndicateValueIcon">{{ $i.unreadNotificationsCount > 99 ? '99+' : $i.unreadNotificationsCount }}</span>
-					</span>
-				</button>
-				<button :class="$style.navButton" class="_button" @click="chooseList"><i :class="$style.navButtonIcon" class="ti ti-list"></i></button>
-				<button :class="$style.navButton" class="_button" @click="chooseAntenna"><i :class="$style.navButtonIcon" class="ti ti-antenna"></i></button>
-				<button :class="$style.navButton" class="_button" @click="chooseChannel"><i :class="$style.navButtonIcon" class="ti ti-device-tv"></i></button>
-				<button :class="$style.navButton" class="_button" @click="widgetsShowing = true"><i :class="$style.navButtonIcon" class="ti ti-apps"></i></button>
-				<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/favorites')"><i :class="$style.navButtonIcon" class="ti ti-star"></i></button>
-				<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/clips')"><i :class="$style.navButtonIcon" class="ti ti-paperclip"></i></button>
-			</div>
-			<button :class="$style.postButton" class="_button" style="position: sticky;" @click="os.post()"><i :class="$style.navButtonIcon" class="ti ti-pencil"></i></button>
+			<button :class="$style.navButton" class="_button" @click="drawerMenuShowing = true"><i :class="$style.navButtonIcon" class="ti ti-menu-2"></i><span v-if="menuIndicated" :class="$style.navButtonIndicator" class="_blink"><i class="_indicatorCircle"></i></span></button>
+			<button :class="$style.navButton" class="_button" @click="mainRouter.push('/')"><i :class="$style.navButtonIcon" class="ti ti-home"></i></button>
+			<button :class="$style.navButton" class="_button" @click="mainRouter.push('/my/notifications')">
+				<i :class="$style.navButtonIcon" class="ti ti-bell"></i>
+				<span v-if="$i?.hasUnreadNotification" :class="$style.navButtonIndicator" class="_blink">
+					<span class="_indicateCounter" :class="$style.itemIndicateValueIcon">{{ $i.unreadNotificationsCount > 99 ? '99+' : $i.unreadNotificationsCount }}</span>
+				</span>
+			</button>
+			<button :class="$style.navButton" class="_button" @click="widgetsShowing = true"><i :class="$style.navButtonIcon" class="ti ti-apps"></i></button>
+			<button :class="$style.postButton" class="_button" @click="os.post()"><i :class="$style.navButtonIcon" class="ti ti-pencil"></i></button>
 		</div>
 	</div>
 
@@ -98,13 +91,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, provide, onMounted, computed, ref, watch, useTemplateRef, shallowRef } from 'vue';
+import { defineAsyncComponent, provide, onMounted, computed, ref, watch, useTemplateRef } from 'vue';
 import { instanceName } from '@@/js/config.js';
 import { isLink } from '@@/js/is-link.js';
 import XCommon from './_common_/common.vue';
-import type MkStickyContainer from '@/components/global/MkStickyContainer.vue';
 import type { PageMetadata } from '@/page.js';
-import type { MenuItem } from '@/types/menu.js';
 import XDrawerMenu from '@/ui/_common_/navbar-for-mobile.vue';
 import * as os from '@/os.js';
 import { navbarItemDef } from '@/navbar.js';
@@ -114,7 +105,6 @@ import { provideMetadataReceiver, provideReactiveMetadata } from '@/page.js';
 import { deviceKind } from '@/utility/device-kind.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { mainRouter } from '@/router.js';
-import { antennasCache, userListsCache, favoritedChannelsCache } from '@/cache.js';
 import { prefer } from '@/preferences.js';
 import { shouldSuggestRestoreBackup } from '@/preferences/utility.js';
 import { DI } from '@/di.js';
@@ -140,7 +130,6 @@ window.addEventListener('resize', () => {
 const pageMetadata = ref<null | PageMetadata>(null);
 const widgetsShowing = ref(false);
 const navFooter = useTemplateRef('navFooter');
-const contents = shallowRef<InstanceType<typeof MkStickyContainer>>();
 
 provide(DI.router, mainRouter);
 provideMetadataReceiver((metadataGetter) => {
@@ -203,70 +192,6 @@ const onContextmenu = (ev) => {
 		},
 	}], ev);
 };
-
-async function chooseList(ev: MouseEvent): Promise<void> {
-	const lists = await userListsCache.fetch();
-	const items: MenuItem[] = [
-		...lists.map(list => ({
-			type: 'link' as const,
-			text: list.name,
-			to: `/timeline/list/${list.id}`,
-		})),
-		(lists.length === 0 ? undefined : { type: 'divider' }),
-		{
-			type: 'link' as const,
-			icon: 'ti ti-plus',
-			text: i18n.ts.createNew,
-			to: '/my/lists',
-		},
-	];
-	os.popupMenu(items, ev.currentTarget ?? ev.target);
-}
-
-async function chooseAntenna(ev: MouseEvent): Promise<void> {
-	const antennas = await antennasCache.fetch();
-	const items: MenuItem[] = [
-		...antennas.map(antenna => ({
-			type: 'link' as const,
-			text: antenna.name,
-			indicate: antenna.hasUnreadNote,
-			to: `/timeline/antenna/${antenna.id}`,
-		})),
-		(antennas.length === 0 ? undefined : { type: 'divider' }),
-		{
-			type: 'link' as const,
-			icon: 'ti ti-plus',
-			text: i18n.ts.createNew,
-			to: '/my/antennas',
-		},
-	];
-	os.popupMenu(items, ev.currentTarget ?? ev.target);
-}
-
-async function chooseChannel(ev: MouseEvent): Promise<void> {
-	const channels = await favoritedChannelsCache.fetch();
-	const items: MenuItem[] = [
-		...channels.map(channel => {
-			const lastReadedAt = miLocalStorage.getItemAsJson(`channelLastReadedAt:${channel.id}`) ?? null;
-			const hasUnreadNote = (lastReadedAt && channel.lastNotedAt) ? Date.parse(channel.lastNotedAt) > lastReadedAt : !!(!lastReadedAt && channel.lastNotedAt);
-
-			return {
-				type: 'link' as const,
-				text: channel.name,
-				indicate: hasUnreadNote,
-				to: `/channels/${channel.id}`,
-			};
-		}),
-		(channels.length === 0 ? undefined : { type: 'divider' }),
-		{
-			type: 'link' as const,
-			icon: 'ti ti-plus',
-			text: i18n.ts.createNew,
-			to: '/channels',
-		},
-	];
-	os.popupMenu(items, ev.currentTarget ?? ev.target);
-}
 
 const navFooterHeight = ref(0);
 
@@ -486,111 +411,5 @@ $widgets-hide-threshold: 1090px;
 	.widgetsCloseButton {
 		display: none;
 	}
-}
-
-.nav {
-	position: fixed;
-	z-index: 1000;
-	bottom: 0;
-	left: 0;
-	padding: 6px 12px max(6px, env(safe-area-inset-bottom, 0px)) 12px;
-  display: flex;
-	width: 100%;
-	box-sizing: border-box;
-	-webkit-backdrop-filter: var(--MI-blur, blur(24px));
-	backdrop-filter: var(--MI-blur, blur(24px));
-	background-color: var(--MI_THEME-header);
-	border-top: solid 0.5px var(--MI_THEME-divider);
-}
-
-.navScrollable {
-		display: flex;
-		grid-gap: 8px;
-    overflow-x: auto;
-    white-space: nowrap;
-    flex-grow: 1;
-		box-sizing: border-box;
-		scrollbar-width: none;
-}
-
-.navButton {
-	position: relative;
-	padding: 0;
-	aspect-ratio: 1;
-	width: 100%;
-	max-width: 60px;
-	margin: auto;
-	border-radius: 100%;
-	background: var(--MI_THEME-panel);
-	color: var(--MI_THEME-fg);
-	flex-shrink: 0;
-
-	&:hover {
-		background: var(--MI_THEME-panelHighlight);
-	}
-
-	&:active {
-		background: hsl(from var(--MI_THEME-panel) h s calc(l - 2));
-	}
-}
-
-.postButton {
-	composes: navButton;
-	background: linear-gradient(90deg, var(--MI_THEME-buttonGradateA), var(--MI_THEME-buttonGradateB));
-	color: var(--MI_THEME-fgOnAccent);
-
-	&:hover {
-		background: linear-gradient(90deg, hsl(from var(--MI_THEME-accent) h s calc(l + 5)), hsl(from var(--MI_THEME-accent) h s calc(l + 5)));
-	}
-
-	&:active {
-		background: linear-gradient(90deg, hsl(from var(--MI_THEME-accent) h s calc(l + 5)), hsl(from var(--MI_THEME-accent) h s calc(l + 5)));
-	}
-}
-
-.navButtonIcon {
-	font-size: 18px;
-	vertical-align: middle;
-}
-
-.navButtonIndicator {
-	position: absolute;
-	top: 0;
-	left: 0;
-	color: var(--MI_THEME-indicator);
-	font-size: 16px;
-
-	&:has(.itemIndicateValueIcon) {
-		animation: none;
-		font-size: 12px;
-	}
-}
-
-.menuDrawerBg {
-	z-index: 1001;
-}
-
-.menuDrawer {
-	position: fixed;
-	top: 0;
-	left: 0;
-	z-index: 1001;
-	height: 100dvh;
-	width: 240px;
-	box-sizing: border-box;
-	contain: strict;
-	overflow: auto;
-	overscroll-behavior: contain;
-	background: var(--MI_THEME-navBg);
-}
-
-.statusbars {
-	position: sticky;
-	top: 0;
-	left: 0;
-}
-
-.spacer {
-	height: calc(var(--MI-minBottomSpacing));
 }
 </style>
