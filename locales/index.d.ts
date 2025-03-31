@@ -5374,6 +5374,18 @@ export interface Locale extends ILocale {
      * 圧縮
      */
     "compress": string;
+    /**
+     * 右
+     */
+    "right": string;
+    /**
+     * 下
+     */
+    "bottom": string;
+    /**
+     * 上
+     */
+    "top": string;
     "_chat": {
         /**
          * まだメッセージはありません
@@ -5509,7 +5521,7 @@ export interface Locale extends ILocale {
          */
         "thisUserAllowsChatOnlyFromFollowers": string;
         /**
-         * このユーザーはフォローしているユーザーからのみチャットを受け付けています。
+         * このユーザーは、このユーザーがフォローしているユーザーからのみチャットを受け付けています。
          */
         "thisUserAllowsChatOnlyFromFollowing": string;
         /**
@@ -10086,6 +10098,18 @@ export interface Locale extends ILocale {
          */
         "columnAlign": string;
         /**
+         * カラム間のマージン
+         */
+        "columnGap": string;
+        /**
+         * デッキメニューの位置
+         */
+        "deckMenuPosition": string;
+        /**
+         * ナビゲーションバーの位置
+         */
+        "navbarPosition": string;
+        /**
          * カラムを追加
          */
         "addColumn": string;
@@ -10138,7 +10162,7 @@ export interface Locale extends ILocale {
          */
         "introduction": string;
         /**
-         * 画面の右にある + を押して、いつでもカラムを追加できます。
+         * カラムを追加するには、画面の + をクリックします。
          */
         "introduction2": string;
         /**
