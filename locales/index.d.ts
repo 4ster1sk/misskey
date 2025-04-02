@@ -1723,6 +1723,10 @@ export interface Locale extends ILocale {
      */
     "withFileAntenna": string;
     /**
+     * センシティブなチャンネルのノートを非表示
+     */
+    "hideNotesInSensitiveChannel": string;
+    /**
      * ブラウザへのプッシュ通知を有効にする
      */
     "enableServiceworker": string;
@@ -5386,6 +5390,10 @@ export interface Locale extends ILocale {
      * 上
      */
     "top": string;
+    /**
+     * 埋め込み
+     */
+    "embed": string;
     "_chat": {
         /**
          * まだメッセージはありません
@@ -5674,6 +5682,10 @@ export interface Locale extends ILocale {
          * オフのとき
          */
         "ifOff": string;
+        /**
+         * デバイス間でインストールしたテーマを同期
+         */
+        "enableSyncThemesBetweenDevices": string;
         "_chat": {
             /**
              * 送信者の名前を表示

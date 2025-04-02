@@ -426,6 +426,7 @@ antennaExcludeBots: "Botアカウントを除外"
 antennaKeywordsDescription: "スペースで区切るとAND指定になり、改行で区切るとOR指定になります"
 notifyAntenna: "新しいノートを通知する"
 withFileAntenna: "ファイルが添付されたノートのみ"
+hideNotesInSensitiveChannel: "センシティブなチャンネルのノートを非表示"
 enableServiceworker: "ブラウザへのプッシュ通知を有効にする"
 antennaUsersDescription: "ユーザー名を改行で区切って指定します"
 caseSensitive: "大文字小文字を区別する"
@@ -1342,6 +1343,7 @@ compress: "圧縮"
 right: "右"
 bottom: "下"
 top: "上"
+embed: "埋め込み"
 
 _chat:
   noMessagesYet: "まだメッセージはありません"
@@ -1419,6 +1421,7 @@ _settings:
   showNavbarSubButtons: "ナビゲーションバーに副ボタンを表示"
   ifOn: "オンのとき"
   ifOff: "オフのとき"
+  enableSyncThemesBetweenDevices: "デバイス間でインストールしたテーマを同期"
 
   _chat:
     showSenderName: "送信者の名前を表示"
