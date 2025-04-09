@@ -4917,7 +4917,7 @@ export type components = {
       /** @default false */
       notify: boolean;
       /** @default false */
-      hideNotesInSensitiveChannel: boolean;
+      excludeNotesInSensitiveChannel: boolean;
     };
     Clip: {
       /**
@@ -5199,7 +5199,8 @@ export type components = {
       canImportFollowing: boolean;
       canImportMuting: boolean;
       canImportUserLists: boolean;
-      canChat: boolean;
+      /** @enum {string} */
+      chatAvailability: 'available' | 'readonly' | 'unavailable';
     };
     ReversiGameLite: {
       /** Format: id */
@@ -11366,7 +11367,7 @@ export type operations = {
           excludeBots?: boolean;
           withReplies: boolean;
           withFile: boolean;
-          hideNotesInSensitiveChannel?: boolean;
+          excludeNotesInSensitiveChannel?: boolean;
         };
       };
     };
@@ -11648,7 +11649,7 @@ export type operations = {
           excludeBots?: boolean;
           withReplies?: boolean;
           withFile?: boolean;
-          hideNotesInSensitiveChannel?: boolean;
+          excludeNotesInSensitiveChannel?: boolean;
         };
       };
     };
