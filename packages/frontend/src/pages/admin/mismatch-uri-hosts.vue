@@ -48,9 +48,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script lang="ts" setup>
 import { defineAsyncComponent, ref, computed } from 'vue';
-import XHeader from './_header_.vue';
 import * as os from '@/os.js';
-import { fetchInstance, instance } from '@/instance.js';
+import { fetchInstance } from '@/instance.js';
 import { i18n } from '@/i18n.js';
 import { definePage } from '@/page.js';
 import MkButton from '@/components/MkButton.vue';

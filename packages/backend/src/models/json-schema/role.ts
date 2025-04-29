@@ -224,6 +224,10 @@ export const packedRolePoliciesSchema = {
 			type: 'integer',
 			optional: false, nullable: false,
 		},
+		maxFileSizeMb: {
+			type: 'integer',
+			optional: false, nullable: false,
+		},
 		alwaysMarkNsfw: {
 			type: 'boolean',
 			optional: false, nullable: false,
@@ -275,9 +279,6 @@ export const packedRolePoliciesSchema = {
 		avatarDecorationLimit: {
 			type: 'integer',
 			optional: false, nullable: false,
-		},
-		fileSizeLimit: {
-			type: 'integer',
 		},
 		canImportAntennas: {
 			type: 'boolean',

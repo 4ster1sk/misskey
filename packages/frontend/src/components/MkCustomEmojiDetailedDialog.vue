@@ -13,7 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 >
 	<template #header>:{{ emoji.name }}:</template>
 	<template #default>
-		<MkSpacer>
+		<div class="_spacer">
 			<div style="display: flex; flex-direction: column; gap: 1em;">
 				<div :class="$style.emojiImgWrapper">
 					<MkCustomEmoji :name="emoji.name" :normal="true" :useOriginalSize="true" style="height: 100%;"></MkCustomEmoji>
@@ -60,7 +60,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</template>
 				</MkKeyValue>
 			</div>
-		</MkSpacer>
+		</div>
 	</template>
 </MkWindow>
 </template>
