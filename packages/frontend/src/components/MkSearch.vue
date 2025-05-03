@@ -13,7 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { i18n } from '@/i18n.js';
-import { store } from '@/store.js';
+import { prefer } from '@/preferences.js';
 
 const props = defineProps<{
 	q: string;
@@ -23,7 +23,7 @@ const query = ref(props.q);
 
 const search = () => {
 	const sp = new URLSearchParams();
-	if (store.state.searchSite === 'yahoo') {
+	if (prefer.s.searchSite === 'yahoo') {
 		sp.append('p', query.value);
 	} else {
 		sp.append('q', query.value);
@@ -31,7 +31,7 @@ const search = () => {
 
 	let url = '';
 
-	switch (store.state.searchSite) {
+	switch (prefer.s.searchSite) {
 		case 'bing':
 			url = `https://www.bing.com/search?${sp.toString()}`;
 			break;
