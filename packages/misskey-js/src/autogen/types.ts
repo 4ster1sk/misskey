@@ -5007,7 +5007,7 @@ export type components = {
       isNotResponding: boolean;
       isSuspended: boolean;
       /** @enum {string} */
-      suspensionState: 'none' | 'manuallySuspended' | 'goneSuspended' | 'autoSuspendedForNotResponding';
+      suspensionState: 'none' | 'manuallySuspended' | 'goneSuspended' | 'autoSuspendedForNotResponding' | 'softwareSuspended';
       isBlocked: boolean;
       /** @example misskey */
       softwareName: string | null;
@@ -5248,7 +5248,6 @@ export type components = {
       userEachUserListsLimit: number;
       rateLimitFactor: number;
       avatarDecorationLimit: number;
-      fileSizeLimit: number;
       canImportAntennas: boolean;
       canImportBlocking: boolean;
       canImportFollowing: boolean;
@@ -8789,6 +8788,10 @@ export type operations = {
             federation: 'all' | 'specified' | 'none';
             federationHosts: string[];
             mismatchUriHosts: string[];
+            deliverSuspendedSoftware: {
+                software: string;
+                versionRange: string;
+              }[];
           };
         };
       };
@@ -11458,6 +11461,10 @@ export type operations = {
           disableSignup?: boolean;
           requireSigninToViewRemoteUsers?: boolean;
           mismatchUriHosts?: string[];
+          deliverSuspendedSoftware?: {
+              software: string;
+              versionRange: string;
+            }[];
         };
       };
     };
