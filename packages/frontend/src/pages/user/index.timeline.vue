@@ -13,7 +13,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<option value="files">{{ i18n.ts.withFiles }}</option>
 		</MkTab>
 	</template>
-	<MkNotes :noGap="true" :pagination="pagination" :class="$style.tl"/>
+	<MkNotes v-if="$i != null || user.host == null || !instance.requireSigninToViewRemoteUsers" :noGap="true" :pagination="pagination" :class="$style.tl"/>
+	<div v-else class="_fullinfo">
+		<img :src="infoImageUrl" draggable="false"/>
+		<div>{{ i18n.ts.signinRequiredForRemoteNotes }}</div>
+	</div>
 </MkStickyContainer>
 </template>
 
@@ -23,6 +27,8 @@ import * as Misskey from 'misskey-js';
 import MkNotes from '@/components/MkNotes.vue';
 import MkTab from '@/components/MkTab.vue';
 import { i18n } from '@/i18n.js';
+import { infoImageUrl, instance } from '@/instance.js';
+import { $i } from '@/i.js';
 
 const props = defineProps<{
 	user: Misskey.entities.UserDetailed;
