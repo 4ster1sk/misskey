@@ -4,8 +4,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<div ref="rootEl">
-	<div v-if="isPulling" :class="$style.frame" :style="`--frame-min-height: ${pullDistance / (PULL_BRAKE_BASE + (pullDistance / PULL_BRAKE_FACTOR))}px;`">
+<div ref="rootEl" :class="isPulling ? $style.isPulling : null">
+	<!-- 小数が含まれるとレンダリングが高頻度になりすぎパフォーマンスが悪化するためround -->
+	<div v-if="isPulling" :class="$style.frame" :style="`--frame-min-height: ${Math.round(pullDistance / (PULL_BRAKE_BASE + (pullDistance / PULL_BRAKE_FACTOR)))}px;`">
 		<div :class="$style.frameContent">
 			<MkLoading v-if="isRefreshing" :class="$style.loader" :em="true"/>
 			<i v-else class="ti ti-arrow-bar-to-down" :class="[$style.icon, { [$style.refresh]: isPulledEnough }]"></i>
@@ -29,7 +30,7 @@ import { isHorizontalSwipeSwiping } from '@/utility/touch.js';
 
 const SCROLL_STOP = 10;
 const MAX_PULL_DISTANCE = Infinity;
-const FIRE_THRESHOLD = 230;
+const FIRE_THRESHOLD = 200;
 const RELEASE_TRANSITION_DURATION = 200;
 const PULL_BRAKE_BASE = 1.5;
 const PULL_BRAKE_FACTOR = 170;
@@ -64,41 +65,49 @@ function getScreenY(event: TouchEvent | MouseEvent | PointerEvent): number {
 
 // When at the top of the page, disable vertical overscroll so passive touch listeners can take over.
 function lockDownScroll() {
-	scrollEl!.style.touchAction = 'pan-x pan-down pinch-zoom';
-	scrollEl!.style.overscrollBehavior = 'none';
+	if (scrollEl == null) return;
+	scrollEl.style.touchAction = 'pan-x pan-down pinch-zoom';
+	scrollEl.style.overscrollBehavior = 'none';
 }
 
 function unlockDownScroll() {
-	scrollEl!.style.touchAction = 'auto';
-	scrollEl!.style.overscrollBehavior = 'contain';
+	if (scrollEl == null) return;
+	scrollEl.style.touchAction = 'auto';
+	scrollEl.style.overscrollBehavior = 'contain';
 }
 
 function moveStart(event: PointerEvent) {
-	const scrollPos = scrollEl!.scrollTop;
-	if (scrollPos === 0) {
-		lockDownScroll();
-		if (!isPulling.value && !isRefreshing.value) {
-			isPulling.value = true;
-			startScreenY = getScreenY(event);
-			pullDistance.value = 0;
+	if (event.pointerType === 'mouse' && event.button !== 1) return;
+	if (isRefreshing.value) return;
 
-			// タッチデバイスでPointerEventを使うとなんか挙動がおかしいので、TouchEventとMouseEventを使い分ける
-			if (event.pointerType === 'mouse') {
-				window.addEventListener('mousemove', moving, { passive: true });
-				window.addEventListener('mouseup', () => {
-					window.removeEventListener('mousemove', moving);
-					onPullRelease();
-				}, { passive: true, once: true });
-			} else {
-				window.addEventListener('touchmove', moving, { passive: true });
-				window.addEventListener('touchend', () => {
-					window.removeEventListener('touchmove', moving);
-					onPullRelease();
-				}, { passive: true, once: true });
-			}
-		}
-	} else {
+	const scrollPos = scrollEl!.scrollTop;
+	if (scrollPos !== 0) {
 		unlockDownScroll();
+		return;
+	}
+
+	lockDownScroll();
+
+	// マウスでのpull時、画面上のテキスト選択が発生したり、ブラウザの中クリックによる挙動が競合したりして画面がスクロールされたりするのを防ぐ
+	window.document.body.setAttribute('inert', 'true');
+
+	isPulling.value = true;
+	startScreenY = getScreenY(event);
+	pullDistance.value = 0;
+
+	// タッチデバイスでPointerEventを使うとなんか挙動がおかしいので、TouchEventとMouseEventを使い分ける
+	if (event.pointerType === 'mouse') {
+		window.addEventListener('mousemove', moving, { passive: true });
+		window.addEventListener('mouseup', () => {
+			window.removeEventListener('mousemove', moving);
+			onPullRelease();
+		}, { passive: true, once: true });
+	} else {
+		window.addEventListener('touchmove', moving, { passive: true });
+		window.addEventListener('touchend', () => {
+			window.removeEventListener('touchmove', moving);
+			onPullRelease();
+		}, { passive: true, once: true });
 	}
 }
 
@@ -165,8 +174,6 @@ function toggleScrollLockOnTouchEnd() {
 }
 
 function moving(event: MouseEvent | TouchEvent) {
-	if (!isPulling.value || isRefreshing.value) return;
-
 	if ((scrollEl?.scrollTop ?? 0) > SCROLL_STOP + pullDistance.value || isHorizontalSwipeSwiping.value) {
 		pullDistance.value = 0;
 		isPulledEnough.value = false;
@@ -181,11 +188,6 @@ function moving(event: MouseEvent | TouchEvent) {
 
 	const moveHeight = moveScreenY - startScreenY!;
 	pullDistance.value = Math.min(Math.max(moveHeight, 0), MAX_PULL_DISTANCE);
-
-	// マウスでのpull時、画面上のテキスト選択が発生して画面がスクロールされたりするのを防ぐ
-	if (pullDistance.value > 3) { // ある程度遊びを持たせないと通常のクリックでも発火しクリックできなくなる
-		window.document.body.setAttribute('inert', 'true');
-	}
 
 	isPulledEnough.value = pullDistance.value >= FIRE_THRESHOLD;
 }
@@ -204,20 +206,24 @@ function refreshFinished() {
 
 onMounted(() => {
 	if (rootEl.value == null) return;
-
 	scrollEl = getScrollContainer(rootEl.value);
-
+	lockDownScroll();
 	rootEl.value.addEventListener('pointerdown', moveStart, { passive: true });
 	rootEl.value.addEventListener('touchend', toggleScrollLockOnTouchEnd, { passive: true });
 });
 
 onUnmounted(() => {
-	rootEl.value.removeEventListener('pointerdown', moveStart);
-	rootEl.value.removeEventListener('touchend', toggleScrollLockOnTouchEnd);
+	unlockDownScroll();
+	if (rootEl.value) rootEl.value.removeEventListener('pointerdown', moveStart);
+	if (rootEl.value) rootEl.value.removeEventListener('touchend', toggleScrollLockOnTouchEnd);
 });
 </script>
 
 <style lang="scss" module>
+.isPulling {
+	will-change: contents;
+}
+
 .frame {
 	position: relative;
 	overflow: clip;
@@ -239,7 +245,6 @@ onUnmounted(() => {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	font-size: 14px;
 
 	> .icon, > .loader {
 		margin: 6px 0;
@@ -255,6 +260,7 @@ onUnmounted(() => {
 
 	> .text {
 		margin: 5px 0;
+		font-size: 90%;
 	}
 }
 </style>
