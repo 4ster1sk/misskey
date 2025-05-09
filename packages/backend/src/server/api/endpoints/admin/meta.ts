@@ -558,6 +558,11 @@ export const meta = {
 					},
 				},
 			},
+			ugcVisibilityForVisitor: {
+				type: 'string',
+				enum: ['all', 'local', 'none'],
+				optional: false, nullable: false,
+			},
 		},
 	},
 } as const;
@@ -705,6 +710,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				federationHosts: instance.federationHosts,
 				mismatchUriHosts: instance.mismatchUriHosts,
 				deliverSuspendedSoftware: instance.deliverSuspendedSoftware,
+				ugcVisibilityForVisitor: instance.ugcVisibilityForVisitor,
 			};
 		});
 	}

@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<i class="ti ti-list"></i><span style="margin-left: 8px;">{{ (column.name || listName) ?? i18n.ts._deck._columns.list }}</span>
 	</template>
 
-	<MkTimeline
+	<MkStreamingNotesTimeline
 		v-if="column.listId"
 		ref="timeline"
 		:key="column.listId + withRenotes + onlyFiles"
@@ -17,7 +17,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 		:list="column.listId"
 		:withRenotes="withRenotes"
 		:onlyFiles="onlyFiles"
-		@note="onNote"
 	/>
 </XColumn>
 </template>
@@ -30,13 +29,12 @@ import type { Column } from '@/deck.js';
 import type { MenuItem } from '@/types/menu.js';
 import type { SoundStore } from '@/preferences/def.js';
 import { updateColumn } from '@/deck.js';
-import MkTimeline from '@/components/MkTimeline.vue';
+import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
 import { userListsCache } from '@/cache.js';
 import { soundSettingsButton } from '@/ui/deck/tl-note-notification.js';
-import * as sound from '@/utility/sound.js';
 
 const props = defineProps<{
 	column: Column;
@@ -116,10 +114,6 @@ async function setList() {
 
 function editList() {
 	os.pageWindow('my/lists/' + props.column.listId);
-}
-
-function onNote() {
-	sound.playMisskeySfxFile(soundSetting.value);
 }
 
 const menu: MenuItem[] = [
