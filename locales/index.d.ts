@@ -2007,10 +2007,6 @@ export interface Locale extends ILocale {
      */
     "signinOrContinueOnRemote": string;
     /**
-     * リモートユーザーのノートを表示するにはログインが必要です
-     */
-    "signinRequiredForRemoteNotes": string;
-    /**
      * 招待
      */
     "invitations": string;

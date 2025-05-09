@@ -492,7 +492,6 @@ attachAsFileQuestion: "クリップボードのテキストが長すぎるから
 onlyOneFileCanBeAttached: "ごめんな、メッセージに添付できるファイルはひとつだけなんよ。"
 signinRequired: "ログインしてくれへん？"
 signinOrContinueOnRemote: "続行するには、お使いのサーバーに移動するか、このサーバーに登録・ログインする必要があるで"
-signinRequiredForRemoteNotes: "リモートユーザーのノートを表示するにはログインが必要やで"
 invitations: "来てや"
 invitationCode: "招待コード"
 checking: "確認しとるで"

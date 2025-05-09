@@ -497,7 +497,6 @@ attachAsFileQuestion: "The text in clipboard is long. Would you want to attach i
 onlyOneFileCanBeAttached: "You can only attach one file to a message"
 signinRequired: "Please register or sign in before continuing"
 signinOrContinueOnRemote: "To continue, you need to move your server or sign up / log in to this server."
-signinRequiredForRemoteNotes: "You need to log in to view remote users' notes"
 invitations: "Invites"
 invitationCode: "Invitation code"
 checking: "Checking..."
