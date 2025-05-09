@@ -5351,7 +5351,6 @@ export type components = {
       defaultLightTheme: string | null;
       disableRegistration: boolean;
       disableSignup: boolean;
-      requireSigninToViewRemoteUsers: boolean;
       emailRequiredForSignup: boolean;
       enableHcaptcha: boolean;
       hcaptchaSiteKey: string | null;
@@ -8666,7 +8665,6 @@ export type operations = {
         content: {
           'application/json': {
             disableSignup: boolean;
-            requireSigninToViewRemoteUsers: boolean;
             cacheRemoteFiles: boolean;
             cacheRemoteSensitiveFiles: boolean;
             emailRequiredForSignup: boolean;
@@ -11461,7 +11459,6 @@ export type operations = {
           federation?: 'all' | 'none' | 'specified';
           federationHosts?: string[];
           disableSignup?: boolean;
-          requireSigninToViewRemoteUsers?: boolean;
           mismatchUriHosts?: string[];
           deliverSuspendedSoftware?: {
               software: string;

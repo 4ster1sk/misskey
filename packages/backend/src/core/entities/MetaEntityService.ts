@@ -99,7 +99,6 @@ export class MetaEntityService {
 			swPublickey: instance.swPublicKey,
 			themeColor: instance.themeColor,
 			disableSignup: instance.disableSignup,
-			requireSigninToViewRemoteUsers: instance.requireSigninToViewRemoteUsers,
 			mascotImageUrl: instance.mascotImageUrl ?? '/assets/ai.png',
 			bannerUrl: instance.bannerUrl,
 			infoImageUrl: instance.infoImageUrl,

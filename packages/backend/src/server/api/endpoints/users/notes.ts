@@ -99,13 +99,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 			}
 
-			if (me == null && this.serverSettings.requireSigninToViewRemoteUsers) {
-				const user = await this.cacheService.findUserById(ps.userId);
-				if (user.host != null) {
-					return [];
-				}
-			}
-
 			if (!this.serverSettings.enableFanoutTimeline) {
 				const timeline = await this.getFromDb({
 					untilId,

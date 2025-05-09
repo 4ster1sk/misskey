@@ -669,11 +669,6 @@ export class MiMeta {
 	})
 	public disableSignup: boolean;
 
-	@Column('boolean', {
-		default: false,
-	})
-	public requireSigninToViewRemoteUsers: boolean;
-
 	@Column('varchar', {
 		length: 64,
 		nullable: true,

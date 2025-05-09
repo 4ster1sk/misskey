@@ -186,7 +186,6 @@ export const paramDef = {
 			},
 		},
 		disableSignup: { type: 'boolean' },
-		requireSigninToViewRemoteUsers: { type: 'boolean' },
 		mismatchUriHosts: {
 			type: 'array',
 			items: {
@@ -328,10 +327,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (ps.disableSignup !== undefined) {
 				set.disableSignup = ps.disableSignup;
-			}
-
-			if (ps.requireSigninToViewRemoteUsers !== undefined) {
-				set.requireSigninToViewRemoteUsers = ps.requireSigninToViewRemoteUsers;
 			}
 
 			if (ps.cacheRemoteSensitiveFiles !== undefined) {
