@@ -4499,6 +4499,7 @@ export type components = {
       url?: string;
       reactionAndUserPairCache?: string[];
       clippedCount?: number;
+      hasPoll?: boolean;
       myReaction?: string | null;
     };
     NoteReaction: {
@@ -5552,6 +5553,7 @@ export type components = {
       name: string;
       description: string;
       isMuted?: boolean;
+      invitationExists?: boolean;
     };
     ChatRoomInvitation: {
       id: string;
@@ -8801,6 +8803,7 @@ export type operations = {
                 software: string;
                 versionRange: string;
               }[];
+            singleUserMode: boolean;
             /** @enum {string} */
             ugcVisibilityForVisitor: 'all' | 'local' | 'none';
           };
@@ -11475,6 +11478,7 @@ export type operations = {
               software: string;
               versionRange: string;
             }[];
+          singleUserMode?: boolean;
           /** @enum {string} */
           ugcVisibilityForVisitor?: 'all' | 'local' | 'none';
         };
