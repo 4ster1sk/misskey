@@ -8806,6 +8806,9 @@ export type operations = {
             singleUserMode: boolean;
             /** @enum {string} */
             ugcVisibilityForVisitor: 'all' | 'local' | 'none';
+            proxyRemoteFiles: boolean;
+            signToActivityPubGet: boolean;
+            allowExternalApRedirect: boolean;
           };
         };
       };
@@ -11481,6 +11484,9 @@ export type operations = {
           singleUserMode?: boolean;
           /** @enum {string} */
           ugcVisibilityForVisitor?: 'all' | 'local' | 'none';
+          proxyRemoteFiles?: boolean;
+          signToActivityPubGet?: boolean;
+          allowExternalApRedirect?: boolean;
         };
       };
     };
