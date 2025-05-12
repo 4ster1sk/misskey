@@ -154,15 +154,8 @@ export class ApNoteService {
 
 		const url = getOneApHrefNullable(note.url);
 
-		if (url != null) {
-			const urlHost = this.utilityService.punyHost(url).toLowerCase();
-			const uriHost = this.utilityService.punyHost(note.id).toLowerCase();
-
-			if (urlHost !== uriHost && !this.meta.mismatchUriHosts.some(x => x === `${urlHost},${uriHost}`)) {
-				if (!checkHttps(url)) {
-					throw new Error(`unexpected schema of note url: ${url} / note uri: ${note.id}`);
-				}
-			}
+		if (url && !checkHttps(url)) {
+			throw new Error('unexpected schema of note url: ' + url);
 		}
 
 		this.logger.info(`Creating the Note: ${note.id}`);

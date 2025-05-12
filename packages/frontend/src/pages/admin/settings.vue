@@ -267,12 +267,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</MkFolder>
 
 			<MkFolder>
-				<div class="_gaps_s">
-					<FormLink to="/admin/mismatch-uri-hosts">{{ i18n.ts._mismatchUriHosts.title }}</FormLink>
-				</div>
-			</MkFolder>
-
-			<MkFolder>
 				<template #icon><i class="ti ti-ghost"></i></template>
 				<template #label>{{ i18n.ts.proxyAccount }}</template>
 				<template v-if="proxyAccountForm.modified.value" #footer>

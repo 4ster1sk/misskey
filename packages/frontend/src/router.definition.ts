@@ -472,10 +472,6 @@ export const ROUTE_DEF = [{
 		name: 'moderation',
 		component: page(() => import('@/pages/admin/moderation.vue')),
 	}, {
-		path: '/mismatch-uri-hosts',
-		name: 'mismatch-uri-hosts',
-		component: page(() => import('@/pages/admin/mismatch-uri-hosts.vue')),
-	}, {
 		path: '/email-settings',
 		name: 'email-settings',
 		component: page(() => import('@/pages/admin/email-settings.vue')),

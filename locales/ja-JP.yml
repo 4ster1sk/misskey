@@ -3116,10 +3116,6 @@ _remoteLookupErrors:
     title: "見つかりません"
     description: "要求されたリソースは見つかりませんでした。URIをもう一度お確かめください。"
 
-_mismatchUriHosts:
-  title: "URLとURIが異なるサーバーの許可設定"
-  url: "URL"
-  uri: "URI"
 _captcha:
   verify: "CAPTCHAを通過してください"
   testSiteKeyMessage: "サイトキーとシークレットキーにテスト用の値を入力することでプレビューを確認できます。\n詳細は下記ページをご確認ください。"

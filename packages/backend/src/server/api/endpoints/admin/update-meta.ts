@@ -186,12 +186,6 @@ export const paramDef = {
 			},
 		},
 		disableSignup: { type: 'boolean' },
-		mismatchUriHosts: {
-			type: 'array',
-			items: {
-				type: 'string',
-			},
-		},
 		deliverSuspendedSoftware: {
 			type: 'array',
 			items: {
@@ -707,10 +701,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (Array.isArray(ps.federationHosts)) {
 				set.federationHosts = ps.federationHosts.filter(Boolean).map(x => x.toLowerCase());
-			}
-
-			if (Array.isArray(ps.mismatchUriHosts)) {
-				set.mismatchUriHosts = ps.mismatchUriHosts.filter(Boolean).map(x => x.toLowerCase());
 			}
 
 			if (ps.singleUserMode !== undefined) {

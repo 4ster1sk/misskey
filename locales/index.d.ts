@@ -11663,20 +11663,6 @@ export interface Locale extends ILocale {
             "description": string;
         };
     };
-    "_mismatchUriHosts": {
-        /**
-         * URLとURIが異なるサーバーの許可設定
-         */
-        "title": string;
-        /**
-         * URL
-         */
-        "url": string;
-        /**
-         * URI
-         */
-        "uri": string;
-    };
     "_captcha": {
         /**
          * CAPTCHAを通過してください

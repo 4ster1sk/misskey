@@ -532,14 +532,6 @@ export const meta = {
 					optional: false, nullable: false,
 				},
 			},
-			mismatchUriHosts: {
-				type: 'array',
-				optional: false, nullable: false,
-				items: {
-					type: 'string',
-					optional: false, nullable: false,
-				},
-			},
 			deliverSuspendedSoftware: {
 				type: 'array',
 				optional: false, nullable: false,
@@ -724,7 +716,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				urlPreviewSummaryProxyUrl: instance.urlPreviewSummaryProxyUrl,
 				federation: instance.federation,
 				federationHosts: instance.federationHosts,
-				mismatchUriHosts: instance.mismatchUriHosts,
 				deliverSuspendedSoftware: instance.deliverSuspendedSoftware,
 				singleUserMode: instance.singleUserMode,
 				ugcVisibilityForVisitor: instance.ugcVisibilityForVisitor,

@@ -8798,7 +8798,6 @@ export type operations = {
             /** @enum {string} */
             federation: 'all' | 'specified' | 'none';
             federationHosts: string[];
-            mismatchUriHosts: string[];
             deliverSuspendedSoftware: {
                 software: string;
                 versionRange: string;
@@ -11476,7 +11475,6 @@ export type operations = {
           federation?: 'all' | 'none' | 'specified';
           federationHosts?: string[];
           disableSignup?: boolean;
-          mismatchUriHosts?: string[];
           deliverSuspendedSoftware?: {
               software: string;
               versionRange: string;
