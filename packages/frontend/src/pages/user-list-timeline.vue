@@ -13,6 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				:list="listId"
 				:withRenotes="withRenotes"
 				:withReplies="withReplies"
+				:withSensitive="withSensitive"
 				:onlyFiles="onlyFiles"
 				:sound="true"
 			/>
@@ -41,10 +42,12 @@ const list = ref<Misskey.entities.UserList | null>(null);
 
 const withRenotes = ref(true);
 const withReplies = ref(false);
+const withSensitive = ref(false);
 const onlyFiles = ref(false);
 
 watch(withRenotes, fetch, { immediate: true });
 watch(withReplies, fetch, { immediate: true });
+watch(withSensitive, fetch, { immediate: true });
 watch(onlyFiles, fetch, { immediate: true });
 watch(() => props.listId, fetch, { immediate: true });
 
@@ -81,7 +84,10 @@ const headerActions = computed(() => list.value ? [
 					type: 'switch',
 					text: i18n.ts.fileAttachedOnly,
 					ref: onlyFiles,
-					disabled: withReplies,
+				}, {
+					type: 'switch',
+					text: i18n.ts.withSensitive,
+					ref: withSensitive,
 				}], ev.currentTarget ?? ev.target);
 		},
 	}] : []);

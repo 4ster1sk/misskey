@@ -16,6 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		src="list"
 		:list="column.listId"
 		:withRenotes="withRenotes"
+		:withSensitive="withSensitive"
 		:onlyFiles="onlyFiles"
 	/>
 </XColumn>
@@ -44,6 +45,7 @@ const props = defineProps<{
 const timeline = useTemplateRef('timeline');
 const withRenotes = ref(props.column.withRenotes ?? true);
 const onlyFiles = ref(props.column.onlyFiles ?? false);
+const withSensitive = ref(props.column.withSensitive ?? true);
 const soundSetting = ref<SoundStore>(props.column.soundSetting ?? { type: null, volume: 1 });
 const listName = ref<string | null>(null);
 
@@ -63,6 +65,12 @@ watch([() => props.column.name, () => props.column.listId], () => {
 watch(withRenotes, v => {
 	updateColumn(props.column.id, {
 		withRenotes: v,
+	});
+});
+
+watch(withSensitive, v => {
+	updateColumn(props.column.id, {
+		withSensitive: v,
 	});
 });
 
@@ -136,6 +144,11 @@ const menu: MenuItem[] = [
 		type: 'switch',
 		text: i18n.ts.fileAttachedOnly,
 		ref: onlyFiles,
+	},
+	{
+		type: 'switch',
+		text: i18n.ts.withSensitive,
+		ref: withSensitive,
 	},
 	{
 		icon: 'ti ti-bell',
