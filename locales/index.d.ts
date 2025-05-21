@@ -1211,6 +1211,10 @@ export interface Locale extends ILocale {
      */
     "uploadFromUrlMayTakeTime": string;
     /**
+     * {n}個のファイルをアップロード
+     */
+    "uploadNFiles": ParameterizedString<"n">;
+    /**
      * みつける
      */
     "explore": string;
@@ -2338,6 +2342,10 @@ export interface Locale extends ILocale {
      * サウンド
      */
     "sound": string;
+    /**
+     * 通知音の設定
+     */
+    "notificationSoundSettings": string;
     /**
      * 聴く
      */
@@ -5457,6 +5465,10 @@ export interface Locale extends ILocale {
      * {x}のミュートを解除
      */
     "unmuteX": ParameterizedString<"x">;
+    /**
+     * 中止
+     */
+    "abort": string;
     "_chat": {
         /**
          * まだメッセージはありません
@@ -5793,6 +5805,10 @@ export interface Locale extends ILocale {
          * リアルタイムモードがオンのときは、この設定に関わらずリアルタイムでコンテンツが更新されます。
          */
         "contentsUpdateFrequency_description2": string;
+        /**
+         * URLプレビューを表示する
+         */
+        "showUrlPreview": string;
         "_chat": {
             /**
              * 送信者の名前を表示
@@ -8548,10 +8564,6 @@ export interface Locale extends ILocale {
              */
             "inputBorder": string;
             /**
-             * ドライブフォルダーの背景
-             */
-            "driveFolderBg": string;
-            /**
              * バッジ
              */
             "badge": string;
@@ -10970,13 +10982,23 @@ export interface Locale extends ILocale {
              */
             "description": string;
         };
-        "_urlPreview": {
+        "_urlPreviewThumbnail": {
             /**
              * URLプレビューのサムネイルを非表示
              */
             "title": string;
             /**
              * URLプレビューのサムネイル画像が読み込まれなくなります。
+             */
+            "description": string;
+        };
+        "_disableUrlPreview": {
+            /**
+             * URLプレビューを無効化
+             */
+            "title": string;
+            /**
+             * URLプレビュー機能を無効化します。サムネイル画像だけと違い、リンク先の情報の読み込み自体を削減できます。
              */
             "description": string;
         };
@@ -11466,22 +11488,6 @@ export interface Locale extends ILocale {
                  */
                 "directoryToCategoryCaption": string;
                 /**
-                 * いずれかの方法で登録する絵文字を選択してください。
-                 */
-                "emojiInputAreaCaption": string;
-                /**
-                 * この枠に画像ファイルまたはディレクトリをドラッグ＆ドロップ
-                 */
-                "emojiInputAreaList1": string;
-                /**
-                 * このリンクをクリックしてPCから選択する
-                 */
-                "emojiInputAreaList2": string;
-                /**
-                 * このリンクをクリックしてドライブから選択する
-                 */
-                "emojiInputAreaList3": string;
-                /**
                  * リストに表示されている絵文字を新たなカスタム絵文字として登録します。よろしいですか？（負荷を避けるため、一度の操作で登録可能な絵文字は{count}件までです）
                  */
                 "confirmRegisterEmojisDescription": ParameterizedString<"count">;
@@ -11941,6 +11947,28 @@ export interface Locale extends ILocale {
              */
             "text3": string;
         };
+    };
+    "_uploader": {
+        /**
+         * {x}に圧縮
+         */
+        "compressedToX": ParameterizedString<"x">;
+        /**
+         * {x}%節約
+         */
+        "savedXPercent": ParameterizedString<"x">;
+        /**
+         * アップロードされていないファイルがありますが、中止しますか？
+         */
+        "abortConfirm": string;
+        /**
+         * アップロードされていないファイルがありますが、完了しますか？
+         */
+        "doneConfirm": string;
+        /**
+         * アップロード可能な最大ファイルサイズは{x}です。
+         */
+        "maxFileSizeIsX": ParameterizedString<"x">;
     };
     "_clientPerformanceIssueTip": {
         /**
