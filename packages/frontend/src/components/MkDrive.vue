@@ -27,13 +27,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<span v-if="folder != null" :class="[$style.navPathItem, $style.navSeparator]"><i class="ti ti-chevron-right"></i></span>
 				<span v-if="folder != null" :class="[$style.navPathItem, $style.navCurrent]">{{ folder.name }}</span>
 			</div>
-			<div :class="$style.navMenu">
-				<!-- "Search drive via alt text or file names" -->
-				<MkInput v-model="searchQuery" :large="true" :autofocus="true" type="search" @enter.prevent="fetch">
-					<template #prefix><i class="ti ti-search"></i></template>
-				</MkInput>
-				<button class="_button" :class="$style.navMenu" @click="showMenu"><i class="ti ti-dots"></i></button>
-			</div>
+			<button class="_button" :class="$style.navMenu" @click="showMenu"><i class="ti ti-dots"></i></button>
 		</nav>
 	</template>
 
@@ -119,9 +113,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 			<div v-if="filesPaginator.items.value.length == 0 && foldersPaginator.items.value.length == 0 && !fetching" :class="$style.empty">
 				<div v-if="draghover">{{ i18n.ts['empty-draghover'] }}</div>
-				<div v-if="!draghover && folder == null && lastSearchQuery === ''"><strong>{{ i18n.ts.emptyDrive }}</strong><br/>{{ i18n.ts['empty-drive-description'] }}</div>
-				<div v-if="!draghover && folder != null && lastSearchQuery === ''">{{ i18n.ts.emptyFolder }}</div>
-				<div v-if="!draghover && lastSearchQuery !== ''"><strong>{{ i18n.tsx.driveSearchNotFound({query: lastSearchQuery}) }}</strong></div>
+				<div v-if="!draghover && folder == null"><strong>{{ i18n.ts.emptyDrive }}</strong><br/>{{ i18n.ts['empty-drive-description'] }}</div>
+				<div v-if="!draghover && folder != null">{{ i18n.ts.emptyFolder }}</div>
 			</div>
 		</div>
 		<MkLoading v-if="fetching"/>
@@ -144,7 +137,6 @@ import type { MenuItem } from '@/types/menu.js';
 import XNavFolder from '@/components/MkDrive.navFolder.vue';
 import XFolder from '@/components/MkDrive.folder.vue';
 import XFile from '@/components/MkDrive.file.vue';
-import MkInput from '@/components/MkInput.vue';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { useStream } from '@/stream.js';
@@ -804,13 +796,8 @@ onBeforeUnmount(() => {
 }
 
 .navMenu {
-	display: flex;
 	margin-left: auto;
-	align-items: center;
-}
-
-.navMenu > *:not(:last-child) {
-	padding-right: 12px;
+	padding: 0 12px;
 }
 
 .main {
