@@ -145,6 +145,7 @@ import { getPluginHandlers } from '@/plugin.js';
 import { DI } from '@/di.js';
 import { globalEvents } from '@/events.js';
 import { checkDragDataType, getDragData } from '@/drag-and-drop.js';
+import { uploadFile, UploadAbortedError } from '@/utility/drive.js';
 import { useUploader } from '@/composables/use-uploader.js';
 
 const $i = ensureSignin();
@@ -484,6 +485,23 @@ function updateFileName(file, name) {
 	files.value[files.value.findIndex(x => x.id === file.id)].name = name;
 }
 
+function upload(file: File, name?: string): void {
+	if (props.mock) return;
+
+	const { filePromise, abort } = uploadFile(file, {
+		name: name,
+		folderId: prefer.s.uploadFolder,
+	});
+
+	filePromise.then(res => {
+		files.value.push(res);
+	}).catch(err => {
+		if (!(err instanceof UploadAbortedError)) {
+			throw err;
+		}
+	});
+}
+
 function setVisibility() {
 	if (props.channel) {
 		visibility.value = 'public';
@@ -669,24 +687,15 @@ async function onPaste(ev: ClipboardEvent) {
 	if (props.mock) return;
 	if (!ev.clipboardData) return;
 
-	let pastedFiles: File[] = [];
 	for (const { item, i } of Array.from(ev.clipboardData.items, (data, x) => ({ item: data, i: x }))) {
 		if (item.kind === 'file') {
 			const file = item.getAsFile();
 			if (!file) continue;
 			const lio = file.name.lastIndexOf('.');
 			const ext = lio >= 0 ? file.name.slice(lio) : '';
-			const formattedName = `${formatTimeString(new Date(file.lastModified), pastedFileName).replace(/{{number}}/g, `${i + 1}`)}${ext}`;
-			const renamedFile = new File([file], formattedName, { type: file.type });
-			pastedFiles.push(renamedFile);
+			const formatted = `${formatTimeString(new Date(file.lastModified), pastedFileName).replace(/{{number}}/g, `${i + 1}`)}${ext}`;
+			upload(file, formatted);
 		}
-	}
-	if (pastedFiles.length > 0) {
-		ev.preventDefault();
-		os.launchUploader(pastedFiles, {}).then(driveFiles => {
-			files.value.push(...driveFiles);
-		});
-		return;
 	}
 
 	const paste = ev.clipboardData.getData('text');
