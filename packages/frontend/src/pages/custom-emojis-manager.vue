@@ -129,7 +129,7 @@ const toggleSelect = (emoji) => {
 };
 
 const add = async (ev: MouseEvent) => {
-	const { dispose } = os.popup(defineAsyncComponent(() => import('./emoji-edit-dialog.vue')), {
+	const { dispose } = await os.popupAsyncWithDialog(import('./emoji-edit-dialog.vue').then(x => x.default), {
 	}, {
 		done: result => {
 			if (result.created) {
@@ -140,8 +140,8 @@ const add = async (ev: MouseEvent) => {
 	});
 };
 
-const edit = (emoji) => {
-	const { dispose } = os.popup(defineAsyncComponent(() => import('./emoji-edit-dialog.vue')), {
+const edit = async (emoji) => {
+	const { dispose } = await os.popupAsyncWithDialog(import('./emoji-edit-dialog.vue').then(x => x.default), {
 		emoji: emoji,
 	}, {
 		done: result => {
@@ -215,7 +215,10 @@ const menu = (ev: MouseEvent) => {
 		icon: 'ti ti-upload',
 		text: i18n.ts.import,
 		action: async () => {
-			const file = await selectFile(ev.currentTarget ?? ev.target);
+			const file = await selectFile({
+				anchorElement: ev.currentTarget ?? ev.target,
+				multiple: false,
+			});
 			misskeyApi('admin/emoji/import-zip', {
 				fileId: file.id,
 			})
