@@ -11347,6 +11347,7 @@ export interface operations {
                     type?: string | null;
                     /** Format: misskey:id */
                     userId?: string | null;
+                    search?: string | null;
                 };
             };
         };
@@ -18374,6 +18375,7 @@ export interface operations {
                     untilId?: string;
                     sinceDate?: number;
                     untilDate?: number;
+                    search?: string | null;
                 };
             };
         };
