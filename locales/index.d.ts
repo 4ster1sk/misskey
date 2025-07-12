@@ -7811,6 +7811,10 @@ export interface Locale extends ILocale {
              * サーバーサイドのノートの下書きの作成可能数
              */
             "noteDraftLimit": string;
+            /**
+             * ウォーターマーク機能の使用可否
+             */
+            "watermarkAvailable": string;
         };
         "_condition": {
             /**
@@ -10906,6 +10910,10 @@ export interface Locale extends ILocale {
          * 添付されているノート
          */
         "attachedNotes": string;
+        /**
+         * 利用
+         */
+        "usage": string;
         /**
          * このページは、このファイルをアップロードしたユーザーしか閲覧できません。
          */
