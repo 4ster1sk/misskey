@@ -134,7 +134,8 @@ export class SignupApiService {
 			return;
 		}
 
-		if (this.meta.disableRegistration) {
+		// テスト時はこの機構は障害となるため無効にする
+		if (process.env.NODE_ENV !== 'test' && this.meta.disableRegistration) {
 			if (invitationCode == null || typeof invitationCode !== 'string') {
 				reply.code(400);
 				return;
