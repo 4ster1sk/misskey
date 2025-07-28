@@ -1308,6 +1308,7 @@ prohibitedWordsForNameOfUserDescription: "このリストに含まれる文字�
 yourNameContainsProhibitedWords: "変更しようとした名前に禁止された文字列が含まれています"
 yourNameContainsProhibitedWordsDescription: "名前に禁止されている文字列が含まれています。この名前を使用したい場合は、サーバー管理者にお問い合わせください。"
 thisContentsAreMarkedAsSigninRequiredByAuthor: "投稿者により、表示にはログインが必要と設定されています"
+thisContentRequiredSignin: "表示にはログインが必要です"
 lockdown: "ロックダウン"
 pleaseSelectAccount: "アカウントを選択してください"
 availableRoles: "利用可能なロール"

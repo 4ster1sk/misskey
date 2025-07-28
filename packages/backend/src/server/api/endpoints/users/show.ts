@@ -55,6 +55,12 @@ export const meta = {
 			id: '4362f8dc-731f-4ad8-a694-be5a88922a24',
 			httpStatusCode: 404,
 		},
+
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: '1113a59e-7c4b-44af-baca-0ba03a6a841d',
+		},
 	},
 } as const;
 
@@ -155,7 +161,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// Lookup user
 				if (typeof ps.host === 'string' && 'username' in ps) {
 					if (this.serverSettings.ugcVisibilityForVisitor === 'local' && me == null) {
-						throw new ApiError(meta.errors.noSuchUser);
+						throw new ApiError(meta.errors.signinRequired);
 					}
 
 					user = await this.remoteUserResolveService.resolveUser(ps.username, ps.host).catch(err => {
@@ -175,7 +181,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 
 				if (this.serverSettings.ugcVisibilityForVisitor === 'local' && user.host != null && me == null) {
-					throw new ApiError(meta.errors.noSuchUser);
+					throw new ApiError(meta.errors.signinRequired);
 				}
 
 				if (user.host == null) {

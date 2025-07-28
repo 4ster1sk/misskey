@@ -141,7 +141,7 @@ function fetchNote() {
 		if (err.id === '8e75455b-738c-471d-9f80-62693f33372e') {
 			pleaseLogin({
 				path: '/',
-				message: i18n.ts.thisContentsAreMarkedAsSigninRequiredByAuthor,
+				message: i18n.ts.thisContentRequiredSignin,
 				openOnRemote: {
 					type: 'lookup',
 					url: `https://${host}/notes/${props.noteId}`,
