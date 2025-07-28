@@ -1309,6 +1309,7 @@ prohibitedWordsForNameOfUserDescription: "If any of the strings in this list are
 yourNameContainsProhibitedWords: "Your name contains prohibited words"
 yourNameContainsProhibitedWordsDescription: "If you wish to use this name, please contact your server administrator."
 thisContentsAreMarkedAsSigninRequiredByAuthor: "Set by the author to require login to view"
+thisContentRequiredSignin: "Sign in required to access this content."
 lockdown: "Lockdown"
 pleaseSelectAccount: "Select an account"
 availableRoles: "Available roles"

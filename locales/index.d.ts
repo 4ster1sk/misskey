@@ -5259,6 +5259,10 @@ export interface Locale extends ILocale {
      */
     "thisContentsAreMarkedAsSigninRequiredByAuthor": string;
     /**
+     * 表示にはログインが必要です
+     */
+    "thisContentRequiredSignin": string;
+    /**
      * ロックダウン
      */
     "lockdown": string;
