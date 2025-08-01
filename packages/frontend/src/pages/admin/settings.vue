@@ -288,6 +288,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 				</div>
 			</MkFolder>
 
+			<MkButton primary @click="openSetupWizard">
+				Open setup wizard
+			</MkButton>
+
 			<MkFolder>
 				<template #icon><i class="ti ti-cloud"></i></template>
 				<template #label>{{ i18n.ts._customizeFeature.title }}</template>
@@ -447,6 +451,20 @@ const proxyAccountForm = useForm({
 	});
 	fetchInstance(true);
 });
+
+async function openSetupWizard() {
+	const { canceled } = await os.confirm({
+		type: 'warning',
+		title: i18n.ts._serverSettings.restartServerSetupWizardConfirm_title,
+		text: i18n.ts._serverSettings.restartServerSetupWizardConfirm_text,
+	});
+	if (canceled) return;
+
+	const { dispose } = await os.popupAsyncWithDialog(import('@/components/MkServerSetupWizardDialog.vue').then(x => x.default), {
+	}, {
+		closed: () => dispose(),
+	});
+}
 
 const headerTabs = computed(() => []);
 

@@ -58,7 +58,11 @@ async function fetch() {
 }
 
 function settings() {
-	router.push(`/my/lists/${props.listId}`);
+	router.push('/my/lists/:listId', {
+		params: {
+			listId: props.listId,
+		}
+	});
 }
 
 const headerActions = computed(() => list.value ? [
