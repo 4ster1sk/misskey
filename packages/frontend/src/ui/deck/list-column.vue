@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <XColumn :menu="menu" :column="column" :isStacked="isStacked" :refresher="async () => { await timeline?.reloadTimeline() }">
 	<template #header>
-		<i class="ti ti-list"></i><span style="margin-left: 8px;">{{ (column.name || listName) ?? i18n.ts._deck._columns.list }}</span>
+		<i class="ti ti-list"></i><span style="margin-left: 8px;">{{ column.name || column.timelineNameCache || i18n.ts._deck._columns.list }}</span>
 	</template>
 
 	<MkStreamingNotesTimeline
@@ -47,18 +47,13 @@ const withRenotes = ref(props.column.withRenotes ?? true);
 const onlyFiles = ref(props.column.onlyFiles ?? false);
 const withSensitive = ref(props.column.withSensitive ?? true);
 const soundSetting = ref<SoundStore>(props.column.soundSetting ?? { type: null, volume: 1 });
-const listName = ref<string | null>(null);
 
 onMounted(() => {
 	if (props.column.listId == null) {
 		setList();
-	}
-});
-
-watch([() => props.column.name, () => props.column.listId], () => {
-	if (!props.column.name && props.column.listId) {
+	} else if (props.column.timelineNameCache == null) {
 		misskeyApi('users/lists/show', { listId: props.column.listId })
-			.then(value => listName.value = value.name);
+			.then(value => updateColumn(props.column.id, { timelineNameCache: value.name }));
 	}
 });
 
@@ -112,10 +107,12 @@ async function setList() {
 
 		updateColumn(props.column.id, {
 			listId: res.id,
+			timelineNameCache: res.name,
 		});
 	} else {
 		updateColumn(props.column.id, {
 			listId: list.id,
+			timelineNameCache: list.name,
 		});
 	}
 }
