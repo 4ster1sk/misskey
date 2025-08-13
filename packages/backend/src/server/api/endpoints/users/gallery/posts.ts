@@ -9,6 +9,8 @@ import type { GalleryPostsRepository } from '@/models/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { GalleryPostEntityService } from '@/core/entities/GalleryPostEntityService.js';
 import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
+import { ApiError } from '../../../error.js';
 
 export const meta = {
 	tags: ['users', 'gallery'],
@@ -22,6 +24,13 @@ export const meta = {
 			type: 'object',
 			optional: false, nullable: false,
 			ref: 'GalleryPost',
+		},
+	},
+	errors: {
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: 'a5d2b635-8119-4be1-9e33-c07784897e27',
 		},
 	},
 } as const;
@@ -42,6 +51,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.galleryPostsRepository)
 		private galleryPostsRepository: GalleryPostsRepository,
 
@@ -49,6 +61,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private queryService: QueryService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
+
 			const query = this.queryService.makePaginationQuery(this.galleryPostsRepository.createQueryBuilder('post'), ps.sinceId, ps.untilId, ps.sinceDate, ps.untilDate)
 				.andWhere('post.userId = :userId', { userId: ps.userId });
 

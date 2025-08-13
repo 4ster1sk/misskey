@@ -9,6 +9,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { UserListEntityService } from '@/core/entities/UserListEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
 
 export const meta = {
 	tags: ['lists', 'account'],
@@ -44,6 +45,11 @@ export const meta = {
 			code: 'INVALID_PARAM',
 			id: 'ab36de0e-29e9-48cb-9732-d82f1281620d',
 		},
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: 'f7612304-0a5a-45b6-a217-502f11355486',
+		},
 	},
 } as const;
 
@@ -58,6 +64,9 @@ export const paramDef = {
 @Injectable() // eslint-disable-next-line import/no-default-export
 export default class extends Endpoint<typeof meta, typeof paramDef> {
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
@@ -67,6 +76,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		private userListEntityService: UserListEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
+
 			if (typeof ps.userId !== 'undefined') {
 				const user = await this.usersRepository.findOneBy({ id: ps.userId });
 				if (user === null) throw new ApiError(meta.errors.noSuchUser);

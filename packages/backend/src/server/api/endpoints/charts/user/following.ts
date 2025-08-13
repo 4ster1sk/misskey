@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { getJsonSchema } from '@/core/chart/core.js';
 import PerUserFollowingChart from '@/core/chart/charts/per-user-following.js';
 import { schema } from '@/core/chart/charts/entities/per-user-following.js';
+import { CacheService } from '@/core/CacheService.js';
+import { MiMeta } from '@/models/Meta.js';
+import { DI } from '@/di-symbols.js';
 
 export const meta = {
 	tags: ['charts', 'users', 'following'],
@@ -32,9 +35,23 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+		private cacheService: CacheService,
 		private perUserFollowingChart: PerUserFollowingChart,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (me == null) {
+				const user = await this.cacheService.findUserById(ps.userId);
+				if (this.serverSettings.ugcVisibilityForVisitor === 'none') {
+					return await this.perUserFollowingChart.getEmpty(ps.span, ps.limit);
+				}
+
+				if (this.serverSettings.ugcVisibilityForVisitor === 'local' && user.host != null) {
+					return await this.perUserFollowingChart.getEmpty(ps.span, ps.limit);
+				}
+			}
+
 			return await this.perUserFollowingChart.getChart(ps.span, ps.limit, ps.offset ? new Date(ps.offset) : null, ps.userId);
 		});
 	}

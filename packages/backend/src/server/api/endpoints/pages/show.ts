@@ -10,6 +10,7 @@ import type { MiPage } from '@/models/Page.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { PageEntityService } from '@/core/entities/PageEntityService.js';
 import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -28,6 +29,11 @@ export const meta = {
 			message: 'No such page.',
 			code: 'NO_SUCH_PAGE',
 			id: '222120c0-3ead-4528-811b-b96f233388d7',
+		},
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: 'd55abdbb-17e5-43a8-a0a6-142814e7deee',
 		},
 	},
 } as const;
@@ -55,6 +61,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
@@ -65,6 +74,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			let page: MiPage | null = null;
+
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
+
+			// リモートユーザーのはここでは取れないので。
+			/*if (this.serverSettings.ugcVisibilityForVisitor === 'local' && note.userHost != null && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}*/
 
 			if ('pageId' in ps) {
 				page = await this.pagesRepository.findOneBy({ id: ps.pageId });
