@@ -5,7 +5,7 @@
 
 import { IsNull } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import type { UsersRepository, FollowingsRepository, UserProfilesRepository } from '@/models/_.js';
+import type { UsersRepository, FollowingsRepository, UserProfilesRepository, MiMeta } from '@/models/_.js';
 import { birthdaySchema } from '@/models/User.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
@@ -49,6 +49,12 @@ export const meta = {
 			message: 'Birthday date format is invalid.',
 			code: 'BIRTHDAY_DATE_FORMAT_INVALID',
 			id: 'a2b007b9-4782-4eba-abd3-93b05ed4130d',
+		},
+
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: '9748b741-4742-4a34-97d4-c5abcb537ca4',
 		},
 	},
 } as const;
@@ -95,6 +101,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
@@ -116,6 +125,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (user == null) {
 				throw new ApiError(meta.errors.noSuchUser);
+			}
+
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
+
+			if (this.serverSettings.ugcVisibilityForVisitor === 'local' && me == null) {
+				if (user.host != null) {
+					throw new ApiError(meta.errors.signinRequired);
+				}
 			}
 
 			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });

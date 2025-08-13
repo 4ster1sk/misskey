@@ -4,7 +4,7 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import type { UserProfilesRepository, NoteReactionsRepository } from '@/models/_.js';
+import type { UserProfilesRepository, NoteReactionsRepository, MiMeta } from '@/models/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
 import { NoteReactionEntityService } from '@/core/entities/NoteReactionEntityService.js';
@@ -43,6 +43,11 @@ export const meta = {
 			code: 'IS_REMOTE_USER',
 			id: '6b95fa98-8cf9-2350-e284-f0ffdb54a805',
 		},
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: '5f59beb0-bcff-4277-a4cc-c8f593a13c8f',
+		},
 	},
 } as const;
 
@@ -62,6 +67,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.userProfilesRepository)
 		private userProfilesRepository: UserProfilesRepository,
 
@@ -75,6 +83,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private roleService: RoleService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
+
 			const userIdsWhoBlockingMe = me ? await this.cacheService.userBlockedCache.fetch(me.id) : new Set<string>();
 			const iAmModerator = me ? await this.roleService.isModerator(me) : false; // Moderators can see reactions of all users
 			if (!iAmModerator) {
