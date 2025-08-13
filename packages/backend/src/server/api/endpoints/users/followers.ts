@@ -5,7 +5,7 @@
 
 import { IsNull } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import type { UsersRepository, FollowingsRepository, UserProfilesRepository } from '@/models/_.js';
+import type { UsersRepository, FollowingsRepository, UserProfilesRepository, MiMeta } from '@/models/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
 import { FollowingEntityService } from '@/core/entities/FollowingEntityService.js';
@@ -42,6 +42,12 @@ export const meta = {
 			message: 'Forbidden.',
 			code: 'FORBIDDEN',
 			id: '3c6a84db-d619-26af-ca14-06232a21df8a',
+		},
+
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: '417d4ad9-b98b-4e49-8972-f53a4d4d2080',
 		},
 	},
 } as const;
@@ -87,6 +93,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
@@ -108,6 +117,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (user == null) {
 				throw new ApiError(meta.errors.noSuchUser);
+			}
+
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
+
+			if (this.serverSettings.ugcVisibilityForVisitor === 'local' && me == null) {
+				if (user.host != null) {
+					throw new ApiError(meta.errors.signinRequired);
+				}
 			}
 
 			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
