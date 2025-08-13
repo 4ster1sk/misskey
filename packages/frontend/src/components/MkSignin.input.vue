@@ -17,21 +17,22 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 		<!-- 外部サーバーへの転送 -->
 		<div v-if="openOnRemote" class="_gaps_m">
-			<div class="_gaps_s">
+			<div class="_gaps_m">
 				<MkButton type="button" rounded primary style="margin: 0 auto;" @click="openRemote(openOnRemote)">
-					{{ i18n.ts.continueOnRemote }} <i class="ti ti-external-link"></i>
+					{{ i18n.ts.chooseServerOnMisskeyHub }} <i class="ti ti-external-link"></i>
 				</MkButton>
-				<button type="button" class="_button" :class="$style.instanceManualSelectButton" @click="specifyHostAndOpenRemote(openOnRemote)">
+				<MkButton type="button" rounded primary style="margin: 0 auto;" @click="specifyHostAndOpenRemote(openOnRemote)">
 					{{ i18n.ts.specifyServerHost }}
-				</button>
+				</MkButton>
 			</div>
+			<!--
 			<div :class="$style.orHr">
 				<p :class="$style.orMsg">{{ i18n.ts.or }}</p>
-			</div>
+			</div>-->
 		</div>
 
 		<!-- username入力 -->
-		<form class="_gaps_s" @submit.prevent="emit('usernameSubmitted', username)">
+		<form v-if="!openOnRemote" class="_gaps_s" @submit.prevent="emit('usernameSubmitted', username)">
 			<MkInput v-model="username" :placeholder="i18n.ts.username" type="text" pattern="^[a-zA-Z0-9_]+$" :spellcheck="false" autocomplete="username webauthn" autofocus required data-cy-signin-username>
 				<template #prefix>@</template>
 				<template #suffix>@{{ host }}</template>
@@ -40,11 +41,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</form>
 
 		<!-- パスワードレスログイン -->
-		<div :class="$style.orHr">
+		<div v-if="!openOnRemote" :class="$style.orHr">
 			<p :class="$style.orMsg">{{ i18n.ts.or }}</p>
 		</div>
 		<div>
-			<MkButton type="submit" style="margin: auto auto;" large rounded primary gradate @click="emit('passkeyClick', $event)">
+			<MkButton v-if="!openOnRemote" type="submit" style="margin: auto auto;" large rounded primary gradate @click="emit('passkeyClick', $event)">
 				<i class="ti ti-device-usb" style="font-size: medium;"></i>{{ i18n.ts.signinWithPasskey }}
 			</MkButton>
 		</div>
