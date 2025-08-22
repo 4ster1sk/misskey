@@ -265,6 +265,7 @@ import type {
 	ClipsCreateResponse,
 	ClipsDeleteRequest,
 	ClipsFavoriteRequest,
+	ClipsListRequest,
 	ClipsListResponse,
 	ClipsMyFavoritesResponse,
 	ClipsNotesRequest,
@@ -655,6 +656,7 @@ import type {
 	UsersUpdateMemoRequest,
 	V2AdminEmojiListRequest,
 	V2AdminEmojiListResponse,
+	VerifyEmailRequest,
 } from './entities.js';
 
 export type Endpoints = {
@@ -833,7 +835,7 @@ export type Endpoints = {
 	'clips/create': { req: ClipsCreateRequest; res: ClipsCreateResponse };
 	'clips/delete': { req: ClipsDeleteRequest; res: EmptyResponse };
 	'clips/favorite': { req: ClipsFavoriteRequest; res: EmptyResponse };
-	'clips/list': { req: EmptyRequest; res: ClipsListResponse };
+	'clips/list': { req: ClipsListRequest; res: ClipsListResponse };
 	'clips/my-favorites': { req: EmptyRequest; res: ClipsMyFavoritesResponse };
 	'clips/notes': { req: ClipsNotesRequest; res: ClipsNotesResponse };
 	'clips/remove-note': { req: ClipsRemoveNoteRequest; res: EmptyResponse };
@@ -1088,6 +1090,7 @@ export type Endpoints = {
 	'users/stats': { req: UsersStatsRequest; res: UsersStatsResponse };
 	'users/update-memo': { req: UsersUpdateMemoRequest; res: EmptyResponse };
 	'v2/admin/emoji/list': { req: V2AdminEmojiListRequest; res: V2AdminEmojiListResponse };
+	'verify-email': { req: VerifyEmailRequest; res: EmptyResponse };
 };
 
 /**
