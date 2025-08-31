@@ -66,8 +66,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 								mode="default"
 							>
 								<template v-if="useAvatarAsStone">
-									<img v-if="stone === true" :class="$style.boardCellStone" :src="blackUser.avatarUrl ?? undefined"/>
-									<img v-else-if="stone === false" :class="$style.boardCellStone" :src="whiteUser.avatarUrl ?? undefined"/>
+									<img v-if="stone === true" :class="$style.boardCellStone" :src="(blackUser.avatarUrl) ? getProxiedImageUrl(blackUser.avatarUrl,'avatar') : undefined"/>
+									<img v-else-if="stone === false" :class="$style.boardCellStone" :src="(whiteUser.avatarUrl) ? getProxiedImageUrl(whiteUser.avatarUrl,'avatar') : undefined"/>
 								</template>
 								<template v-else>
 									<img v-if="stone === true" :class="$style.boardCellStone" src="/client-assets/reversi/stone_b.png"/>
@@ -159,6 +159,7 @@ import * as sound from '@/utility/sound.js';
 import * as os from '@/os.js';
 import { confetti } from '@/utility/confetti.js';
 import { genId } from '@/utility/id.js';
+import { getProxiedImageUrl } from '@/utility/media-proxy.js';
 
 const $i = ensureSignin();
 

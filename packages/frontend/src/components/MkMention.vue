@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <MkA v-user-preview="canonical" :class="[$style.root, { [$style.isMe]: isMe }]" :to="url" :behavior="navigationBehavior">
-	<img :class="$style.icon" :src="avatarUrl" alt="">
+	<img :class="$style.icon" :src="getProxiedImageUrl(avatarUrl,'avatar')" alt="">
 	<span>
 		<span>@{{ username }}</span>
 		<span v-if="(host != localHost)" :class="$style.host">@{{ toUnicode(host) }}</span>
@@ -21,6 +21,7 @@ import type { MkABehavior } from '@/components/global/MkA.vue';
 import { $i } from '@/i.js';
 import { getStaticImageUrl } from '@/utility/media-proxy.js';
 import { prefer } from '@/preferences.js';
+import { getProxiedImageUrl } from '@/utility/media-proxy.js';
 
 const props = defineProps<{
 	username: string;

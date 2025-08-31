@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <div :class="$style.wrapper" data-cy-signin-page-password>
 	<div class="_gaps" :class="$style.root">
-		<div :class="$style.avatar" :style="{ backgroundImage: user ? `url('${user.avatarUrl}')` : undefined }"></div>
+		<div :class="$style.avatar" :style="{ backgroundImage: user ? `url('${(user.avatarUrl) ? getProxiedImageUrl(user.avatarUrl,'avatar') : undefined}')` : undefined }"></div>
 		<div :class="$style.welcomeBackMessage">
 			<I18n :src="i18n.ts.welcomeBackWithName" tag="span">
 				<template #name><Mfm :text="user.name ?? user.username" :plain="true"/></template>
@@ -61,6 +61,7 @@ import * as os from '@/os.js';
 import MkButton from '@/components/MkButton.vue';
 import MkInput from '@/components/MkInput.vue';
 import MkCaptcha from '@/components/MkCaptcha.vue';
+import { getProxiedImageUrl } from '@/utility/media-proxy.js';
 
 const props = defineProps<{
 	user: Misskey.entities.UserDetailed;

@@ -52,6 +52,7 @@ import { getStaticImageUrl } from '@/utility/media-proxy.js';
 import { acct, userPage } from '@/filters/user.js';
 import MkUserOnlineIndicator from '@/components/MkUserOnlineIndicator.vue';
 import { prefer } from '@/preferences.js';
+import { getProxiedImageUrl } from '@/utility/media-proxy.js';
 
 const animation = ref(prefer.s.animation);
 const squareAvatars = ref(prefer.s.squareAvatars);
@@ -85,7 +86,7 @@ const bound = computed(() => props.link
 
 const url = computed(() => {
 	if (prefer.s.disableShowingAnimatedImages || prefer.s.dataSaver.avatar) return getStaticImageUrl(props.user.avatarUrl);
-	return props.user.avatarUrl;
+	return (props.user.avatarUrl) ? getProxiedImageUrl(props.user.avatarUrl, 'avatar') : props.user.avatarUrl;
 });
 
 function onClick(ev: MouseEvent): void {
