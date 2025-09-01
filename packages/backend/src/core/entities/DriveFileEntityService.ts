@@ -111,9 +111,17 @@ export class DriveFileEntityService {
 	}
 
 	@bindThis
-	public getPublicUrl(file: MiDriveFile, mode?: 'avatar'): string { // static = thumbnail
+	public getPublicUrl({
+		file,
+		mode = undefined,
+		allowProxiedUrl = false,
+	}: {
+		file: MiDriveFile;
+		mode?: 'avatar';
+		allowProxiedUrl?: boolean;
+	}): string {// static = thumbnail
 		// リモートかつメディアプロキシ
-		if (file.uri != null && file.userHost != null && this.config.externalMediaProxyEnabled) {
+		if (allowProxiedUrl && file.uri != null && file.userHost != null && this.config.externalMediaProxyEnabled) {
 			return this.getProxiedUrl(file.uri, mode);
 		}
 
@@ -123,16 +131,16 @@ export class DriveFileEntityService {
 
 			if (key && !key.match('/')) {	// 古いものはここにオブジェクトストレージキーが入ってるので除外
 				const url = `${this.config.url}/files/${key}`;
-				//if (mode === 'avatar') return this.getProxiedUrl(file.uri, 'avatar');
+				if (allowProxiedUrl && mode === 'avatar') return this.getProxiedUrl(file.uri, 'avatar');
 				return url;
 			}
 		}
 
 		const url = file.webpublicUrl ?? file.url;
 
-		/*if (mode === 'avatar') {
+		if (allowProxiedUrl && mode === 'avatar') {
 			return this.getProxiedUrl(url, 'avatar');
-		}*/
+		}
 		return url;
 	}
 
@@ -208,7 +216,7 @@ export class DriveFileEntityService {
 			isSensitive: file.isSensitive,
 			blurhash: file.blurhash,
 			properties: opts.self ? file.properties : this.getPublicProperties(file),
-			url: opts.self ? file.url : this.getPublicUrl(file),
+			url: opts.self ? file.url : this.getPublicUrl({ file: file, allowProxiedUrl: true }),
 			thumbnailUrl: this.getThumbnailUrl(file),
 			comment: file.comment,
 			folderId: file.folderId,
@@ -246,7 +254,7 @@ export class DriveFileEntityService {
 			isSensitive: file.isSensitive,
 			blurhash: file.blurhash,
 			properties: opts.self ? file.properties : this.getPublicProperties(file),
-			url: opts.self ? file.url : this.getPublicUrl(file),
+			url: opts.self ? file.url : this.getPublicUrl({ file: file, allowProxiedUrl: true }),
 			thumbnailUrl: this.getThumbnailUrl(file),
 			comment: file.comment,
 			folderId: file.folderId,
