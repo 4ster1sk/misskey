@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <MkA v-user-preview="canonical" :class="[$style.root, { [$style.isMe]: isMe }]" :to="url" :behavior="navigationBehavior">
-	<img :class="$style.icon" :src="getProxiedImageUrl(avatarUrl,'avatar')" alt="">
+	<img :class="$style.icon" :src="avatarUrl" alt="">
 	<span>
 		<span>@{{ username }}</span>
 		<span v-if="(host != localHost)" :class="$style.host">@{{ toUnicode(host) }}</span>
@@ -19,9 +19,9 @@ import { computed } from 'vue';
 import { host as localHost } from '@@/js/config.js';
 import type { MkABehavior } from '@/components/global/MkA.vue';
 import { $i } from '@/i.js';
-import { getStaticImageUrl } from '@/utility/media-proxy.js';
+import { getStaticImageUrl, getProxiedImageUrl } from '@/utility/media-proxy.js';
 import { prefer } from '@/preferences.js';
-import { getProxiedImageUrl } from '@/utility/media-proxy.js';
+import { instance } from '@/instance.js';
 
 const props = defineProps<{
 	username: string;
@@ -37,10 +37,10 @@ const isMe = $i && (
 	`@${props.username}@${toUnicode(props.host)}` === `@${$i.username}@${toUnicode(localHost)}`.toLowerCase()
 );
 
-const avatarUrl = computed(() => prefer.s.disableShowingAnimatedImages || prefer.s.dataSaver.avatar
-	? getStaticImageUrl(`/avatar/@${props.username}@${props.host}`)
-	: `/avatar/@${props.username}@${props.host}`,
-);
+const avatarUrl = computed(() => {
+	const v = `${instance.uri}/avatar/@${props.username}@${props.host}`;
+	return prefer.s.disableShowingAnimatedImages || prefer.s.dataSaver.avatar ? getStaticImageUrl(v) : getProxiedImageUrl(v);
+});
 </script>
 
 <style lang="scss" module>
