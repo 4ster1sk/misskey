@@ -8,6 +8,7 @@ import type { UserListsRepository, UserListFavoritesRepository } from '@/models/
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { UserListEntityService } from '@/core/entities/UserListEntityService.js';
 import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
 import { ApiError } from '../../../error.js';
 
 export const meta = {
@@ -31,6 +32,11 @@ export const meta = {
 			code: 'NO_SUCH_LIST',
 			id: '7bc05c21-1d7a-41ae-88f1-66820f4dc686',
 		},
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: 'a7d27477-e933-4f27-9049-d059d7e1b9d5',
+		},
 	},
 } as const;
 
@@ -46,6 +52,9 @@ export const paramDef = {
 @Injectable() // eslint-disable-next-line import/no-default-export
 export default class extends Endpoint<typeof meta, typeof paramDef> {
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.userListsRepository)
 		private userListsRepository: UserListsRepository,
 
@@ -55,6 +64,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		private userListEntityService: UserListEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
 			const additionalProperties: Partial<{ likedCount: number, isLiked: boolean }> = {};
 			// Fetch the list
 			const userList = await this.userListsRepository.findOneBy(!ps.forPublic && me !== null ? {

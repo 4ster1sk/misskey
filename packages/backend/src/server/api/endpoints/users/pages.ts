@@ -9,6 +9,8 @@ import { QueryService } from '@/core/QueryService.js';
 import { PageEntityService } from '@/core/entities/PageEntityService.js';
 import type { PagesRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
+import { ApiError } from '../../error.js';
 
 export const meta = {
 	tags: ['users', 'pages'],
@@ -22,6 +24,14 @@ export const meta = {
 			type: 'object',
 			optional: false, nullable: false,
 			ref: 'Page',
+		},
+	},
+
+	errors: {
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: 'bc975eeb-7921-4d10-9328-8e083cb4851f',
 		},
 	},
 } as const;
@@ -42,6 +52,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.pagesRepository)
 		private pagesRepository: PagesRepository,
 
@@ -49,6 +62,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private queryService: QueryService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
 			const query = this.queryService.makePaginationQuery(this.pagesRepository.createQueryBuilder('page'), ps.sinceId, ps.untilId, ps.sinceDate, ps.untilDate)
 				.andWhere('page.userId = :userId', { userId: ps.userId })
 				.andWhere('page.visibility = \'public\'');

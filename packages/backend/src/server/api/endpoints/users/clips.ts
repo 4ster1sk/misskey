@@ -9,6 +9,8 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
 import { ClipEntityService } from '@/core/entities/ClipEntityService.js';
 import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
+import { ApiError } from '../../error.js';
 
 export const meta = {
 	tags: ['users', 'clips'],
@@ -22,6 +24,13 @@ export const meta = {
 			type: 'object',
 			optional: false, nullable: false,
 			ref: 'Clip',
+		},
+	},
+	errors: {
+		signinRequired: {
+			message: 'Signin required.',
+			code: 'SIGNIN_REQUIRED',
+			id: 'b2407eab-9d0e-4e9b-ae79-db426e2d9784',
 		},
 	},
 } as const;
@@ -42,6 +51,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		@Inject(DI.clipsRepository)
 		private clipsRepository: ClipsRepository,
 
@@ -49,6 +61,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private queryService: QueryService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (this.serverSettings.ugcVisibilityForVisitor === 'none' && me == null) {
+				throw new ApiError(meta.errors.signinRequired);
+			}
 			const query = this.queryService.makePaginationQuery(this.clipsRepository.createQueryBuilder('clip'), ps.sinceId, ps.untilId, ps.sinceDate, ps.untilDate)
 				.andWhere('clip.userId = :userId', { userId: ps.userId })
 				.andWhere('clip.isPublic = true');
