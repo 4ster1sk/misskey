@@ -253,6 +253,7 @@ noteDeleteConfirm: "このノートを削除しますか？"
 pinLimitExceeded: "これ以上ピン留めできません"
 done: "完了"
 processing: "処理中"
+preprocessing: "準備中"
 preview: "プレビュー"
 default: "デフォルト"
 defaultValueIs: "デフォルト: {value}"
@@ -1376,6 +1377,8 @@ redisplayAllTips: "全ての「ヒントとコツ」を再表示"
 hideAllTips: "全ての「ヒントとコツ」を非表示"
 defaultImageCompressionLevel: "デフォルトの画像圧縮度"
 defaultImageCompressionLevel_description: "低くすると画質を保てますが、ファイルサイズは増加します。<br>高くするとファイルサイズを減らせますが、画質は低下します。"
+defaultCompressionLevel: "デフォルトの圧縮度"
+defaultCompressionLevel_description: "低くすると品質を保てますが、ファイルサイズは増加します。<br>高くするとファイルサイズを減らせますが、品質は低下します。"
 inMinutes: "分"
 inDays: "日"
 safeModeEnabled: "セーフモードが有効です"
@@ -1384,6 +1387,16 @@ customCssIsDisabledBecauseSafeMode: "セーフモードが有効なため、カ�
 themeIsDefaultBecauseSafeMode: "セーフモードが有効な間はデフォルトのテーマが使用されます。セーフモードをオフにすると元に戻ります。"
 thankYouForTestingBeta: "ベータ版の検証にご協力いただきありがとうございます！"
 createUserSpecifiedNote: "ユーザー指定ノートを作成"
+
+_compression:
+  _quality:
+    high: "高品質"
+    medium: "中品質"
+    low: "低品質"
+  _size:
+    large: "サイズ大"
+    medium: "サイズ中"
+    small: "サイズ小"
 
 _order:
   newest: "新しい順"
@@ -3320,6 +3333,7 @@ _imageEffector:
     mirror: "ミラー"
     invert: "色の反転"
     grayscale: "白黒"
+    blur: "ぼかし"
     colorAdjust: "色調補正"
     colorClamp: "色の圧縮"
     colorClampAdvanced: "色の圧縮(高度)"
@@ -3331,12 +3345,14 @@ _imageEffector:
     checker: "チェッカー"
     blockNoise: "ブロックノイズ"
     tearing: "ティアリング"
-    fillSquare: "塗りつぶし(四角)"
+    fill: "塗りつぶし"
 
   _fxProps:
     angle: "角度"
     scale: "サイズ"
     size: "サイズ"
+    radius: "半径"
+    samples: "サンプル数"
     offset: "位置"
     color: "色"
     opacity: "不透明度"
@@ -3366,6 +3382,7 @@ _imageEffector:
     zoomLinesThreshold: "集中線の幅"
     zoomLinesMaskSize: "中心径"
     zoomLinesBlack: "黒色にする"
+    circle: "円形"
 
 drafts: "下書き"
 _drafts:
