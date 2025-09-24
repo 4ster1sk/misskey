@@ -623,7 +623,10 @@ export function useUploader(options: {
 
 			const output = new mediabunny.Output({
 				target: new mediabunny.BufferTarget(),
-				format: new mediabunny.Mp4OutputFormat(),
+				format: new mediabunny.WebMOutputFormat({
+					videoCodec: mediabunny.VP9,
+					audioCodec: mediabunny.OPUS,
+				}),
 			});
 
 			const currentConversion = await mediabunny.Conversion.init({
@@ -631,10 +634,22 @@ export function useUploader(options: {
 				output,
 				video: {
 					//width: 320, // Height will be deduced automatically to retain aspect ratio
-					bitrate: item.compressionLevel === 1 ? mediabunny.QUALITY_VERY_HIGH : item.compressionLevel === 2 ? mediabunny.QUALITY_MEDIUM : mediabunny.QUALITY_VERY_LOW,
+					//
+					// 1920x1080(VP9) VBR
+					// 低 QUALITY_VERY_HIGH / 3 * 4 * 0.6 = 7.2Mbps
+					// 中 QUALITY_MEDIUM / 3 * 1 * 0.6 = 1.8Mbps
+					// 高 QUALITY_VERY_LOW / 3 * 0.3 * 0.6 = 0.54Mbps
+					//
+					// 低 3.00 / 3 * 3.00 * 0.6 = 5.40Mbps
+					// 中 1.50 / 3 * 1.60 * 0.6 = 2.88Mbps
+					// 高 0.45 / 3 * 0.45 * 0.6 = 0.81Mbps
+					//
+					//bitrate: item.compressionLevel === 1 ? mediabunny.QUALITY_VERY_HIGH : item.compressionLevel === 2 ? mediabunny.QUALITY_MEDIUM : mediabunny.QUALITY_VERY_LOW,
+					bitrate: item.compressionLevel === 1 ? new mediabunny.Quality(3.0) : item.compressionLevel === 2 ? new mediabunny.Quality(1.6) : new mediabunny.Quality(0.45),
+
 				},
 				audio: {
-					bitrate: item.compressionLevel === 1 ? mediabunny.QUALITY_VERY_HIGH : item.compressionLevel === 2 ? mediabunny.QUALITY_MEDIUM : mediabunny.QUALITY_VERY_LOW,
+					bitrate: 192000,
 				},
 			});
 
@@ -653,7 +668,7 @@ export function useUploader(options: {
 
 			preprocessedFile = new Blob([output.target.buffer!], { type: output.format.mimeType });
 			item.compressedSize = output.target.buffer!.byteLength;
-			item.uploadName = `${item.name}.mp4`;
+			item.uploadName = `${item.name}.webm`;
 		} else {
 			item.compressedSize = null;
 			item.uploadName = item.name;
