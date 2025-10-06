@@ -104,6 +104,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<MkSwitch v-model="enableHapticFeedback">
 							<template #label>Enable haptic feedback</template>
 						</MkSwitch>
+						<MkSwitch v-model="enableWebTranslatorApi">
+							<template #label>Enable in-browser translator API</template>
+						</MkSwitch>
 					</div>
 				</MkFolder>
 			</SearchMarker>
@@ -184,6 +187,7 @@ const devMode = prefer.model('devMode');
 const stackingRouterView = prefer.model('experimental.stackingRouterView');
 const enableFolderPageView = prefer.model('experimental.enableFolderPageView');
 const enableHapticFeedback = prefer.model('experimental.enableHapticFeedback');
+const enableWebTranslatorApi = prefer.model('experimental.enableWebTranslatorApi');
 
 watch(skipNoteRender, () => {
 	suggestReload();

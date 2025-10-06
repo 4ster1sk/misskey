@@ -1363,6 +1363,10 @@ export interface Locale extends ILocale {
      */
     "selectFolder": string;
     /**
+     * フォルダーの選択を解除
+     */
+    "unselectFolder": string;
+    /**
      * フォルダーを選択
      */
     "selectFolders": string;
@@ -1410,6 +1414,10 @@ export interface Locale extends ILocale {
      * フォルダーは空です
      */
     "emptyFolder": string;
+    /**
+     * ここにファイルをドロップしてアップロード
+     */
+    "dropHereToUpload": string;
     /**
      * 削除できません
      */
@@ -5593,6 +5601,18 @@ export interface Locale extends ILocale {
      * 予約
      */
     "scheduled": string;
+    /**
+     * ウィジェット
+     */
+    "widgets": string;
+    /**
+     * デバイス情報
+     */
+    "deviceInfo": string;
+    /**
+     * 技術的なお問い合わせの際に、以下の情報を併記すると問題の解決に役立つことがあります。
+     */
+    "deviceInfoDescription": string;
     "_compression": {
         "_quality": {
             /**
@@ -9476,6 +9496,10 @@ export interface Locale extends ILocale {
          * アクセスを許可すると、自動で以下のURLに遷移します
          */
         "byClickingYouWillBeRedirectedToThisUrl": string;
+        /**
+         * このアプリケーションは既にアクセスが許可されています。
+         */
+        "alreadyAuthorized": string;
     };
     "_antennaSources": {
         /**
@@ -10497,6 +10521,14 @@ export interface Locale extends ILocale {
              * アンケートが終了
              */
             "pollEnded": string;
+            /**
+             * 予約投稿が成功した
+             */
+            "scheduledNotePosted": string;
+            /**
+             * 予約投稿が失敗した
+             */
+            "scheduledNotePostFailed": string;
             /**
              * フォロー申請を受け取った
              */
