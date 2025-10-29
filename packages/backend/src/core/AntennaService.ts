@@ -9,6 +9,7 @@ import { In } from 'typeorm';
 import { FanoutTimelineService } from '@/core/FanoutTimelineService.js';
 import type { GlobalEvents } from '@/core/GlobalEventService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
+import { NotificationService } from '@/core/NotificationService.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { bindThis } from '@/decorators.js';
 import { DI } from '@/di-symbols.js';
@@ -45,6 +46,7 @@ export class AntennaService implements OnApplicationShutdown {
 		private globalEventService: GlobalEventService,
 		private fanoutTimelineService: FanoutTimelineService,
 		private roleService: RoleService,
+		private notificationService: NotificationService,
 	) {
 		this.antennasFetched = false;
 		this.antennas = [];
@@ -113,6 +115,13 @@ export class AntennaService implements OnApplicationShutdown {
 
 			this.fanoutTimelineService.push(`antennaTimeline:${antenna.id}`, note.id, antennaNotesLimit, redisPipeline);
 			this.globalEventService.publishAntennaStream(antenna.id, 'note', note);
+		}
+
+		// notifyが有効なのが存在する場合は通知を送る
+		if (matchedAntennas.some(a => a.notify)) {
+			this.notificationService.createNotification(noteUser.id, 'note', {
+				noteId: note.id,
+			});
 		}
 
 		redisPipeline.exec();
