@@ -48,9 +48,10 @@ const exportedAntennaSchema = {
 		excludeBots: { type: 'boolean' },
 		withReplies: { type: 'boolean' },
 		withFile: { type: 'boolean' },
+		notify: { type: 'boolean' },
 		excludeNotesInSensitiveChannel: { type: 'boolean' },
 	},
-	required: ['name', 'src', 'keywords', 'excludeKeywords', 'users', 'caseSensitive', 'withReplies', 'withFile'],
+	required: ['name', 'src', 'keywords', 'excludeKeywords', 'users', 'caseSensitive', 'withReplies', 'withFile', 'notify'],
 } as const satisfies Schema;
 
 export type ExportedAntenna = SchemaType<typeof exportedAntennaSchema>;
@@ -97,6 +98,7 @@ export class ImportAntennasProcessorService {
 					excludeBots: antenna.excludeBots,
 					withReplies: antenna.withReplies,
 					withFile: antenna.withFile,
+					notify: antenna.notify,
 					excludeNotesInSensitiveChannel: antenna.excludeNotesInSensitiveChannel,
 				});
 				this.logger.succ('Antenna created: ' + result.id);

@@ -9,6 +9,7 @@ import { In } from 'typeorm';
 import { FanoutTimelineService } from '@/core/FanoutTimelineService.js';
 import type { GlobalEvents } from '@/core/GlobalEventService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
+import { NotificationService } from '@/core/NotificationService.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { bindThis } from '@/decorators.js';
 import { DI } from '@/di-symbols.js';
@@ -45,6 +46,7 @@ export class AntennaService implements OnApplicationShutdown {
 		private globalEventService: GlobalEventService,
 		private fanoutTimelineService: FanoutTimelineService,
 		private roleService: RoleService,
+		private notificationService: NotificationService,
 	) {
 		this.antennasFetched = false;
 		this.antennas = [];
@@ -108,11 +110,22 @@ export class AntennaService implements OnApplicationShutdown {
 			.filter((result): result is PromiseFulfilledResult<[string, RolePolicies]> => result.status === 'fulfilled')
 			.map(result => result.value));
 
+		const notifiedUserIds = new Set<string>();
+
 		for (const antenna of matchedAntennas) {
 			const { antennaNotesLimit } = policies.get(antenna.userId) ?? await this.roleService.getUserPolicies(antenna.userId);
 
 			this.fanoutTimelineService.push(`antennaTimeline:${antenna.id}`, note.id, antennaNotesLimit, redisPipeline);
 			this.globalEventService.publishAntennaStream(antenna.id, 'note', note);
+
+			if (antenna.notify) {
+				if (!notifiedUserIds.has(antenna.userId)) {
+					this.notificationService.createNotification(antenna.userId, 'note', {
+						noteId: note.id,
+					});
+					notifiedUserIds.add(antenna.userId);
+				}
+			}
 		}
 
 		redisPipeline.exec();
