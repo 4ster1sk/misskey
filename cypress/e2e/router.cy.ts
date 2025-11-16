@@ -30,6 +30,7 @@ describe('Router transition', () => {
 
 			// プロフィールページのURLであることを確認する
 			cy.url().should('include', '/@alice')
+		cy.wait(1000);
 		});
 	});
 });
