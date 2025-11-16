@@ -139,12 +139,10 @@ function onClick(ev: MouseEvent) {
 				text: i18n.ts.info,
 				icon: 'ti ti-info-circle',
 				action: async () => {
-					let emoji = await misskeyApiGet('emoji', {
-						name: customEmojiName.value,
-					});
-					emoji = await importEmojiMeta(emoji, props.host);
 					const { dispose } = os.popup(MkCustomEmojiDetailedDialog, {
-						emoji: emoji,
+						emoji: await misskeyApiGet('emoji', {
+							name: customEmojiName.value,
+						}),
 					}, {
 						closed: () => dispose(),
 					});

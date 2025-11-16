@@ -120,16 +120,18 @@ import FormSection from '@/components/form/section.vue';
 import MkKeyValue from '@/components/MkKeyValue.vue';
 import number from '@/filters/number.js';
 import bytes from '@/filters/bytes.js';
-import { $i } from '@/i.js';
+import { ensureSignin } from '@/i.js';
 import { i18n } from '@/i18n.js';
 import { definePage } from '@/page.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
+
+const $i = ensureSignin();
 
 const stats = ref<any>({});
 
 onMounted(() => {
 	misskeyApi('users/stats', {
-		userId: $i!.id,
+		userId: $i.id,
 	}).then(response => {
 		stats.value = response;
 	});

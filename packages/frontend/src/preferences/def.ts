@@ -179,7 +179,7 @@ export const PREF_DEF = definePreferences({
 		default: false,
 	},
 	searchSite: {
-		default: 'google',
+		default: 'google' as 'google' | 'bing' | 'duckduckgo' | 'yahoo',
 	},
 	reportError: {
 		default: false,

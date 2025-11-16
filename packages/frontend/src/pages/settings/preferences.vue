@@ -794,12 +794,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</SearchMarker>
 
 						<SearchMarker>
-							<MkSelect v-model="searchSite">
+							<MkSelect
+								v-model="searchSite"
+								:items="[
+									{ label: i18n.ts._searchSite.google, value: 'google' },
+									{ label: i18n.ts._searchSite.bing, value: 'bing' },
+									{ label: i18n.ts._searchSite.duckduckgo, value: 'duckduckgo' },
+									{ label: i18n.ts._searchSite.yahoo, value: 'yahoo' },
+								]"
+							>
 								<template #label>{{ i18n.ts.search }}</template>
-								<option value="google">{{ i18n.ts._searchSite.google }}</option>
-								<option value="bing">{{ i18n.ts._searchSite.bing }}</option>
-								<option value="duckduckgo">{{ i18n.ts._searchSite.duckduckgo }}</option>
-								<option value="yahoo">{{ i18n.ts._searchSite.yahoo }}</option>
 							</MkSelect>
 						</SearchMarker>
 

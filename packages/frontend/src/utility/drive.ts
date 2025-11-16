@@ -60,7 +60,7 @@ export function uploadFile(file: File | Blob, options: {
 		//	return reject();
 		//}
 
-		if ((file.size > instance.maxFileSize) || (file.size > ($i.policies.maxFileSizeMb * 1024 * 1024))) {
+		if (file.size > ($i.policies.maxFileSizeMb * 1024 * 1024)) {
 			os.alert({
 				type: 'error',
 				title: i18n.ts.failedToUpload,

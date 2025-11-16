@@ -6,6 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <MkWindow
 	ref="dialogEl"
+	:initialWidth="400"
 	:initialHeight="500"
 	:canResize="true"
 	@close="cancel()"
@@ -75,7 +76,7 @@ import MkKeyValue from '@/components/MkKeyValue.vue';
 
 const props = withDefaults(defineProps<{
 	emoji: Misskey.entities.EmojiDetailed;
-	licenseToTop: boolean;
+	licenseToTop?: boolean;
 }>(), {
 	licenseToTop: false,
 });
@@ -90,7 +91,7 @@ const dialogEl = useTemplateRef('dialogEl');
 
 function cancel() {
 	emit('cancel');
-	dialogEl.value!.close();
+	if (dialogEl.value != null) dialogEl.value.close();
 }
 </script>
 
