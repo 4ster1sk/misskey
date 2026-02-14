@@ -133,7 +133,7 @@ describe('Notification', () => {
 					await bob.client.request('notes/create', { text });
 					await sleep();
 				},
-				notification => notification.type === 'note' && notification.userId === bobInA.id && notification.note.text === text,
+				notification => notification.type === 'note' && notification.note.userId === bobInA.id && notification.note.text === text,
 				true,
 			);
 			await alice.client.request('following/delete', { userId: bobInA.id });
