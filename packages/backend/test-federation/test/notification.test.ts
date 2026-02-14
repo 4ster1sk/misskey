@@ -105,7 +105,7 @@ describe('Notification', () => {
 		});
 
 		test('Get notification when antenna matches', async () => {
-			const text = 'hi Alice!';
+			const text = `@${alice.username}@a.test hi Alice!`;
 			await alice.client.request('antennas/create', {
 				name: 'Test Alice Notification Antenna',
 				src: 'all',
@@ -123,6 +123,8 @@ describe('Notification', () => {
 			await sleep();
 			const res = await alice.client.request('i/notifications', {});
 			console.log(res);
+
+			await sleep();
 			await assertNotificationReceived(
 				'a.test', alice,
 				async () => await bob.client.request('notes/create', { text }),
