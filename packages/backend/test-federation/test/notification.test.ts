@@ -103,5 +103,32 @@ describe('Notification', () => {
 				true,
 			);
 		});
+
+		test('Get notification when antenna matches', async () => {
+			const text = 'hi Alice!';
+			await alice.client.request('antennas/create', {
+				name: 'Test Alice Notification Antenna',
+				src: 'all',
+				keywords: [['Alice']],
+				excludeKeywords: [],
+				users: [],
+				caseSensitive: false,
+				localOnly: false,
+				withReplies: true,
+				withFile: false,
+				notify: true,
+			});
+			await sleep();
+			await bob.client.request('notes/create', { text });
+			await sleep();
+			const res = await alice.client.request('i/notifications', {});
+			console.log(res);
+			await assertNotificationReceived(
+				'a.test', alice,
+				async () => await bob.client.request('notes/create', { text }),
+				notification => notification.type === 'note' && notification.userId === bobInA.id && notification.note.text === text,
+				true,
+			);
+		});
 	});
 });
