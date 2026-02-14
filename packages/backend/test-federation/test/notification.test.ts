@@ -105,7 +105,8 @@ describe('Notification', () => {
 		});
 
 		test('Get notification when antenna matches', async () => {
-			const text = `@${alice.username}@a.test hi Alice!`;
+			//const text = `@${alice.username}@a.test hi Alice!`;
+			const text = 'My name is Alice';
 			await alice.client.request('antennas/create', {
 				name: 'Test Alice Notification Antenna',
 				src: 'all',
@@ -118,6 +119,7 @@ describe('Notification', () => {
 				withFile: false,
 				notify: true,
 			});
+			await alice.client.request('following/create', { userId: bobInA.id });
 			await sleep();
 			await bob.client.request('notes/create', { text });
 			await sleep();
@@ -127,10 +129,14 @@ describe('Notification', () => {
 			await sleep();
 			await assertNotificationReceived(
 				'a.test', alice,
-				async () => await bob.client.request('notes/create', { text }),
+				async () => {
+					await bob.client.request('notes/create', { text });
+					await sleep();
+				},
 				notification => notification.type === 'note' && notification.userId === bobInA.id && notification.note.text === text,
 				true,
 			);
+			await alice.client.request('following/delete', { userId: bobInA.id });
 		});
 	});
 });
