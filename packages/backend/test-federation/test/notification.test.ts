@@ -119,9 +119,7 @@ describe('Notification', () => {
 				withFile: false,
 				notify: true,
 			});
-			await alice.client.request('following/create', { userId: bobInA.id });
-			await sleep();
-			await bob.client.request('notes/create', { text });
+			await alice.client.request('notes/create', { text });
 			await sleep();
 			const res = await alice.client.request('i/notifications', {});
 			console.log(res);
@@ -130,13 +128,12 @@ describe('Notification', () => {
 			await assertNotificationReceived(
 				'a.test', alice,
 				async () => {
-					await bob.client.request('notes/create', { text });
+					await alice.client.request('notes/create', { text });
 					await sleep();
 				},
 				notification => notification.type === 'note' && notification.note.userId === bobInA.id && notification.note.text === text,
 				true,
 			);
-			await alice.client.request('following/delete', { userId: bobInA.id });
 		});
 	});
 });
