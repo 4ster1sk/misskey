@@ -50,6 +50,7 @@ import { ChatRoomChannel } from './api/stream/channels/chat-room.js';
 import { ReversiChannel } from './api/stream/channels/reversi.js';
 import { ReversiGameChannel } from './api/stream/channels/reversi-game.js';
 import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.js';
+import { ChannelsService } from './api/stream/ChannelsService.js';
 
 @Module({
 	imports: [
@@ -100,6 +101,7 @@ import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.j
 		UserListChannel,
 		OpenApiServerService,
 		OAuth2ProviderService,
+		ChannelsService,
 	],
 	exports: [
 		ServerService,

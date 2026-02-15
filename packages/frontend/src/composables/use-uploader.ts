@@ -718,13 +718,19 @@ export function useUploader(options: {
 			const videoQuality = new mediabunny.Quality();
 			switch (item.compressionLevel) {
 				case 1:
-					videoQuality['_factor'] = 3.0;
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-expect-error
+					videoQuality._factor = factorValue = 3.0;
 					break;
 				case 2:
-					videoQuality['_factor'] = 1.6;
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-expect-error
+					videoQuality._factor = factorValue = 1.6;
 					break;
 				default:
-					videoQuality['_factor'] = 0.45;
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-expect-error
+					videoQuality._factor = factorValue = 0.45;
 			}
 
 			const currentConversion = await mediabunny.Conversion.init({

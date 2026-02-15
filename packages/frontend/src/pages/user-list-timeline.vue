@@ -25,6 +25,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { computed, watch, ref, useTemplateRef } from 'vue';
 import * as Misskey from 'misskey-js';
+import type { PageHeaderItem } from '@/types/page-header';
 import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { definePage } from '@/page.js';
@@ -61,11 +62,11 @@ function settings() {
 	router.push('/my/lists/:listId', {
 		params: {
 			listId: props.listId,
-		}
+		},
 	});
 }
 
-const headerActions = computed(() => list.value ? [
+const headerActions = computed<PageHeaderItem[]>(() => list.value ? [
 	{
 		icon: 'ti ti-dots',
 		text: i18n.ts.options,

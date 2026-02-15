@@ -20,7 +20,7 @@ const cpuUsage = ref<number>(0);
 const memUsage = ref<number>(0);
 const diskUsage = ref<number>(0);
 
-function onStats(stats) {
+function onStats(stats: Misskey.entities.ServerStats) {
 	cpuUsage.value = stats.cpu;
 	memUsage.value = stats.mem.active / props.meta.mem.total;
 	diskUsage.value = props.meta.fs.used / props.meta.fs.total;
