@@ -6,8 +6,6 @@ on:
       - master
       - develop
     paths:
-      - cypress/e2e/**
-      - cypress.config.ts
       - packages/frontend/**
       # for permissions
       - packages/misskey-js/**
