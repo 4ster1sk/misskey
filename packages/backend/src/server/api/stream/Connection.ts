@@ -16,8 +16,6 @@ import { ChannelFollowingService } from '@/core/ChannelFollowingService.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
 import { isJsonObject } from '@/misc/json-value.js';
 import type { JsonObject, JsonValue } from '@/misc/json-value.js';
-import type Logger from '@/logger.js';
-import { LoggerService } from '@/core/LoggerService.js';
 import type { ChannelsService } from './ChannelsService.js';
 import type { EventEmitter } from 'events';
 import type Channel from './channel.js';
@@ -44,7 +42,6 @@ export default class Connection {
 	public userIdsWhoMeMutingRenotes: Set<string> = new Set();
 	public userMutedInstances: Set<string> = new Set();
 	private fetchIntervalId: NodeJS.Timeout | null = null;
-	private logger: Logger;
 
 	constructor(
 		private channelsService: ChannelsService,
@@ -52,15 +49,11 @@ export default class Connection {
 		private cacheService: CacheService,
 		private channelFollowingService: ChannelFollowingService,
 		private channelMutingService: ChannelMutingService,
-		private loggerService: LoggerService,
-
 		user: MiUser | null | undefined,
 		token: MiAccessToken | null | undefined,
 	) {
 		if (user) this.user = user;
 		if (token) this.token = token;
-		this.loggerService = loggerService;
-		this.logger = this.loggerService.getLogger('connection');
 	}
 
 	@bindThis
@@ -125,7 +118,7 @@ export default class Connection {
 
 		try {
 			obj = JSON.parse(data.toString());
-		} catch (e) {
+		} catch (_) {
 			return;
 		}
 
@@ -210,7 +203,6 @@ export default class Connection {
 		if (typeof channel !== 'string') return;
 		if (typeof pong !== 'boolean' && typeof pong !== 'undefined' && pong !== null) return;
 		if (typeof params !== 'undefined' && !isJsonObject(params)) return;
-		this.logger.info(`onChannelConnectRequested: ${id} ${channel} ${JSON.stringify(params)}`);
 		this.connectChannel(id, params, channel, pong ?? undefined);
 	}
 
@@ -223,7 +215,6 @@ export default class Connection {
 		const { id } = payload;
 		if (typeof id !== 'string') return;
 		this.disconnectChannel(id);
-		this.logger.info(`onChannelDisconnectRequested: ${id}`);
 	}
 
 	/**

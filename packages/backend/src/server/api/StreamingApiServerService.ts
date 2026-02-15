@@ -16,7 +16,6 @@ import { MiLocalUser } from '@/models/User.js';
 import { UserService } from '@/core/UserService.js';
 import { ChannelFollowingService } from '@/core/ChannelFollowingService.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
-import { LoggerService } from '@/core/LoggerService.js';
 import { AuthenticateService, AuthenticationError } from './AuthenticateService.js';
 import MainStreamConnection from './stream/Connection.js';
 import { ChannelsService } from './stream/ChannelsService.js';
@@ -42,7 +41,6 @@ export class StreamingApiServerService {
 		private usersService: UserService,
 		private channelFollowingService: ChannelFollowingService,
 		private channelMutingService: ChannelMutingService,
-		private loggerService: LoggerService,
 	) {
 	}
 
@@ -102,7 +100,6 @@ export class StreamingApiServerService {
 				this.cacheService,
 				this.channelFollowingService,
 				this.channelMutingService,
-				this.loggerService,
 				user, app,
 			);
 
@@ -127,7 +124,7 @@ export class StreamingApiServerService {
 			user: MiLocalUser | null;
 			app: MiAccessToken | null
 		}) => {
-			const { stream, user, app } = ctx;
+			const { stream, user } = ctx;
 
 			const ev = new EventEmitter();
 
