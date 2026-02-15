@@ -720,17 +720,17 @@ export function useUploader(options: {
 				case 1:
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-expect-error
-					videoQuality._factor = factorValue = 3.0;
+					videoQuality._factor = 3.0;
 					break;
 				case 2:
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-expect-error
-					videoQuality._factor = factorValue = 1.6;
+					videoQuality._factor = 1.6;
 					break;
 				default:
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-expect-error
-					videoQuality._factor = factorValue = 0.45;
+					videoQuality._factor = 0.45;
 			}
 
 			const currentConversion = await mediabunny.Conversion.init({

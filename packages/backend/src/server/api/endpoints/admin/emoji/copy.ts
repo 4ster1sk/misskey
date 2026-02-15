@@ -42,6 +42,42 @@ export const meta = {
 				optional: false, nullable: false,
 				format: 'id',
 			},
+			aliases: {
+				type: 'array',
+				optional: false, nullable: false,
+				items: {
+					type: 'string',
+					optional: false, nullable: false,
+				},
+			},
+			name: {
+				type: 'string',
+				optional: false, nullable: false,
+			},
+			category: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			host: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			url: {
+				type: 'string',
+				optional: false, nullable: false,
+			},
+			license: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			isSensitive: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
+			localOnly: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
 		},
 	},
 } as const;

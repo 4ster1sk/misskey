@@ -1,4 +1,8 @@
-export async function importEmojiMeta(emoji, host:string) {
+import * as Misskey from 'misskey-js';
+
+type RemoteEmoji = Misskey.entities.AdminEmojiListRemoteResponse[number] & { host: string };
+
+export async function importEmojiMeta(emoji: RemoteEmoji, host:string) {
 	emoji.category = '取得失敗';
 	try {
 		const json = await(await window.fetch('https://' + host + '/api/emoji?name=' + emoji.name)).json();
@@ -6,7 +10,7 @@ export async function importEmojiMeta(emoji, host:string) {
 		const from_json = (key: string) => {
 			try {
 				if (json[key]) {
-					emoji[key] = json[key];
+					(emoji as any)[key] = json[key];
 				}
 			} catch {
 				//一部失敗したら転送せず空欄のままにしておく

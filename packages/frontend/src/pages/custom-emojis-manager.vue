@@ -162,40 +162,37 @@ const edit = async (emoji: Misskey.entities.EmojiDetailed) => {
 	});
 };
 
-const detailRemoteEmoji = (emoji: {
-	id: string,
-	name: string,
-	host: string,
-	license: string | null,
-	url: string
-}) => {
-	const { dispose } = os.popup(MkRemoteEmojiEditDialog, {
-		emoji: emoji,
+const aboutEmoji = async(emoji: RemoteEmoji) => {
+	let remoteEmoji = { ...await importEmojiMeta(emoji, emoji.host) };
+	remoteEmoji.name = `${remoteEmoji.name}@${remoteEmoji.host}`;
+	const { dispose } = os.popup(MkCustomEmojiDetailedDialog, {
+		emoji: remoteEmoji,
+		licenseToTop: true,
 	}, {
 		closed: () => dispose(),
 	});
 };
 
-const importEmoji = async (emojiId: string) => {
-	os.apiWithDialog('admin/emoji/copy', {
-		emojiId: emojiId,
-	});
+const importEmoji = async(emoji: RemoteEmoji) => {
+	let res = await os.apiWithDialog('admin/emoji/copy', {
+		emojiId: emoji.id,
+	}) as RemoteEmoji;
+	res = await importEmojiMeta(res, emoji.host);
+	edit(res);
 };
 
-const remoteMenu = (emoji: {
-	id: string,
-	name: string,
-	host: string,
-	license: string | null,
-	url: string
-}, ev: PointerEvent) => {
+const remoteMenu = (emoji: RemoteEmoji, ev: MouseEvent) => {
 	os.popupMenu([{
 		type: 'label',
 		text: ':' + emoji.name + ':',
 	}, {
 		text: i18n.ts.import,
 		icon: 'ti ti-plus',
-		action: () => { importEmoji(emoji.id); },
+		action: () => { importEmoji(emoji); },
+	}, {
+		text: i18n.ts.about,
+		icon: 'ti ti-info-circle',
+		action: () => { aboutEmoji(emoji); },
 	}], ev.currentTarget ?? ev.target);
 };
 

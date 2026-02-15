@@ -8020,6 +8020,14 @@ export interface operations {
                     'application/json': {
                         /** Format: id */
                         id: string;
+                        aliases: string[];
+                        name: string;
+                        category: string | null;
+                        host: string | null;
+                        url: string;
+                        license: string | null;
+                        isSensitive: boolean;
+                        localOnly: boolean;
                     };
                 };
             };
@@ -13210,6 +13218,7 @@ export interface operations {
                     excludeBots?: boolean;
                     withReplies: boolean;
                     withFile: boolean;
+                    notify: boolean;
                     excludeNotesInSensitiveChannel?: boolean;
                 };
             };
@@ -13551,6 +13560,7 @@ export interface operations {
                     excludeBots?: boolean;
                     withReplies?: boolean;
                     withFile?: boolean;
+                    notify?: boolean;
                     excludeNotesInSensitiveChannel?: boolean;
                 };
             };
