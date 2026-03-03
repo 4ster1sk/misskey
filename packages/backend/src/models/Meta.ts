@@ -670,6 +670,11 @@ export class MiMeta {
 	})
 	public disableSignup: boolean;
 
+	@Column('boolean', {
+		default: false,
+	})
+	public serverChartsAuthRequired: boolean;
+
 	@Column('varchar', {
 		length: 128,
 		default: 'local',

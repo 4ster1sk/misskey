@@ -5463,6 +5463,7 @@ export type components = {
             clientOptions: components['schemas']['MetaClientOptions'];
             disableRegistration: boolean;
             disableSignup: boolean;
+            serverChartsAuthRequired: boolean;
             emailRequiredForSignup: boolean;
             enableHcaptcha: boolean;
             hcaptchaSiteKey: string | null;
@@ -9407,6 +9408,7 @@ export interface operations {
                 content: {
                     'application/json': {
                         disableSignup: boolean;
+                        serverChartsAuthRequired: boolean;
                         cacheRemoteFiles: boolean;
                         cacheRemoteSensitiveFiles: boolean;
                         emailRequiredForSignup: boolean;
@@ -12861,6 +12863,7 @@ export interface operations {
                     federation?: 'all' | 'none' | 'specified';
                     federationHosts?: string[];
                     disableSignup?: boolean;
+                    serverChartsAuthRequired?: boolean;
                     deliverSuspendedSoftware?: {
                         software: string;
                         versionRange: string;

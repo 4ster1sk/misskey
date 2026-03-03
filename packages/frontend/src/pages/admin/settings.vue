@@ -380,6 +380,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<template #label>{{ i18n.ts._customizeFeature.disableSignup }}<span v-if="customFeatureForm.modifiedStates.disableSignup" class="_modified">{{ i18n.ts.modified }}</span></template>
 						</MkSwitch>
 					</div>
+					<div class="_gaps">
+						<MkSwitch v-model="customFeatureForm.state.serverChartsAuthRequired">
+							<template #label>{{ i18n.ts._customizeFeature.serverChartsAuthRequired }}<span v-if="customFeatureForm.modifiedStates.serverChartsAuthRequired" class="_modified">{{ i18n.ts.modified }}</span></template>
+						</MkSwitch>
+					</div>
 				</MkFolder>
 
 				<MkButton primary @click="openSetupWizard">
@@ -451,9 +456,11 @@ const pinnedUsersForm = useForm({
 
 const customFeatureForm = useForm({
 	disableSignup: meta.disableSignup,
+	serverChartsAuthRequired: meta.serverChartsAuthRequired,
 }, async (state) => {
 	await os.apiWithDialog('admin/update-meta', {
 		disableSignup: state.disableSignup,
+		serverChartsAuthRequired: state.serverChartsAuthRequired,
 	});
 	fetchInstance(true);
 });

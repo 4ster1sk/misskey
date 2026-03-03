@@ -26,6 +26,7 @@ import { instance } from '@/instance.js';
 import { i18n } from '@/i18n.js';
 import { claimAchievement } from '@/utility/achievements.js';
 import { definePage } from '@/page.js';
+import { $i } from '@/i.js';
 
 const XOverview = defineAsyncComponent(() => import('@/pages/about.overview.vue'));
 const XEmojis = defineAsyncComponent(() => import('@/pages/about.emojis.vue'));
@@ -59,11 +60,11 @@ const headerTabs = computed(() => [{
 	key: 'federation',
 	title: i18n.ts.federation,
 	icon: 'ti ti-whirl',
-}] : []), {
+}] : []), ...($i || instance.serverChartsAuthRequired === false ? [{
 	key: 'charts',
 	title: i18n.ts.charts,
 	icon: 'ti ti-chart-line',
-}]);
+}] : [])]);
 
 definePage(() => ({
 	title: i18n.ts.instanceInfo,
