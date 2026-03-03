@@ -12,8 +12,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<MkSystemIcon v-else-if="type === 'notFound'" type="question" :class="$style.icon"/>
 		<img v-if="type === 'error' && instance.serverErrorImageUrl" :src="instance.serverErrorImageUrl" draggable="false" :class="$style.img"/>
 		<MkSystemIcon v-else-if="type === 'error'" type="error" :class="$style.icon"/>
+		<img v-if="type === 'SignInRequired' && instance.serverErrorImageUrl" :src="instance.serverErrorImageUrl" draggable="false" :class="$style.img"/>
+		<MkSystemIcon v-else-if="type === 'SignInRequired'" type="protect" :class="$style.icon"/>
 
-		<div style="opacity: 0.7;">{{ props.text ?? (type === 'empty' ? i18n.ts.nothing : type === 'notFound' ? i18n.ts.notFound : type === 'error' ? i18n.ts.somethingHappened : null) }}</div>
+		<div style="opacity: 0.7;">{{ props.text ?? (type === 'empty' ? i18n.ts.nothing : type === 'notFound' ? i18n.ts.notFound : type === 'error' ? i18n.ts.somethingHappened : type === 'SignInRequired' ? i18n.ts.signinRequiredToView : null) }}</div>
 		<slot></slot>
 	</div>
 </Transition>
@@ -26,7 +28,7 @@ import { i18n } from '@/i18n.js';
 import { prefer } from '@/preferences.js';
 
 const props = defineProps<{
-	type: 'empty' | 'notFound' | 'error';
+	type: 'empty' | 'notFound' | 'error' | 'SignInRequired';
 	text?: string;
 }>();
 </script>

@@ -2021,6 +2021,10 @@ export interface Locale extends ILocale {
      */
     "onlyOneFileCanBeAttached": string;
     /**
+     * このページを閲覧するにはログインが必要です
+     */
+    "signinRequiredToView": string;
+    /**
      * 続行する前に、登録またはログインが必要です
      */
     "signinRequired": string;

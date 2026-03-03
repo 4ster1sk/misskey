@@ -19,6 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<XGallery v-else-if="tab === 'gallery'" :user="user"/>
 		<XRaw v-else-if="tab === 'raw'" :user="user"/>
 	</div>
+	<MkRequiredSignIn v-else-if="error?.id === '1113a59e-7c4b-44af-baca-0ba03a6a841d'" @retry="fetchUser()"/>
 	<MkError v-else-if="error" @retry="fetchUser()"/>
 	<MkLoading v-else/>
 </PageWithHeader>
@@ -29,7 +30,6 @@ import { defineAsyncComponent, computed, watch, ref } from 'vue';
 import * as Misskey from 'misskey-js';
 import { acct as getAcct } from '@/filters/user.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
-import { pleaseLogin } from '@/utility/please-login.js';
 import { definePage } from '@/page.js';
 import { i18n } from '@/i18n.js';
 import { $i } from '@/i.js';
@@ -81,14 +81,14 @@ function fetchUser(): void {
 		user.value = u;
 	}).catch(err => {
 		if (err.id === '1113a59e-7c4b-44af-baca-0ba03a6a841d') {
-			pleaseLogin({
+			/*pleaseLogin({
 				path: '/',
 				message: i18n.ts.thisContentRequiredSignin,
 				openOnRemote: {
 					type: 'lookup',
 					url: `https://${host}/${username}`,
 				},
-			});
+			});*/
 		}
 		error.value = err;
 	});
