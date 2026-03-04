@@ -196,6 +196,7 @@ export const paramDef = {
 			},
 		},
 		disableSignup: { type: 'boolean' },
+		serverChartsAuthRequired: { type: 'boolean' },
 		deliverSuspendedSoftware: {
 			type: 'array',
 			items: {
@@ -353,6 +354,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (ps.disableSignup !== undefined) {
 				set.disableSignup = ps.disableSignup;
+			}
+			if (ps.serverChartsAuthRequired !== undefined) {
+				set.serverChartsAuthRequired = ps.serverChartsAuthRequired;
 			}
 
 			if (ps.cacheRemoteSensitiveFiles !== undefined) {

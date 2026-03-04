@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { getJsonSchema } from '@/core/chart/core.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import DriveChart from '@/core/chart/charts/drive.js';
 import { schema } from '@/core/chart/charts/entities/drive.js';
+import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/Meta.js';
 
 export const meta = {
 	tags: ['charts', 'drive'],
@@ -31,9 +33,15 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
 		private driveChart: DriveChart,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (me == null && this.serverSettings.serverChartsAuthRequired) {
+				return await this.driveChart.getEmpty(ps.span, ps.limit);
+			}
+
 			return await this.driveChart.getChart(ps.span, ps.limit, ps.offset ? new Date(ps.offset) : null);
 		});
 	}

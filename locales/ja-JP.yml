@@ -3311,6 +3311,7 @@ _followRequest:
 _customizeFeature:
   title: "独自機能"
   disableSignup: "Signupの無効化"
+  serverChartsAuthRequired: "サーバーチャートの表示にはログインを必須にする"
 
 _remoteLookupErrors:
   _federationNotAllowed:

@@ -12397,6 +12397,10 @@ export interface Locale extends ILocale {
          * Signupの無効化
          */
         "disableSignup": string;
+        /**
+         * サーバーチャートの表示にはログインを必須にする
+         */
+        "serverChartsAuthRequired": string;
     };
     "_remoteLookupErrors": {
         "_federationNotAllowed": {

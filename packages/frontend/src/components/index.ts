@@ -20,6 +20,7 @@ import NestedRouterView from './global/NestedRouterView.vue';
 import StackingRouterView from './global/StackingRouterView.vue';
 import MkLoading from './global/MkLoading.vue';
 import MkError from './global/MkError.vue';
+import MkRequiredSignIn from './global/MkRequiredSignIn.vue';
 import MkSuspense from './global/MkSuspense.vue';
 import MkAd from './global/MkAd.vue';
 import MkPageHeader from './global/MkPageHeader.vue';
@@ -60,6 +61,7 @@ export const components = {
 	MkTime: MkTime,
 	MkUrl: MkUrl,
 	MkLoading: MkLoading,
+	MkRequiredSignIn: MkRequiredSignIn,
 	MkError: MkError,
 	MkSuspense: MkSuspense,
 	MkAd: MkAd,
@@ -95,6 +97,7 @@ declare module 'vue' {
 		MkTime: typeof MkTime;
 		MkUrl: typeof MkUrl;
 		MkLoading: typeof MkLoading;
+		MkRequiredSignIn: typeof MkRequiredSignIn;
 		MkError: typeof MkError;
 		MkSuspense: typeof MkSuspense;
 		MkAd: typeof MkAd;
