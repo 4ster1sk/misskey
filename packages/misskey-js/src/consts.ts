@@ -211,6 +211,7 @@ export const rolePolicies = [
 	'canUpdateBioMedia',
 	'pinLimit',
 	'antennaLimit',
+	'antennaNotesLimit',
 	'wordMuteLimit',
 	'webhookLimit',
 	'clipLimit',
