@@ -4897,6 +4897,10 @@ export interface Locale extends ILocale {
      */
     "unnotifyNotes": string;
     /**
+     * 投稿通知を設定したユーザー
+     */
+    "notifyUsers": string;
+    /**
      * 認証
      */
     "authentication": string;
