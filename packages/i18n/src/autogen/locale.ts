@@ -4893,7 +4893,11 @@ export interface Locale extends ILocale {
      */
     "notifyNotes": string;
     /**
-     * 投稿の通知を解除
+     * ファイル付き投稿のみ通知
+     */
+    "notifyNotesOnlyFiles": string;
+    /**
+     * 通知しない
      */
     "unnotifyNotes": string;
     /**
