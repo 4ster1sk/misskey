@@ -1,5 +1,6 @@
 import assert, { deepStrictEqual, strictEqual } from 'node:assert';
 import * as Misskey from 'misskey-js';
+import { describe, test, beforeAll } from 'vitest';
 import { createAccount, fetchAdmin, type LoginUser, resolveRemoteNote, resolveRemoteUser, sleep } from './utils.js';
 
 describe('whitelist federation', () => {
