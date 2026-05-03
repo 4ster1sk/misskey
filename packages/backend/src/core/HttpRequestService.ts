@@ -12,6 +12,7 @@ import CacheableLookup from 'cacheable-lookup';
 import fetch from 'node-fetch';
 import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent';
 import { Inject, Injectable } from '@nestjs/common';
+import FormData from 'form-data';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
 import { StatusError } from '@/misc/status-error.js';
@@ -311,7 +312,7 @@ export class HttpRequestService {
 		url: string,
 		args: {
 			method?: string,
-			body?: string,
+			body?: string | FormData,
 			headers?: Record<string, string>,
 			timeout?: number,
 			size?: number,
@@ -335,6 +336,7 @@ export class HttpRequestService {
 			method: args.method ?? 'GET',
 			headers: {
 				'User-Agent': this.config.userAgent,
+				...(args.body instanceof FormData ? args.body.getHeaders() : {}),
 				...(args.headers ?? {}),
 			},
 			body: args.body,

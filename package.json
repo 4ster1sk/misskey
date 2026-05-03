@@ -79,9 +79,6 @@
 		"start-server-and-test": "3.0.2",
 		"typescript": "5.9.3"
 	},
-	"optionalDependencies": {
-		"@tensorflow/tfjs-core": "4.22.0"
-	},
 	"pnpm": {
 		"overrides": {
 			"@aiscript-dev/aiscript-languageserver": "-",
