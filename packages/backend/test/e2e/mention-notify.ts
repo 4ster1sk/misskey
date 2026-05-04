@@ -290,5 +290,70 @@ describe('mention notification', () => {
 				'DM返信でreply通知が届かなかった',
 			);
 		});
+		test('@メンションでも非フォロワーの carol には followers 投稿が漏れないこと', async () => {
+			await api('notifications/mark-all-as-read', {}, carol);
+
+			// 前提: alice が carol をフォローしていないことを保証する
+			const following = await api('users/following', {
+				userId: alice.id,
+				limit: 100,
+			}, alice);
+			assert.strictEqual(following.status, 200);
+			assert.ok(
+				!following.body.some(f => f.followeeId === carol.id),
+				'前提条件違反: alice が carol をフォローしている状態でテストが実行された',
+			);
+
+			const noteRes = await api('notes/create', {
+				text: `@${carol.username} hello from followers (not following)`,
+				visibility: 'followers',
+			}, alice);
+
+			assert.strictEqual(noteRes.status, 200);
+			await setTimeout(100);
+
+			await assertNoNotification(
+				noteRes.body.createdNote.id,
+				carol,
+				'followers投稿のメンションが非フォロワーに漏れた',
+			);
+		});
+		test('返信(replyId付き)でも非フォロワーの carol には followers 返信が漏れないこと', async () => {
+			await api('notifications/mark-all-as-read', {}, carol);
+
+			// 前提: alice が carol をフォローしていないことを保証する
+			const following = await api('users/following', {
+				userId: alice.id,
+				limit: 100,
+			}, alice);
+			assert.strictEqual(following.status, 200);
+			assert.ok(
+				!following.body.some(f => f.followeeId === carol.id),
+				'前提条件違反: alice が carol をフォローしている状態でテストが実行された',
+			);
+
+			// carol が起点のノートを投稿
+			const baseNote = await api('notes/create', {
+				text: 'base note by carol',
+				visibility: 'public',
+			}, carol);
+			assert.strictEqual(baseNote.status, 200);
+
+			// alice が followers 限定で返信
+			const replyRes = await api('notes/create', {
+				text: 'reply from alice (followers, not following carol)',
+				replyId: baseNote.body.createdNote.id,
+				visibility: 'followers',
+			}, alice);
+
+			assert.strictEqual(replyRes.status, 200);
+			await setTimeout(100);
+
+			await assertNoNotification(
+				replyRes.body.createdNote.id,
+				carol,
+				'followers返信が非フォロワーに漏れた',
+			);
+		});
 	});
 });
