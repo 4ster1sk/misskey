@@ -34,19 +34,17 @@ services:
     networks: [playwright]
 
   misskey:
-    build: .
+    build: ../../
     restart: always
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "3000:3000"
     networks: [playwright]
     volumes:
       - ./files:/misskey/files
-      - ./tests/playwright/instance.yml:/misskey/.config/default.yml:ro
+      - ./instance.yml:/misskey/.config/default.yml:ro
     healthcheck:
       test:
         - "CMD-SHELL"
@@ -61,7 +59,7 @@ services:
   # 明示的に `--profile test run` で起動する (cypress runner と同 pattern)。
   playwright-runner:
     build:
-      context: ./tests/playwright
+      context: .
       dockerfile: Dockerfile.runner
     environment:
       # mkgo backend への接続先。spec から fixtures 経由で参照する。
@@ -70,7 +68,7 @@ services:
       # spec ファイルと playwright.config.ts は test 実行時に変更されること
       # があるので bind mount で読み込む。生成物 (test-results/) は host に
       # 残るので gitignore で除外する。
-      - ./tests/playwright:/work
+      - ./:/work
       # bind mount が image 焼き付けの /work/node_modules を上書きしないよう
       # anonymous volume で保護する。これにより npm install (Dockerfile.runner)
       # の結果が container 内で生き続ける。

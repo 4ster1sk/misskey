@@ -51,10 +51,10 @@ jobs:
       # version は docker-compose.playwright.ts.yml と sync。
 
       - name: Bring up stack
-        run: docker compose -f docker-compose.playwright.yml up -d --build
+        run: docker compose -f ./tests/playwright/docker-compose.playwright.yml up -d --build
 
       - name: Run Playwright
-        run: docker compose -f docker-compose.playwright.yml --profile test run --rm playwright-runner
+        run: docker compose -f ./tests/playwright/docker-compose.playwright.yml --profile test run --rm playwright-runner
 
       # 失敗時のみ playwright test-results (trace / screenshot 含む) を保存。
       - name: Upload test-results on failure
@@ -73,7 +73,7 @@ jobs:
         run: |
           mkdir -p /tmp/playwright-logs
           docker compose \
-            -f docker-compose.playwright.yml \
+            -f ./tests/playwright/docker-compose.playwright.yml \
             logs > /tmp/playwright-logs/compose.log 2>&1 || true
 
       - name: Upload logs artifact on failure
@@ -87,4 +87,4 @@ jobs:
 
       - name: Final teardown
         if: always()
-        run: docker compose -f docker-compose.playwright.yml down -v >/dev/null 2>&1 || true
+        run: docker compose -f ./tests/playwright/docker-compose.playwright.yml down -v >/dev/null 2>&1 || true
