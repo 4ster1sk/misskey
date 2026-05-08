@@ -12,17 +12,16 @@
 #   docker compose -f docker-compose.playwright.yml down -v
 
 services:
-  postgres:
+  db:
     image: postgres:18-alpine
     environment:
       POSTGRES_DB: misskey
-      POSTGRES_USER: misskey
-      POSTGRES_PASSWORD: testpass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: pg_isready -U misskey
-      interval: 3s
-      timeout: 3s
-      retries: 10
+      test: "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
+      interval: 5s
+      retries: 20
     networks: [playwright]
 
   redis:
@@ -35,13 +34,8 @@ services:
     networks: [playwright]
 
   misskey:
-    build:
+    build: .
     restart: always
-    links:
-      - db
-      - redis
-#     - mcaptcha
-#     - meilisearch
     depends_on:
       db:
         condition: service_healthy
@@ -52,13 +46,20 @@ services:
     networks: [playwright]
     volumes:
       - ./files:/misskey/files
-      - ./.config:/misskey/.config:ro
+      - ./tests/playwright/instance.yml:/misskey/.config/default.yml:ro
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "curl -fsS -X POST -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:3000/api/ping || exit 1"
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
 
 
   # Playwright runner. profiles: [test] で `up -d` の対象から外し、
   # 明示的に `--profile test run` で起動する (cypress runner と同 pattern)。
   playwright-runner:
-    profiles: [test]
     build:
       context: ./tests/playwright
       dockerfile: Dockerfile.runner
@@ -76,7 +77,7 @@ services:
       - /work/node_modules
     working_dir: /work
     depends_on:
-      mkgo: {condition: service_healthy}
+      misskey: {condition: service_healthy}
     networks: [playwright]
 
 networks:

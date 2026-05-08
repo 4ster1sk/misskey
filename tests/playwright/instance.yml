@@ -1,12 +1,12 @@
-url: http://mkgo:3000/
+url: http://localhost:3000/
 port: 3000
 
 db:
-  host: postgres
+  host: db
   port: 5432
   db: misskey
-  user: misskey
-  pass: testpass
+  user: postgres
+  pass: postgres
 
 redis:
   host: redis
