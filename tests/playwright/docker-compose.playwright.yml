@@ -89,6 +89,12 @@ services:
       # `rejectUnauthorized` option がない。env で TLS verify を bypass
       # する (= test 環境のみ、self-signed cert を accept する目的)。
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      # Playwright runner に「TS backend で実行中」と伝える marker。spec 側は
+      # process.env.MK_BACKEND_TYPE で TS 限定の skip 等を制御する (#882 で
+      # import-zip async download が TS の got HTTPS で self-signed cert を
+      # 弾く問題への workaround)。
+      MK_BACKEND_TYPE: ts
+
     volumes:
       # spec ファイルと playwright.config.ts は test 実行時に変更されること
       # があるので bind mount で読み込む。生成物 (test-results/) は host に
