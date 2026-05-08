@@ -524,7 +524,7 @@ function onFileClick(ev: PointerEvent, file: Misskey.entities.DriveFile) {
 			}
 		}
 	} else {
-		os.popupMenu(getDriveFileMenu(file, folder.value), (ev.currentTarget ?? ev.target ?? undefined) as HTMLElement | undefined);
+		os.contextMenu(getDriveFileMenu(file, folder.value), ev);
 	}
 }
 
