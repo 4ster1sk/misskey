@@ -112,8 +112,8 @@ const $i = ensureSignin();
 
 async function showNotifyMenu(user: Misskey.entities.UserDetailed, ev: PointerEvent) {
 	os.popupMenu((['normal', 'withFile', 'none'] as const).map(v => ({
-		type: 'radioOption',
-		text: v === 'normal' ? i18n.ts.notifyNotes : v === 'withFile' ? i18n.ts.notifyNotesOnlyFiles : i18n.ts.none,
+		type: 'radioOption' as const,
+		text: (v === 'normal' ? i18n.ts.notifyNotes : v === 'withFile' ? i18n.ts.notifyNotesOnlyFiles : i18n.ts.none) as string,
 		active: computed(() => user.notify === v),
 		action: () => {
 			os.apiWithDialog('following/update', {
@@ -198,12 +198,6 @@ definePage(() => ({
 	display: flex;
 }
 
-.userItemSub {
-	padding: 6px 12px;
-	font-size: 85%;
-	color: color(from var(--MI_THEME-fg) srgb r g b / 0.75);
-}
-
 .userItemMainBody {
 	flex: 1;
 	min-width: 0;
@@ -218,16 +212,5 @@ definePage(() => ({
 	width: 32px;
 	height: 32px;
 	align-self: center;
-}
-
-.chevron {
-	display: block;
-	transition: transform 0.1s ease-out;
-}
-
-.userItem.userItemOpend {
-	.chevron {
-		transform: rotateX(180deg);
-	}
 }
 </style>
