@@ -121,8 +121,14 @@ export class DownloadService {
 		this.logger.info(`text file: Temp file is ${path}`);
 
 		try {
-			// write content at URL to temp file
-			await this.downloadUrl(url, path);
+			// テスト環境時にmisskey.localの名前解決にコケるため。
+			if (process.env.NODE_ENV === 'test' && url.startsWith('http://misskey.local/files')) {
+				const testUrl = new URL(new URL(url).pathname, `http://127.0.0.1:${this.config.port}`).toString();
+				await this.downloadUrl(testUrl, path);
+			} else {
+				// write content at URL to temp file
+				await this.downloadUrl(url, path);
+			}
 
 			const text = await fs.promises.readFile(path, 'utf8');
 

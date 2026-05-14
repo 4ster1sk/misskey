@@ -63,6 +63,7 @@ export class ImportFollowingProcessorService {
 
 	@bindThis
 	public async processDb(job: Bull.Job<DbUserImportToDbJobData>): Promise<void> {
+		this.logger.succ('processDb');
 		const line = job.data.target;
 		const user = job.data.user;
 
@@ -80,8 +81,13 @@ export class ImportFollowingProcessorService {
 						break;
 				}
 			}
+			this.logger.succ(`following!!: ${username} ${host} withReplies=${job.data.withReplies}`);
 
-			if (!host) return;
+			// import時にhostがnullということは自鯖ということになるわけだけど、そもそもエクスポートにホスト名が含まれていないのが悪いわね
+			if (!host) {
+				this.logger.succ('ha?');
+				return;
+			}
 
 			let target = this.utilityService.isSelfHost(host) ? await this.usersRepository.findOneBy({
 				host: IsNull(),
