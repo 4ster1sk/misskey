@@ -2,16 +2,19 @@ import { portToPid } from 'pid-port';
 import fkill from 'fkill';
 import Fastify from 'fastify';
 import { NestFactory } from '@nestjs/core';
+import { INestApplicationContext } from '@nestjs/common';
 import { MainModule } from '@/MainModule.js';
 import { ServerService } from '@/server/ServerService.js';
 import { loadConfig } from '@/config.js';
 import { NestLogger } from '@/NestLogger.js';
-import { INestApplicationContext } from '@nestjs/common';
+import { envOption } from '@/env.js';
 
 const config = loadConfig();
 const originEnv = JSON.stringify(process.env);
 
 process.env.NODE_ENV = 'test';
+delete process.env.MK_QUIET;
+process.env.MK_VERBOSE = '1';
 
 let app: INestApplicationContext;
 let serverService: ServerService;
@@ -19,13 +22,17 @@ let serverService: ServerService;
 /**
  * テスト用のサーバインスタンスを起動する
  */
+process.stderr.write('!!!!!!!!!! ENTRY.TS LOADED !!!!!!!!!!\n');
+process.stderr.write(`!!!! envOption.quiet = ${envOption.quiet} !!!!\n`);
+process.stderr.write(`!!!! envOption = ${JSON.stringify(envOption)} !!!!\n`);
 export async function setup() {
+	process.stderr.write('!!!!!!!!!! SETUP CALLED !!!!!!!!!!\n');
 	await killTestServer();
 
 	console.log('starting application...');
 
 	app = await NestFactory.createApplicationContext(MainModule, {
-		logger: new NestLogger(),
+		logger: ['error', 'warn', 'log', 'debug', 'verbose'],
 	});
 	serverService = app.get(ServerService);
 	await serverService.launch();
@@ -93,7 +100,7 @@ async function startControllerEndpoints(port = config.port + 1000) {
 		console.log('starting application...');
 
 		app = await NestFactory.createApplicationContext(MainModule, {
-			logger: new NestLogger(),
+			logger: ['error', 'warn', 'log', 'debug', 'verbose'],
 		});
 		serverService = app.get(ServerService);
 		await serverService.launch();

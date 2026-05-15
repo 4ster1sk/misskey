@@ -42,9 +42,39 @@ services:
       interval: 5s
       retries: 20
 
+  redistest:
+    restart: unless-stopped
+    image: redis:7-alpine
+    networks:
+      - internal_network
+    volumes:
+      - redis-data-test:/data
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 5s
+      retries: 20
+
+  dbtest:
+    restart: unless-stopped
+    image: postgres:18-alpine
+    networks:
+      - internal_network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test-misskey
+    volumes:
+      - postgres-data-test:/var/lib/postgresql
+    healthcheck:
+      test: "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
+      interval: 5s
+      retries: 20
+
 volumes:
   postgres-data:
+  postgres-data-test:
   redis-data:
+  redis-data-test:
   node_modules:
 
 networks:
