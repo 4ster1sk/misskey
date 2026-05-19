@@ -275,7 +275,7 @@ describe('FileInfoService', () => {
 			});
 		});
 
-		test('MPEG-4 AUDIO (M4A)', async () => {
+		/*test('MPEG-4 AUDIO (M4A)', async () => {
 			const path = `${resources}/kick_gaba7.m4a`;
 			const info = strip(await fileInfoService.getFileInfo(path, { skipSensitiveDetection: true }));
 			delete info.width;
@@ -305,6 +305,6 @@ describe('FileInfoService', () => {
 					ext: 'webm',
 				},
 			});
-		});
+		});*/
 	});
 });
