@@ -52,7 +52,7 @@ describe('users/notify/list', () => {
 		assert.strictEqual(res.status, 200);
 		assert.strictEqual(res.body.length, 2);
 
-		const ids = res.body.map((u: { id: string, user: misskey.entities.UserDetailed }) => u.user.id).sort();
+		const ids = res.body.map(r => r.user.id).sort();
 		assert.deepStrictEqual(ids, [bob.id, carol.id].sort());
 	});
 
