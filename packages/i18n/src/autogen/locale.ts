@@ -3041,6 +3041,14 @@ export interface Locale extends ILocale {
      */
     "confirmToUnclipAlreadyClippedNote": ParameterizedString<"name">;
     /**
+     * このアンテナから削除
+     */
+    "removeFromAntenna": string;
+    /**
+     * 「{name}」からこのノートを削除しますか？
+     */
+    "removeNoteFromAntennaConfirm": ParameterizedString<"name">;
+    /**
      * パブリック
      */
     "public": string;
@@ -5687,6 +5695,10 @@ export interface Locale extends ILocale {
      * 元に戻す
      */
     "previewingThemeRestore": string;
+    /**
+     * アクセストークン
+     */
+    "accessToken": string;
     "_imageEditing": {
         "_vars": {
             /**
@@ -12605,6 +12617,14 @@ export interface Locale extends ILocale {
          * 例: misskey.example.com
          */
         "serverHostPlaceholder": string;
+        /**
+         * 投稿日時from
+         */
+        "postFrom": string;
+        /**
+         * 投稿日時to
+         */
+        "postTo": string;
     };
     "_serverSetupWizard": {
         /**
