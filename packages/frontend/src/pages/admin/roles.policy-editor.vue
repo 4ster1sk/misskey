@@ -181,18 +181,18 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</template>
 	</XFolder>
 
-	<XFolder v-if="matchQuery([i18n.ts._role._options.maxFileSize, 'maxFileSizeMb'])" v-model:policyMeta="policyMetaModel.maxFileSizeMb" :isBaseRole="isBaseRole" :readonly="readonly">
-		<template #label>{{ i18n.ts._role._options.maxFileSize }}</template>
-		<template #valueText>{{ valuesModel.maxFileSizeMb }}MB</template>
-		<template #default="{ disabled }">
-			<MkInput v-model="valuesModel.maxFileSizeMb" type="number" :disabled="disabled">
-				<template #suffix>MB</template>
-				<template #caption>
-					<div><i class="ti ti-alert-triangle" style="color: var(--MI_THEME-warn);"></i> {{ i18n.ts._role._options.maxFileSize_caption }}</div>
-				</template>
-			</MkInput>
-		</template>
-	</XFolder>
+		<XFolder v-if="matchQuery([i18n.ts._role._options.maxFileSize, 'maxFileSizeMb'])" v-model:policyMeta="policyMetaModel.maxFileSizeMb" :isBaseRole="isBaseRole" :readonly="readonly">
+			<template #label>{{ i18n.ts._role._options.maxFileSize }}</template>
+			<template #valueText>{{ valuesModel.maxFileSizeMb }}MB</template>
+			<template #default="{ disabled }">
+				<MkInput v-model="valuesModel.maxFileSizeMb" type="number" :disabled="disabled">
+					<template #suffix>MB</template>
+					<template #caption>
+						<div><i class="ti ti-alert-triangle" style="color: var(--MI_THEME-warn);"></i> {{ i18n.ts._role._options.maxFileSize_caption }}</div>
+					</template>
+				</MkInput>
+			</template>
+		</XFolder>
 
 	<XFolder v-if="matchQuery([i18n.ts._role._options.uploadableFileTypes, 'uploadableFileTypes'])" v-model:policyMeta="policyMetaModel.uploadableFileTypes" :isBaseRole="isBaseRole" :readonly="readonly">
 		<template #label>{{ i18n.ts._role._options.uploadableFileTypes }}</template>
@@ -410,6 +410,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script lang="ts">
 import * as Misskey from 'misskey-js';
+import { instance } from '@/instance.js';
 
 export type PolicyMeta = {
 	useDefault: boolean;
