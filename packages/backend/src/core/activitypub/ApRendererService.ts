@@ -172,6 +172,8 @@ export class ApRendererService {
 			mediaType: file.webpublicType ?? file.type,
 			url: this.driveFileEntityService.getPublicUrl({ file: file, allowProxiedUrl: false }),
 			name: file.comment,
+			width: file.properties?.width,
+			height: file.properties?.height,
 			sensitive: file.isSensitive,
 		};
 	}
