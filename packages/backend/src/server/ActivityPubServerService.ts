@@ -180,13 +180,23 @@ export class ActivityPubServerService {
 			}
 		}
 
+		const body = request.body;
+
+		// Reject structurally invalid activities (e.g. missing actor) here instead
+		// of letting them fail deep inside the inbox processor. An actor-less
+		// activity can never be authenticated, so there is no point enqueueing it.
+		if (typeof body !== 'object' || body == null || !('actor' in body) || body.actor == null) {
+			reply.code(400);
+			return;
+		}
+
 		if (request.headers.date) {
 			const delay = Date.now() - new Date(request.headers.date).getTime();
 			const host = this.utilityService.toPuny(new URL(signature.keyId).hostname);
 			this.logger.info(`Inbox host: ${host}, delay: ${delay}ms`);
 		}
 
-		this.queueService.inbox(request.body as IActivity, signature);
+		this.queueService.inbox(body as IActivity, signature);
 
 		reply.code(202);
 	}
