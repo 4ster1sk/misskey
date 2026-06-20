@@ -5,8 +5,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <div v-if="show" ref="el" :class="[$style.root]">
-	<div :class="[$style.upper, { [$style.slim]: narrow, [$style.thin]: thin_ }]">
-		<div v-if="!thin_ && narrow && props.displayMyAvatar && $i" class="_button" @click="openAccountMenu">
+	<div :class="[$style.upper, { [$style.slim]: narrow, [$style.thin]: thin_, [$style.centeredTabs]: props.displayMyAvatar }]">
+		<div v-if="!thin_ && (narrow || isMobile) && props.displayMyAvatar && $i" class="_button" @click="openAccountMenu">
 			<MkAvatar :class="$style.avatar" :user="$i"/>
 		</div>
 		<div v-else-if="!thin_ && narrow && !hideTitle" :class="$style.buttons"></div>
@@ -44,6 +44,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 import type { PageHeaderItem } from '@/types/page-header.js';
 import type { PageMetadata } from '@/page.js';
 import type { Tab } from './MkPageHeader.tabs.vue';
+import { deviceKind } from '@/utility/device-kind.js';
 
 export type PageHeaderProps = {
 	overridePageMetadata?: PageMetadata;
@@ -88,6 +89,7 @@ const hasActions = computed(() => props.actions && props.actions.length > 0);
 const show = computed(() => {
 	return !hideTitle.value || hasTabs.value || hasActions.value;
 });
+const isMobile = deviceKind === 'smartphone';
 
 const preventDrag = (ev: TouchEvent) => {
 	ev.stopPropagation();
@@ -185,6 +187,13 @@ onUnmounted(() => {
 		.titleContainer {
 			margin: 0 auto;
 			max-width: 100%;
+		}
+	}
+
+  &.centeredTabs {
+    .tabs {
+      margin-left: auto;
+      margin-right: auto;
 		}
 	}
 }
