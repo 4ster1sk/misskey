@@ -319,9 +319,9 @@ export const meta = {
 				type: 'string',
 				optional: false, nullable: true,
 			},
-			objectStorageSecretKey: {
-				type: 'string',
-				optional: false, nullable: true,
+			hasObjectStorageSecretKey: {
+				type: 'boolean',
+				optional: false, nullable: false,
 			},
 			objectStorageUseSSL: {
 				type: 'boolean',
@@ -730,7 +730,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				objectStorageRegion: instance.objectStorageRegion,
 				objectStoragePort: instance.objectStoragePort,
 				objectStorageAccessKey: instance.objectStorageAccessKey,
-				objectStorageSecretKey: instance.objectStorageSecretKey,
+				hasObjectStorageSecretKey: instance.objectStorageSecretKey !== null,
 				objectStorageUseSSL: instance.objectStorageUseSSL,
 				objectStorageUseProxy: instance.objectStorageUseProxy,
 				objectStorageSetPublicRead: instance.objectStorageSetPublicRead,

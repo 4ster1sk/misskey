@@ -9496,7 +9496,7 @@ export interface operations {
                         objectStorageRegion: string | null;
                         objectStoragePort: number | null;
                         objectStorageAccessKey: string | null;
-                        objectStorageSecretKey: string | null;
+                        hasObjectStorageSecretKey: boolean;
                         objectStorageUseSSL: boolean;
                         objectStorageUseProxy: boolean;
                         objectStorageSetPublicRead: boolean;

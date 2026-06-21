@@ -58,7 +58,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</SearchMarker>
 
 						<SearchMarker>
-							<MkInput v-model="objectStorageSecretKey" type="password" autocomplete="new-password">
+							<MkInput
+								v-model="objectStorageSecretKey"
+								type="password"
+								autocomplete="new-password"
+								:placeholder="hasObjectStorageSecretKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''"
+							>
 								<template #prefix><i class="ti ti-key"></i></template>
 								<template #label><SearchLabel>Secret key</SearchLabel></template>
 							</MkInput>
@@ -127,11 +132,12 @@ const objectStorageEndpoint = ref(meta.objectStorageEndpoint);
 const objectStorageRegion = ref(meta.objectStorageRegion);
 const objectStoragePort = ref(meta.objectStoragePort);
 const objectStorageAccessKey = ref(meta.objectStorageAccessKey);
-const objectStorageSecretKey = ref(meta.objectStorageSecretKey);
+const objectStorageSecretKey = ref('');
 const objectStorageUseSSL = ref(meta.objectStorageUseSSL);
 const objectStorageUseProxy = ref(meta.objectStorageUseProxy);
 const objectStorageSetPublicRead = ref(meta.objectStorageSetPublicRead);
 const objectStorageS3ForcePathStyle = ref(meta.objectStorageS3ForcePathStyle);
+const hasObjectStorageSecretKey = ref(meta.hasObjectStorageSecretKey);
 
 function save() {
 	os.apiWithDialog('admin/update-meta', {
@@ -143,7 +149,7 @@ function save() {
 		objectStorageRegion: objectStorageRegion.value,
 		objectStoragePort: objectStoragePort.value,
 		objectStorageAccessKey: objectStorageAccessKey.value,
-		objectStorageSecretKey: objectStorageSecretKey.value,
+		objectStorageSecretKey: objectStorageSecretKey.value === '' ? undefined : objectStorageSecretKey.value,
 		objectStorageUseSSL: objectStorageUseSSL.value,
 		objectStorageUseProxy: objectStorageUseProxy.value,
 		objectStorageSetPublicRead: objectStorageSetPublicRead.value,
