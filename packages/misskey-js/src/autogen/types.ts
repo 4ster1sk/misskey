@@ -9523,7 +9523,8 @@ export interface operations {
                         enableReactionsBuffering: boolean;
                         notesPerOneAd: number;
                         backgroundImageUrl: string | null;
-                        deeplAuthKey: string | null;
+                        hasDeeplAuthKey: boolean;
+                        deeplAuthKeyTest: string | null;
                         deeplIsPro: boolean;
                         defaultDarkTheme: string | null;
                         defaultLightTheme: string | null;

@@ -427,7 +427,11 @@ export const meta = {
 				type: 'string',
 				optional: false, nullable: true,
 			},
-			deeplAuthKey: {
+			hasDeeplAuthKey: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
+			deeplAuthKeyTest: {
 				type: 'string',
 				optional: false, nullable: true,
 			},
@@ -735,7 +739,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				objectStorageUseProxy: instance.objectStorageUseProxy,
 				objectStorageSetPublicRead: instance.objectStorageSetPublicRead,
 				objectStorageS3ForcePathStyle: instance.objectStorageS3ForcePathStyle,
-				deeplAuthKey: instance.deeplAuthKey,
+				hasDeeplAuthKey: instance.deeplAuthKey !== null,
+				deeplAuthKeyTest: instance.deeplAuthKey,
 				deeplIsPro: instance.deeplIsPro,
 				enableIpLogging: instance.enableIpLogging,
 				enableActiveEmailValidation: instance.enableActiveEmailValidation,
