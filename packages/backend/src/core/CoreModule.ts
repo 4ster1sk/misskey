@@ -18,6 +18,7 @@ import { FlashService } from '@/core/FlashService.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
 import { AccountMoveService } from './AccountMoveService.js';
 import { AccountUpdateService } from './AccountUpdateService.js';
+import { AiService } from './AiService.js';
 import { AnnouncementService } from './AnnouncementService.js';
 import { AntennaService } from './AntennaService.js';
 import { AchievementService } from './AchievementService.js';
@@ -162,6 +163,7 @@ const $AbuseReportService: Provider = { provide: 'AbuseReportService', useExisti
 const $AbuseReportNotificationService: Provider = { provide: 'AbuseReportNotificationService', useExisting: AbuseReportNotificationService };
 const $AccountMoveService: Provider = { provide: 'AccountMoveService', useExisting: AccountMoveService };
 const $AccountUpdateService: Provider = { provide: 'AccountUpdateService', useExisting: AccountUpdateService };
+const $AiService: Provider = { provide: 'AiService', useExisting: AiService };
 const $AnnouncementService: Provider = { provide: 'AnnouncementService', useExisting: AnnouncementService };
 const $AntennaService: Provider = { provide: 'AntennaService', useExisting: AntennaService };
 const $AchievementService: Provider = { provide: 'AchievementService', useExisting: AchievementService };
@@ -315,6 +317,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AbuseReportNotificationService,
 		AccountMoveService,
 		AccountUpdateService,
+		AiService,
 		AnnouncementService,
 		AntennaService,
 		AchievementService,
@@ -465,6 +468,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AbuseReportNotificationService,
 		$AccountMoveService,
 		$AccountUpdateService,
+		$AiService,
 		$AnnouncementService,
 		$AntennaService,
 		$AchievementService,
@@ -615,6 +619,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AbuseReportNotificationService,
 		AccountMoveService,
 		AccountUpdateService,
+		AiService,
 		AnnouncementService,
 		AntennaService,
 		AchievementService,
@@ -764,6 +769,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AbuseReportNotificationService,
 		$AccountMoveService,
 		$AccountUpdateService,
+		$AiService,
 		$AnnouncementService,
 		$AntennaService,
 		$AchievementService,

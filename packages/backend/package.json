@@ -34,6 +34,8 @@
 		"generate-api-json": "pnpm compile-config && node ./scripts/generate_api_json.js"
 	},
 	"optionalDependencies": {
+		"@tensorflow/tfjs": "4.22.0",
+		"@tensorflow/tfjs-node": "4.22.0",
 		"bufferutil": "4.1.0",
 		"slacc-android-arm-eabi": "0.1.5",
 		"slacc-android-arm64": "0.1.5",
@@ -159,6 +161,7 @@
 		"@types/archiver": "8.0.0",
 		"@types/color-convert": "3.0.1",
 		"@types/content-disposition": "0.5.9",
+		"@types/fluent-ffmpeg": "2.1.28",
 		"@types/http-link-header": "1.0.7",
 		"@types/js-yaml": "4.0.9",
 		"@types/jsonld": "1.5.15",

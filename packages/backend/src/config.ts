@@ -110,7 +110,6 @@ type Source = {
 	pidFile: string;
 
 	hashtagTrendExcludeBotUsers?: boolean;
-	videoThumbServer?: string;
 
 	logging?: {
 		sql?: {
@@ -216,7 +215,6 @@ export type Config = {
 	deactivateAntennaThreshold: number;
 	pidFile: string;
 	hashtagTrendExcludeBotUsers: boolean | undefined;
-	videoThumbServer: string | null;
 };
 
 export type FulltextSearchProvider = 'sqlLike' | 'sqlPgroonga' | 'meilisearch';
@@ -346,9 +344,6 @@ export function loadConfig(): Config {
 		pidFile: config.pidFile,
 		hashtagTrendExcludeBotUsers: config.hashtagTrendExcludeBotUsers,
 		logging: config.logging,
-		videoThumbServer: config.videoThumbServer ?
-			config.videoThumbServer.endsWith('/') ? config.videoThumbServer.substring(0, config.videoThumbServer.length - 1) : config.videoThumbServer
-			: null,
 	};
 }
 
