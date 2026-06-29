@@ -42,6 +42,7 @@ const VIDEO_COMPRESSION_SUPPORTED_TYPES = [ // TODO
 	'video/mp4',
 	'video/quicktime',
 	'video/x-matroska',
+	'video/webm',
 ];
 
 const IMAGE_PREPROCESS_NEEDED_TYPES = [
