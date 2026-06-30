@@ -96,7 +96,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<div class="_gaps">
 					<MkSwitch v-model="suspended" @update:modelValue="toggleSuspend">{{ i18n.ts.suspend }}</MkSwitch>
 
-					<MkSelect v-model="inboxAcceptance" :items="inboxAcceptanceItems">
+					<MkSelect v-if="user.host != null" v-model="inboxAcceptance" :items="inboxAcceptanceItems">
 						<template #label>{{ i18n.ts.inboxAcceptance }}</template>
 					</MkSelect>
 
