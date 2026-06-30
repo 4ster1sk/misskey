@@ -625,6 +625,22 @@ export interface Locale extends ILocale {
      */
     "unsuspend": string;
     /**
+     * 受け入れるノート
+     */
+    "inboxAcceptance": string;
+    /**
+     * すべて受け付ける
+     */
+    "inboxAcceptanceAll": string;
+    /**
+     * ノートのみ（リノートを拒否）
+     */
+    "inboxAcceptanceNoRenotes": string;
+    /**
+     * すべて拒否する
+     */
+    "inboxAcceptanceNone": string;
+    /**
      * ブロックしますか？
      */
     "blockConfirm": string;
@@ -9712,6 +9728,10 @@ export interface Locale extends ILocale {
          * モデレーションノートを操作する
          */
         "write:admin:user-note": string;
+        /**
+         * ユーザーのノート受け入れ設定を操作する
+         */
+        "write:admin:update-user-note-acceptance": string;
         /**
          * ロールを操作する
          */

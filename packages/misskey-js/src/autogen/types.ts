@@ -932,6 +932,15 @@ export type paths = {
          */
         post: operations['admin___update-user-note'];
     };
+    '/admin/update-user-note-acceptance': {
+        /**
+         * admin/update-user-note-acceptance
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *write:admin:update-user-note-acceptance*
+         */
+        post: operations['admin___update-user-note-acceptance'];
+    };
     '/announcements': {
         /**
          * announcements
@@ -12035,6 +12044,8 @@ export interface operations {
                         isSilenced: boolean;
                         isSuspended: boolean;
                         isHibernated: boolean;
+                        /** @enum {string} */
+                        inboxAcceptance: 'all' | 'noRenotes' | 'none';
                         lastActiveDate: string | null;
                         moderationNote: string;
                         signins: components['schemas']['Signin'][];
@@ -13254,6 +13265,71 @@ export interface operations {
                     /** Format: misskey:id */
                     userId: string;
                     text: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK (without any results) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    'admin___update-user-note-acceptance': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    /** Format: misskey:id */
+                    userId: string;
+                    /** @enum {string} */
+                    value: 'all' | 'noRenotes' | 'none';
                 };
             };
         };

@@ -130,6 +130,11 @@ export const meta = {
 				type: 'boolean',
 				optional: false, nullable: false,
 			},
+			inboxAcceptance: {
+				type: 'string',
+				optional: false, nullable: false,
+				enum: ['all', 'noRenotes', 'none'],
+			},
 			lastActiveDate: {
 				type: 'string',
 				optional: false, nullable: true,
@@ -249,6 +254,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				isSilenced: isSilenced,
 				isSuspended: user.isSuspended,
 				isHibernated: user.isHibernated,
+				inboxAcceptance: user.inboxAcceptance,
 				lastActiveDate: user.lastActiveDate ? user.lastActiveDate.toISOString() : null,
 				moderationNote: profile.moderationNote ?? '',
 				signins,

@@ -176,6 +176,9 @@ export class ApNoteService {
 		if (actor && actor.isSuspended) {
 			throw new IdentifiableError('85ab9bd7-3a41-4530-959d-f07073900109', 'actor has been suspended');
 		}
+		if (actor && actor.inboxAcceptance === 'none') {
+			throw new IdentifiableError('3f1e5452-23e6-47f9-a6a1-c3b7e353b7a9', 'actor inbox has been blocked');
+		}
 
 		const apMentionRawCount = new Set(this.apMentionService.extractApMentionObjects(note.tag).map(x => x.href)).size;
 		const apMentions = await this.apMentionService.extractApMentions(note.tag, resolver);
