@@ -251,6 +251,10 @@ export const store = markRaw(new Pizzax('base', {
 		where: 'device',
 		default: prefersReducedMotion,
 	},
+	disableShowingAnimatedAvatarImages: {
+		where: 'device',
+		default: false,
+	},
 	emojiStyle: {
 		where: 'device',
 		default: 'twemoji' as 'twemoji' | 'fluentEmoji' | 'native',

@@ -88,7 +88,7 @@ const bound = computed(() => props.link
 	: {});
 
 const url = computed(() => {
-	if (prefer.s.disableShowingAnimatedImages || prefer.s.dataSaver.avatar) return getStaticImageUrl(props.user.avatarUrl);
+	if (prefer.s.disableShowingAnimatedImages || prefer.s.disableShowingAnimatedAvatarImages || prefer.s.dataSaver.avatar) return getStaticImageUrl(props.user.avatarUrl);
 	return (props.user.avatarUrl) ? getProxiedImageUrl(props.user.avatarUrl, 'avatar') : props.user.avatarUrl;
 });
 
@@ -98,7 +98,7 @@ function onClick(ev: PointerEvent): void {
 }
 
 function getDecorationUrl(decoration: Decoration | DecorationEditorDecoration) {
-	if (prefer.s.disableShowingAnimatedImages || prefer.s.dataSaver.avatar) return getStaticImageUrl(decoration.url);
+	if (prefer.s.disableShowingAnimatedImages || prefer.s.disableShowingAnimatedAvatarImages || prefer.s.dataSaver.avatar) return getStaticImageUrl(decoration.url);
 	return decoration.url;
 }
 
