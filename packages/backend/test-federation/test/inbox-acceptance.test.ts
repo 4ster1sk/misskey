@@ -1,9 +1,8 @@
-import { describe, test, beforeAll } from 'vitest';
 import { strictEqual } from 'assert';
+import { describe, test, beforeAll } from 'vitest';
 import * as Misskey from 'misskey-js';
 import { createAccount, fetchAdmin, isFired, type LoginUser, sleep, resolveRemoteUser } from './utils.js';
 
-const aAdmin = await fetchAdmin('a.test');
 const bAdmin = await fetchAdmin('b.test');
 
 describe('Inbox acceptance', () => {
@@ -24,7 +23,7 @@ describe('Inbox acceptance', () => {
 
 	async function setInboxAcceptance(value: 'all' | 'noRenotes' | 'none') {
 		await bAdmin.client.request('admin/update-user-note-acceptance', { userId: aliceInB.id, value });
-		await sleep();
+		await sleep(3000);
 	}
 
 	async function postAndCheckReception(
@@ -70,45 +69,33 @@ describe('Inbox acceptance', () => {
 		strictEqual(renoteInB != null, expect);
 	}
 
-	describe('all', () => {
-		beforeAll(async () => {
-			await setInboxAcceptance('all');
-		});
-
-		test('Receive remote followee\'s Note', async () => {
-			await postAndCheckReception(true);
-		});
-
-		test('Receive remote followee\'s Renote', async () => {
-			await renoteAndCheckReception(true);
-		});
+	test('all > Receive remote followee\'s Note', async () => {
+		await setInboxAcceptance('all');
+		await postAndCheckReception(true);
 	});
 
-	describe('noRenotes', () => {
-		beforeAll(async () => {
-			await setInboxAcceptance('noRenotes');
-		});
-
-		test('Receive remote followee\'s Note', async () => {
-			await postAndCheckReception(true);
-		});
-
-		test('Don\'t receive remote followee\'s Renote', async () => {
-			await renoteAndCheckReception(false);
-		});
+	test('all > Receive remote followee\'s Renote', async () => {
+		await setInboxAcceptance('all');
+		await renoteAndCheckReception(true);
 	});
 
-	describe('none', () => {
-		beforeAll(async () => {
-			await setInboxAcceptance('none');
-		});
+	test('noRenotes > Receive remote followee\'s Note', async () => {
+		await setInboxAcceptance('noRenotes');
+		await postAndCheckReception(true);
+	});
 
-		test('Don\'t receive remote followee\'s Note', async () => {
-			await postAndCheckReception(false);
-		});
+	test('noRenotes > Don\'t receive remote followee\'s Renote', async () => {
+		await setInboxAcceptance('noRenotes');
+		await renoteAndCheckReception(false);
+	});
 
-		test('Don\'t receive remote followee\'s Renote', async () => {
-			await renoteAndCheckReception(false);
-		});
+	test('none > Don\'t receive remote followee\'s Note', async () => {
+		await setInboxAcceptance('none');
+		await postAndCheckReception(false);
+	});
+
+	test('none > Don\'t receive remote followee\'s Renote', async () => {
+		await setInboxAcceptance('none');
+		await renoteAndCheckReception(false);
 	});
 });
