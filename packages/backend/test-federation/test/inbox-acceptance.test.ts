@@ -4,6 +4,7 @@ import * as Misskey from 'misskey-js';
 import { createAccount, fetchAdmin, isFired, type LoginUser, sleep, resolveRemoteUser } from './utils.js';
 
 const aAdmin = await fetchAdmin('a.test');
+const bAdmin = await fetchAdmin('b.test');
 
 describe('Inbox acceptance', () => {
 	let alice: LoginUser, bob: LoginUser;
@@ -22,7 +23,7 @@ describe('Inbox acceptance', () => {
 	});
 
 	async function setInboxAcceptance(value: 'all' | 'noRenotes' | 'none') {
-		await aAdmin.client.request('admin/update-user-note-acceptance', { userId: alice.id, value });
+		await bAdmin.client.request('admin/update-user-note-acceptance', { userId: aliceInB.id, value });
 		await sleep();
 	}
 
