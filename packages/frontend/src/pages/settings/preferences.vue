@@ -1030,6 +1030,7 @@ watch([
 	useStickyIcons,
 	enableHighQualityImagePlaceholders,
 	disableShowingAnimatedImages,
+	disableShowingAnimatedAvatarImages,
 	keepScreenOn,
 	contextMenu,
 	fontSize,
