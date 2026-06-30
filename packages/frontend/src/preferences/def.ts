@@ -240,6 +240,9 @@ export const PREF_DEF = definePreferences({
 	disableShowingAnimatedImages: {
 		default: false,
 	},
+	disableShowingAnimatedAvatarImages: {
+		default: false,
+	},
 	emojiStyle: {
 		default: 'twemoji' as 'native' | 'fluentEmoji' | 'twemoji',
 	},

@@ -513,6 +513,15 @@ SPDX-License-Identifier: AGPL-3.0-only
 								</MkPreferenceContainer>
 							</SearchMarker>
 
+							<SearchMarker :keywords="['disable', 'animation', 'avatar', 'icon', 'image', 'photo', 'gif']">
+								<MkPreferenceContainer k="disableShowingAnimatedAvatarImages">
+									<MkSwitch v-model="disableShowingAnimatedAvatarImages">
+										<template #label><SearchLabel>{{ i18n.ts.disableShowingAnimatedAvatarImages }}</SearchLabel></template>
+										<template #caption>{{ i18n.ts.disableShowingAnimatedAvatarImages_caption }}</template>
+									</MkSwitch>
+								</MkPreferenceContainer>
+							</SearchMarker>
+
 							<SearchMarker :keywords="['mfm', 'enable', 'show', 'animated']">
 								<MkPreferenceContainer k="animatedMfm">
 									<MkSwitch v-model="animatedMfm">
@@ -964,6 +973,7 @@ const enableHighQualityImagePlaceholders = prefer.model('enableHighQualityImageP
 const reduceAnimation = prefer.model('animation', v => !v, v => !v);
 const animatedMfm = prefer.model('animatedMfm');
 const disableShowingAnimatedImages = prefer.model('disableShowingAnimatedImages');
+const disableShowingAnimatedAvatarImages = prefer.model('disableShowingAnimatedAvatarImages');
 const keepScreenOn = prefer.model('keepScreenOn');
 const enableHorizontalSwipe = prefer.model('enableHorizontalSwipe');
 const showPageTabBarBottom = prefer.model('showPageTabBarBottom');
@@ -1020,6 +1030,7 @@ watch([
 	useStickyIcons,
 	enableHighQualityImagePlaceholders,
 	disableShowingAnimatedImages,
+	disableShowingAnimatedAvatarImages,
 	keepScreenOn,
 	contextMenu,
 	fontSize,

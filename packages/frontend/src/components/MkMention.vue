@@ -39,7 +39,7 @@ const isMe = $i && (
 
 const avatarUrl = computed(() => {
 	const v = `${instance.uri}/avatar/@${props.username}@${props.host}`;
-	return prefer.s.disableShowingAnimatedImages || prefer.s.dataSaver.avatar ? getStaticImageUrl(v) : getProxiedImageUrl(v);
+	return prefer.s.disableShowingAnimatedImages || prefer.s.disableShowingAnimatedAvatarImages || prefer.s.dataSaver.avatar ? getStaticImageUrl(v) : getProxiedImageUrl(v);
 });
 </script>
 
