@@ -301,3 +301,32 @@ export async function assertNotificationReceived(
 		.then(([notification]) => notification != null ? cond(notification) : false);
 	strictEqual(endpointFired, expect);
 }
+
+export function expectedFederatedUri(host: Host, note: Misskey.entities.Note): string {
+		// Pure renotes are federated as Announce activities; receivers store the activity URI.
+		const isPureRenote = note.renoteId != null && note.text == null && note.cw == null;
+		return isPureRenote
+			? `https://${host}/notes/${note.id}/activity`
+			: `https://${host}/notes/${note.id}`;
+	}
+
+export async function waitNoteInTimeline(
+		user: LoginUser,
+		originHost: Host,
+		expect: boolean,
+		note: Misskey.entities.Note,
+		timeoutMs = 10000,
+	) {
+		const targetUri = expectedFederatedUri(originHost, note);
+		const deadline = Date.now() + timeoutMs;
+		while (Date.now() < deadline) {
+			const notes = await user.client.request('notes/timeline', {});
+			if (notes.some(({ uri }) => uri === targetUri)) {
+				if (expect) return true;
+				// 予期せず見つかった場合、false を返す（以降の wait で再判定される）
+				return false;
+			}
+			await sleep(500);
+		}
+		return false;
+	}
