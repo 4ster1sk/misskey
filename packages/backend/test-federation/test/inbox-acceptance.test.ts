@@ -1,7 +1,7 @@
-import { strictEqual } from 'assert';
 import { describe, test, beforeAll } from 'vitest';
+import { strictEqual } from 'assert';
 import * as Misskey from 'misskey-js';
-import { createAccount, fetchAdmin, type LoginUser, sleep, resolveRemoteUser } from './utils.js';
+import { createAccount, fetchAdmin, type LoginUser, type Host, sleep, resolveRemoteUser } from './utils.js';
 
 const bAdmin = await fetchAdmin('b.test');
 
@@ -14,16 +14,25 @@ describe('Inbox acceptance', () => {
 
 	async function setInboxAcceptance(userId: string, value: 'all' | 'noRenotes' | 'none') {
 		await bAdmin.client.request('admin/update-user-note-acceptance', { userId, value });
-		await sleep(3000);
+		await sleep();
+	}
+
+	function expectedFederatedUri(host: Host, note: Misskey.entities.Note): string {
+		// Pure renotes are federated as Announce activities; receivers store the activity URI.
+		const isPureRenote = note.renoteId != null && note.text == null && note.cw == null;
+		return isPureRenote
+			? `https://${host}/notes/${note.id}/activity`
+			: `https://${host}/notes/${note.id}`;
 	}
 
 	async function waitNoteInTimeline(
 		user: LoginUser,
+		originHost: Host,
 		expect: boolean,
 		note: Misskey.entities.Note,
 		timeoutMs = 10000,
 	) {
-		const targetUri = `https://a.test/notes/${note.id}`;
+		const targetUri = expectedFederatedUri(originHost, note);
 		const deadline = Date.now() + timeoutMs;
 		while (Date.now() < deadline) {
 			const notes = await user.client.request('notes/timeline', {});
@@ -46,13 +55,13 @@ describe('Inbox acceptance', () => {
 		await setInboxAcceptance(aliceInB.id, 'all');
 
 		const note = (await alice.client.request('notes/create', { text: crypto.randomUUID() })).createdNote;
-		const foundNote = await waitNoteInTimeline(bob, true, note);
+		const foundNote = await waitNoteInTimeline(bob, 'a.test', true, note);
 		strictEqual(foundNote, true);
 
 		const targetNote = (await alice.client.request('notes/create', { text: crypto.randomUUID() })).createdNote;
 		await sleep();
 		const renote = (await alice.client.request('notes/create', { renoteId: targetNote.id })).createdNote;
-		const foundRenote = await waitNoteInTimeline(bob, true, renote);
+		const foundRenote = await waitNoteInTimeline(bob, 'a.test', true, renote);
 		strictEqual(foundRenote, true);
 	});
 
@@ -65,13 +74,13 @@ describe('Inbox acceptance', () => {
 		await setInboxAcceptance(aliceInB.id, 'noRenotes');
 
 		const note = (await alice.client.request('notes/create', { text: crypto.randomUUID() })).createdNote;
-		const foundNote = await waitNoteInTimeline(bob, true, note);
+		const foundNote = await waitNoteInTimeline(bob, 'a.test', true, note);
 		strictEqual(foundNote, true);
 
 		const targetNote = (await alice.client.request('notes/create', { text: crypto.randomUUID() })).createdNote;
 		await sleep();
 		const renote = (await alice.client.request('notes/create', { renoteId: targetNote.id })).createdNote;
-		const foundRenote = await waitNoteInTimeline(bob, false, renote);
+		const foundRenote = await waitNoteInTimeline(bob, 'a.test', false, renote);
 		strictEqual(foundRenote, false);
 	});
 
@@ -84,13 +93,13 @@ describe('Inbox acceptance', () => {
 		await setInboxAcceptance(aliceInB.id, 'none');
 
 		const note = (await alice.client.request('notes/create', { text: crypto.randomUUID() })).createdNote;
-		const foundNote = await waitNoteInTimeline(bob, false, note);
+		const foundNote = await waitNoteInTimeline(bob, 'a.test', false, note);
 		strictEqual(foundNote, false);
 
 		const targetNote = (await alice.client.request('notes/create', { text: crypto.randomUUID() })).createdNote;
 		await sleep();
 		const renote = (await alice.client.request('notes/create', { renoteId: targetNote.id })).createdNote;
-		const foundRenote = await waitNoteInTimeline(bob, false, renote);
+		const foundRenote = await waitNoteInTimeline(bob, 'a.test', false, renote);
 		strictEqual(foundRenote, false);
 	});
 });
