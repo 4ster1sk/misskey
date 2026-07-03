@@ -143,6 +143,7 @@ export type AdminUpdateMetaRequest = operations['admin___update-meta']['requestB
 export type AdminUpdateProxyAccountRequest = operations['admin___update-proxy-account']['requestBody']['content']['application/json'];
 export type AdminUpdateProxyAccountResponse = operations['admin___update-proxy-account']['responses']['200']['content']['application/json'];
 export type AdminUpdateUserNoteRequest = operations['admin___update-user-note']['requestBody']['content']['application/json'];
+export type AdminUpdateUserNoteAcceptanceRequest = operations['admin___update-user-note-acceptance']['requestBody']['content']['application/json'];
 export type AnnouncementsRequest = operations['announcements']['requestBody']['content']['application/json'];
 export type AnnouncementsResponse = operations['announcements']['responses']['200']['content']['application/json'];
 export type AnnouncementsShowRequest = operations['announcements___show']['requestBody']['content']['application/json'];

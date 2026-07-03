@@ -54,6 +54,7 @@ function generateDummyUser(override?: Partial<MiUser>): MiUser {
 		makeNotesFollowersOnlyBefore: null,
 		makeNotesHiddenBefore: null,
 		chatScope: 'mutual',
+		inboxAcceptance: 'all',
 		emojis: [],
 		score: 0,
 		host: null,

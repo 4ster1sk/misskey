@@ -240,6 +240,12 @@ export class MiUser {
 	})
 	public chatScope: 'everyone' | 'followers' | 'following' | 'mutual' | 'none';
 
+	@Column('varchar', {
+		length: 16, default: 'all',
+		comment: 'The inbox acceptance policy for this user.',
+	})
+	public inboxAcceptance: 'all' | 'noRenotes' | 'none';
+
 	@Index()
 	@Column('varchar', {
 		length: 128, nullable: true,

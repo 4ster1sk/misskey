@@ -96,6 +96,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<div class="_gaps">
 					<MkSwitch v-model="suspended" @update:modelValue="toggleSuspend">{{ i18n.ts.suspend }}</MkSwitch>
 
+					<MkSelect v-if="user.host != null" v-model="inboxAcceptance" :items="inboxAcceptanceItems">
+						<template #label>{{ i18n.ts.inboxAcceptance }}</template>
+					</MkSelect>
+
 					<div>
 						<MkButton v-if="user.host == null" inline style="margin-right: 8px;" @click="resetPassword"><i class="ti ti-key"></i> {{ i18n.ts.resetPassword }}</MkButton>
 						<MkButton v-if="user.host == null" inline @click="unsetMfa"><i class="ti ti-shield"></i> {{ i18n.ts.unsetMfa }}</MkButton>
@@ -261,8 +265,15 @@ const ips = ref(result.ips);
 const ap = ref<Misskey.entities.ApGetResponse | null>(null);
 const moderator = ref(info.value.isModerator);
 const silenced = ref(info.value.isSilenced);
-const suspended = ref(info.value.isSuspended);
-const isSystem = ref(user.value.host == null && user.value.username.includes('.'));
+	const suspended = ref(info.value.isSuspended);
+	const isSystem = ref(user.value.host == null && user.value.username.includes('.'));
+
+	const inboxAcceptance = ref<'all' | 'noRenotes' | 'none'>(info.value.inboxAcceptance ?? 'all');
+	const inboxAcceptanceItems = [
+		{ label: i18n.ts.inboxAcceptanceAll, value: 'all' as const },
+		{ label: i18n.ts.inboxAcceptanceNoRenotes, value: 'noRenotes' as const },
+		{ label: i18n.ts.inboxAcceptanceNone, value: 'none' as const },
+	];
 const moderationNote = ref(info.value.moderationNote);
 const filesPaginator = markRaw(new Paginator('admin/drive/files', {
 	limit: 10,
@@ -318,6 +329,7 @@ async function refreshUser() {
 	moderator.value = info.value.isModerator;
 	silenced.value = info.value.isSilenced;
 	suspended.value = info.value.isSuspended;
+	inboxAcceptance.value = info.value.inboxAcceptance ?? 'all';
 	isSystem.value = user.value.host == null && user.value.username.includes('.');
 	moderationNote.value = info.value.moderationNote;
 }
@@ -371,6 +383,11 @@ async function toggleSuspend(v: boolean) {
 		await refreshUser();
 	}
 }
+
+watch(inboxAcceptance, async (value) => {
+	await misskeyApi('admin/update-user-note-acceptance', { userId: user.value.id, value });
+	await refreshUser();
+});
 
 async function unsetUserAvatar() {
 	const confirm = await os.confirm({

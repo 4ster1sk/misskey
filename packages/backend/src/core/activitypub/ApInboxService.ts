@@ -142,6 +142,8 @@ export class ApInboxService {
 	@bindThis
 	public async performOneActivity(actor: MiRemoteUser, activity: IObject, resolver?: Resolver): Promise<string | void> {
 		if (actor.isSuspended) return;
+		if (actor.inboxAcceptance === 'none' && (isCreate(activity) || isAnnounce(activity))) return;
+		if (actor.inboxAcceptance === 'noRenotes' && isAnnounce(activity)) return;
 
 		if (isCreate(activity)) {
 			return await this.create(actor, activity, resolver);
@@ -306,6 +308,9 @@ export class ApInboxService {
 		const url = getApUrl(activity);
 
 		if (actor.isSuspended) {
+			return;
+		}
+		if (actor.inboxAcceptance === 'none' || actor.inboxAcceptance === 'noRenotes') {
 			return;
 		}
 
