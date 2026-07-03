@@ -6,6 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { UsersRepository } from '@/models/_.js';
+import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { DI } from '@/di-symbols.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 
@@ -31,6 +32,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+
+		private globalEventService: GlobalEventService,
 	) {
 		super(meta, paramDef, async (ps) => {
 			const user = await this.usersRepository.findOneBy({ id: ps.userId });
@@ -44,6 +47,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			await this.usersRepository.update({ id: user.id }, { inboxAcceptance: ps.value });
+			this.globalEventService.publishInternalEvent('remoteUserUpdated', { id: user.id });
 		});
 	}
 }
