@@ -357,12 +357,12 @@ export function getUserMenu(user: Misskey.entities.UserDetailed, router: Router 
 			ref: withRepliesRef,
 		}, {
 			icon: 'ti ti-bell',
-			text: i18n.ts.notifyNotes,
+			text: i18n.ts.notifySettings,
 			type: 'parent',
 			children: async () => {
 				return (['normal', 'withFile', 'none'] as const).map(v => ({
 					type: 'radioOption',
-					text: v === 'normal' ? i18n.ts.notifyNotes : v === 'withFile' ? i18n.ts.notifyNotesOnlyFiles : i18n.ts.none,
+					text: v === 'normal' ? i18n.ts.notifyNotes : v === 'withFile' ? i18n.ts.notifyNotesOnlyFiles : i18n.ts.unnotifyNotes,
 					active: computed(() => user.notify === v),
 					action: () => {
 						os.apiWithDialog('following/update', {

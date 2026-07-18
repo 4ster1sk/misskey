@@ -113,7 +113,7 @@ const $i = ensureSignin();
 async function showNotifyMenu(user: Misskey.entities.UserDetailed, ev: PointerEvent) {
 	os.popupMenu((['normal', 'withFile', 'none'] as const).map(v => ({
 		type: 'radioOption',
-		text: v === 'normal' ? i18n.ts.notifyNotes : v === 'withFile' ? i18n.ts.notifyNotesOnlyFiles : i18n.ts.none,
+		text: v === 'normal' ? i18n.ts.notifyNotes : v === 'withFile' ? i18n.ts.notifyNotesOnlyFiles : i18n.ts.unnotifyNotes,
 		active: computed(() => user.notify === v),
 		action: () => {
 			os.apiWithDialog('following/update', {
