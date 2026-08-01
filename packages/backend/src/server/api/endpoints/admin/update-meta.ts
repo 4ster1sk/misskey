@@ -499,7 +499,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			if (ps.smtpPass !== undefined) {
-				set.smtpPass = ps.smtpPass;
+				if (ps.smtpPass === '') {
+					set.smtpPass = null;
+				} else {
+					set.smtpPass = ps.smtpPass;
+				}
 			}
 
 			if (ps.enableServiceWorker !== undefined) {
@@ -511,7 +515,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			if (ps.swPrivateKey !== undefined) {
-				set.swPrivateKey = ps.swPrivateKey;
+				if (ps.swPrivateKey === '') {
+					set.swPrivateKey = null;
+				} else {
+					set.swPrivateKey = ps.swPrivateKey;
+				}
 			}
 
 			if (ps.tosUrl !== undefined) {
