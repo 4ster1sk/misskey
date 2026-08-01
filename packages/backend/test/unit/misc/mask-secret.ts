@@ -8,38 +8,38 @@ import { maskMetaSecrets, maskSecretValue } from '@/misc/mask-secret.js';
 import { META_SECRET_FIELDS } from '@/misc/meta-secret-fields.js';
 
 describe('misc:maskSecretValue', () => {
-	test('returns null for null', () => {
+	test('null の場合は null を返す', () => {
 		expect(maskSecretValue(null)).toBeNull();
 	});
 
-	test('returns empty string for empty string', () => {
+	test('空文字列の場合は空文字列を返す', () => {
 		expect(maskSecretValue('')).toBe('');
 	});
 
-	test('masks all characters when value length is less than or equal to visible length', () => {
+	test('表示文字数以下の長さではすべての文字をマスクする', () => {
 		expect(maskSecretValue('abc')).toBe('***');
 		expect(maskSecretValue('abcd')).toBe('****');
 	});
 
-	test('leaves the first N characters visible when value length is greater than visible length', () => {
+	test('表示文字数より長い場合は先頭の N 文字を残してマスクする', () => {
 		expect(maskSecretValue('abcde')).toBe('abcd*');
 		expect(maskSecretValue('abcdefghij')).toBe('abcd******');
 	});
 
-	test('respects custom visible length', () => {
+	test('カスタムの表示文字数を尊重する', () => {
 		expect(maskSecretValue('abcdef', 2)).toBe('ab****');
 		expect(maskSecretValue('ab', 2)).toBe('**');
 	});
 });
 
 describe('misc:maskMetaSecrets', () => {
-	test('returns non-object values as-is', () => {
+	test('非オブジェクト値はそのまま返す', () => {
 		expect(maskMetaSecrets(null)).toBeNull();
 		expect(maskMetaSecrets('string')).toBe('string');
 		expect(maskMetaSecrets(123)).toBe(123);
 	});
 
-	test('masks secret meta fields', () => {
+	test('メタ情報のシークレットフィールドをマスクする', () => {
 		const meta = {
 			hcaptchaSecretKey: 'very-long-secret-key',
 			turnstileSecretKey: 'short',
@@ -53,7 +53,7 @@ describe('misc:maskMetaSecrets', () => {
 		expect(masked.swPrivateKey).toBeUndefined();
 	});
 
-	test('does not modify non-secret fields', () => {
+	test('シークレットでないフィールドは変更しない', () => {
 		const meta = {
 			name: 'instance name',
 			enableHcaptcha: true,
@@ -65,7 +65,7 @@ describe('misc:maskMetaSecrets', () => {
 		expect(masked.hcaptchaSiteKey).toBe('public-site-key');
 	});
 
-	test('covers all defined secret fields', () => {
+	test('定義されたすべてのシークレットフィールドをカバーする', () => {
 		const meta: Record<string, string | null> = {};
 		for (const key of META_SECRET_FIELDS) {
 			meta[key] = 'secret-value';
