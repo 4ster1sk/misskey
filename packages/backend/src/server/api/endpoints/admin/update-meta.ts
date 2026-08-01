@@ -9,6 +9,7 @@ import type { MiMeta } from '@/models/Meta.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { MetaService } from '@/core/MetaService.js';
+import { maskMetaSecrets } from '@/misc/mask-secret.js';
 
 export const meta = {
 	tags: ['admin'],
@@ -799,8 +800,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const after = await this.metaService.fetch(true);
 
 			this.moderationLogService.log(me, 'updateServerSettings', {
-				before,
-				after,
+				before: maskMetaSecrets(before),
+				after: maskMetaSecrets(after),
 			});
 		});
 	}
