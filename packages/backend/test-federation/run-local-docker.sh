@@ -17,11 +17,40 @@ cd "${SCRIPT_DIR}"
 NODE_VERSION="$(cat "${SCRIPT_DIR}/../../../.node-version")"
 export NODE_VERSION
 
+# Pin the pnpm version to the one declared in packageManager so the lockfile
+# is not rewritten just because the image has a newer pnpm.
+PNPM_VERSION="$(sed -n 's/.*"packageManager": "pnpm@\([^"]*\)".*/\1/p' "${SCRIPT_DIR}/../../../package.json")"
+if [[ -z "${PNPM_VERSION}" ]]; then
+    PNPM_VERSION="latest"
+fi
+
+BUILD_IMAGE_TAG="misskey-build-env:${NODE_VERSION}-pnpm${PNPM_VERSION}"
+
+ensure_runtime_image() {
+    if docker image inspect "${BUILD_IMAGE_TAG}" >/dev/null 2>&1; then
+        return 0
+    fi
+    echo "==> Building runtime image ${BUILD_IMAGE_TAG} (pnpm ${PNPM_VERSION})…"
+    # Pass the Dockerfile via stdin instead of writing a temp file —
+    # no mktemp/trap/cleanup needed.
+    docker build \
+        --build-arg NODE_VERSION="${NODE_VERSION}" \
+        -t "${BUILD_IMAGE_TAG}" \
+        -f - \
+        "${SCRIPT_DIR}" <<EOF
+ARG NODE_VERSION=${NODE_VERSION}
+FROM node:\${NODE_VERSION}-trixie
+RUN apt-get update \\
+    && apt-get install -y --no-install-recommends ffmpeg \\
+    && rm -rf /var/lib/apt/lists/*
+RUN npm install -g pnpm@${PNPM_VERSION}
+WORKDIR /misskey
+EOF
+}
+
 CLEAN=0
 TEST_FILTER=""
-ARG_COUNT=0
 for arg in "$@"; do
-    ARG_COUNT=$((ARG_COUNT + 1))
     case "${arg}" in
         --clean)
             CLEAN=1
@@ -66,7 +95,7 @@ fi
 # ──────────────────────────────────────────────
 # 1. Generate configs / certificates if missing
 # ──────────────────────────────────────────────
-if [[ ! -d certificates || ! -f .config/a.test.conf || ! -f .config/a.test.default.yml ]]; then
+if [[ ! -d certificates || ! -f .config/a.test.conf || ! -f .config/a.test.config.json ]]; then
     echo "==> Running setup.sh…"
     bash ./setup.sh
 fi
@@ -81,30 +110,43 @@ fi
 #    we run the container as — we use the host user's, to avoid
 #    root-owned files.
 # ──────────────────────────────────────────────
+ensure_runtime_image
+
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+
+# Ensure build output directories are owned by the host user. Previous
+# container runs may have created them as root, causing EACCES when the
+# build step (which runs as the host user) tries to write meta.json etc.
+echo "==> Ensuring build directories are owned by uid=$(id -u)…"
+docker run --rm \
+    --user root \
+    -e HOST_UID="$(id -u)" \
+    -e HOST_GID="$(id -g)" \
+    -v "${REPO_ROOT}:/misskey" \
+    alpine:3 \
+    sh -c 'mkdir -p \
+        /misskey/built \
+        /misskey/node_modules \
+        /misskey/packages/backend/built \
+        /misskey/packages/backend/node_modules \
+        /misskey/packages/misskey-js/built \
+        /misskey/packages/misskey-js/node_modules \
+        /misskey/packages/misskey-reversi/built \
+        /misskey/packages/misskey-reversi/node_modules \
+      && chown -R "$HOST_UID:$HOST_GID" \
+        /misskey/built \
+        /misskey/node_modules \
+        /misskey/packages/backend/built \
+        /misskey/packages/backend/node_modules \
+        /misskey/packages/misskey-js/built \
+        /misskey/packages/misskey-js/node_modules \
+        /misskey/packages/misskey-reversi/built \
+        /misskey/packages/misskey-reversi/node_modules'
+
 if [[ "${SKIP_BUILD:-}" != "1" ]]; then
     HOST_UID="$(id -u)"
     HOST_GID="$(id -g)"
     echo "==> Building backend & deps (in Docker, as uid=${HOST_UID} gid=${HOST_GID})…"
-    REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
-    BUILD_IMAGE_TAG="misskey-build-env:${NODE_VERSION}"
-
-    BUILD_DOCKERFILE="$(mktemp)"
-    trap 'rm -f "${BUILD_DOCKERFILE}"' EXIT
-    cat > "${BUILD_DOCKERFILE}" <<EOF
-ARG NODE_VERSION=${NODE_VERSION}
-FROM node:\${NODE_VERSION}-trixie
-RUN apt-get update \\
-    && apt-get install -y --no-install-recommends ffmpeg \\
-    && rm -rf /var/lib/apt/lists/*
-RUN npm install -g pnpm
-WORKDIR /misskey
-EOF
-
-    docker build \
-        --build-arg NODE_VERSION="${NODE_VERSION}" \
-        -t "${BUILD_IMAGE_TAG}" \
-        -f "${BUILD_DOCKERFILE}" \
-        "${SCRIPT_DIR}"
 
     docker run --rm \
         --user "$(id -u):$(id -g)" \
@@ -114,16 +156,57 @@ EOF
         -e PNPM_HOME=/tmp/pnpm \
         -e CI=true \
         "${BUILD_IMAGE_TAG}" \
-        bash -c 'pnpm i --frozen-lockfile && pnpm --filter backend --filter misskey-js --filter misskey-reversi build'
-
-    rm -f "${BUILD_DOCKERFILE}"
-    trap - EXIT
+        bash -c 'pnpm i --frozen-lockfile && pnpm build-pre && pnpm --filter backend --filter misskey-js --filter misskey-reversi build'
 else
     echo "==> Skipping build (SKIP_BUILD=1)"
 fi
 
+# Ensure built/meta.json exists even when the build step is skipped;
+# backend loadConfig() requires it at runtime.
+if [[ ! -f "${REPO_ROOT}/built/meta.json" ]]; then
+    echo "==> Generating built/meta.json…"
+    docker run --rm \
+        --user "$(id -u):$(id -g)" \
+        -v "${REPO_ROOT}:/misskey" \
+        -w /misskey \
+        "${BUILD_IMAGE_TAG}" \
+        node scripts/build-pre.mjs
+fi
+
 # ──────────────────────────────────────────────
-# 3. Stop running containers, then clean DB volumes.
+# 3. Compose override: run pnpm in CI mode.
+#    setup/daemon/tester/misskey services run pnpm inside non-interactive
+#    containers. Passing CI=true prevents pnpm from aborting when it needs
+#    to recreate node_modules and finds no TTY.
+#    setup additionally uses --frozen-lockfile so the read-only lockfile
+#    bind-mount is never rewritten.
+# ──────────────────────────────────────────────
+COMPOSE_OVERRIDE="$(mktemp --suffix=.yml)"
+trap 'rm -f "${COMPOSE_OVERRIDE}"' EXIT
+cat > "${COMPOSE_OVERRIDE}" <<EOF
+services:
+  setup:
+    environment:
+      - CI=true
+    command: >
+      bash -c "npm install -g pnpm && pnpm --filter backend --filter misskey-js --filter misskey-reversi i --frozen-lockfile"
+  daemon:
+    environment:
+      - CI=true
+  tester:
+    environment:
+      - CI=true
+  misskey.a.test:
+    environment:
+      - CI=true
+  misskey.b.test:
+    environment:
+      - CI=true
+EOF
+export COMPOSE_FILE="compose.yml:compose.override.yaml:${COMPOSE_OVERRIDE}"
+
+# ──────────────────────────────────────────────
+# 4. Stop running containers, then clean DB volumes.
 #    Recreate redis dir with correct ownership
 #    (UID 999 = redis user) so create_host_path
 #    doesn't make it root-owned.
@@ -135,11 +218,10 @@ docker run --rm -v "${SCRIPT_DIR}/volumes:/volumes" --user root alpine:3 sh -c \
     'rm -rf /volumes/db.a /volumes/db.b /volumes/db.c && rm -rf /volumes/redis/* && mkdir -p /volumes/redis && chown 999:999 /volumes/redis'
 
 # ──────────────────────────────────────────────
-# 4. Start services in phases
+# 5. Start services in phases
 # ──────────────────────────────────────────────
 echo "==> Starting infrastructure (DBs, redis, setup, daemon)…"
 docker compose up -d db.a.test db.b.test redis.test setup daemon
-
 # Wait for setup to finish installing node_modules before starting misskey
 echo -n "==> Waiting for setup to finish"
 while docker compose ps setup --format json 2>/dev/null | grep -q '"State":"running"'; do
@@ -148,21 +230,22 @@ while docker compose ps setup --format json 2>/dev/null | grep -q '"State":"runn
 done
 echo " OK"
 
+
 echo "==> Starting Misskey backends (migration may take a while)…"
 # --no-deps is required because the nginx containers depend on
 # misskey being healthy, but misskey won't be healthy while
 # migrations are running. We start misskey without deps and
-# poll until all three are ready, then start nginx.
+# poll until both backends are ready, then start nginx.
 docker compose up -d --no-deps misskey.a.test misskey.b.test
 
-# Poll until all three misskey containers are healthy
+# Poll until both misskey containers are healthy
 MAX_WAIT=180  # seconds
 WAITED=0
 echo -n "==> Waiting for Misskey containers to become healthy"
 while [[ ${WAITED} -lt ${MAX_WAIT} ]]; do
     HEALTHY_COUNT=$(docker compose ps misskey.a.test misskey.b.test --format json 2>/dev/null \
         | grep -c '"Health":"healthy"' || true)
-    if [[ "${HEALTHY_COUNT}" == "3" ]]; then
+    if [[ "${HEALTHY_COUNT}" == "2" ]]; then
         echo " OK"
         break
     fi
@@ -184,7 +267,7 @@ echo "==> Starting nginx frontends…"
 docker compose up -d --no-deps a.test b.test
 
 # ──────────────────────────────────────────────
-# 5. Run tests
+# 6. Run tests
 # ──────────────────────────────────────────────
 echo "==> Running federation tests…"
 if [[ -n "${TEST_FILTER}" ]]; then
