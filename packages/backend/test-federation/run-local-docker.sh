@@ -92,7 +92,7 @@ if [[ "${SKIP_BUILD:-}" != "1" ]]; then
     trap 'rm -f "${BUILD_DOCKERFILE}"' EXIT
     cat > "${BUILD_DOCKERFILE}" <<EOF
 ARG NODE_VERSION=${NODE_VERSION}
-FROM node:\${NODE_VERSION}-bookworm
+FROM node:\${NODE_VERSION}-trixie
 RUN apt-get update \\
     && apt-get install -y --no-install-recommends ffmpeg \\
     && rm -rf /var/lib/apt/lists/*
