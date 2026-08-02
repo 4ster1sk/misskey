@@ -16,19 +16,19 @@ describe('misc:maskSecretValue', () => {
 		expect(maskSecretValue('')).toBe('');
 	});
 
-	test('表示文字数以下の長さではすべての文字をマスクする', () => {
-		expect(maskSecretValue('abc')).toBe('***');
-		expect(maskSecretValue('abcd')).toBe('****');
+	test('表示文字数以下の長さでは32文字のマスクにする', () => {
+		expect(maskSecretValue('abc')).toBe('*'.repeat(32));
+		expect(maskSecretValue('abcd')).toBe('*'.repeat(32));
 	});
 
-	test('表示文字数より長い場合は先頭の N 文字を残してマスクする', () => {
-		expect(maskSecretValue('abcde')).toBe('abcd*');
-		expect(maskSecretValue('abcdefghij')).toBe('abcd******');
+	test('表示文字数より長い場合は先頭の N 文字を残して32文字にマスクする', () => {
+		expect(maskSecretValue('abcde')).toBe('abcd' + '*'.repeat(28));
+		expect(maskSecretValue('abcdefghij')).toBe('abcd' + '*'.repeat(28));
 	});
 
 	test('カスタムの表示文字数を尊重する', () => {
-		expect(maskSecretValue('abcdef', 2)).toBe('ab****');
-		expect(maskSecretValue('ab', 2)).toBe('**');
+		expect(maskSecretValue('abcdef', 2)).toBe('ab' + '*'.repeat(30));
+		expect(maskSecretValue('ab', 2)).toBe('*'.repeat(32));
 	});
 });
 
@@ -47,8 +47,8 @@ describe('misc:maskMetaSecrets', () => {
 			swPrivateKey: undefined,
 		};
 		const masked = maskMetaSecrets(meta) as typeof meta;
-		expect(masked.hcaptchaSecretKey).toBe('very' + '*'.repeat(16));
-		expect(masked.turnstileSecretKey).toBe('*****');
+		expect(masked.hcaptchaSecretKey).toBe('very' + '*'.repeat(28));
+		expect(masked.turnstileSecretKey).toBe('shor' + '*'.repeat(28));
 		expect(masked.smtpPass).toBeNull();
 		expect(masked.swPrivateKey).toBeUndefined();
 	});
@@ -72,7 +72,7 @@ describe('misc:maskMetaSecrets', () => {
 		}
 		const masked = maskMetaSecrets(meta) as Record<string, string>;
 		for (const key of META_SECRET_FIELDS) {
-			expect(masked[key]).toBe('secr' + '*'.repeat(9));
+			expect(masked[key]).toBe('secr' + '*'.repeat(28));
 		}
 	});
 });

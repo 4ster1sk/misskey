@@ -7,10 +7,11 @@ import { META_SECRET_FIELDS } from './meta-secret-fields.js';
 
 export function maskSecretValue(value: string | null, visibleLength = 4): string | null {
 	if (value === null) return null;
+	if (value === '') return '';
 	if (value.length <= visibleLength) {
-		return '*'.repeat(value.length);
+		return '*'.repeat(32);
 	}
-	return value.slice(0, visibleLength) + '*'.repeat(value.length - visibleLength);
+	return value.slice(0, visibleLength) + '*'.repeat(32 - visibleLength);
 }
 
 export function maskMetaSecrets(meta: unknown): unknown {
