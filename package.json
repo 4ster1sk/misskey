@@ -45,7 +45,7 @@
 		"lint": "pnpm --no-bail -r lint && pnpm check-dts",
 		"cy:open": "pnpm cypress open --config-file=cypress.config.ts",
 		"cy:run": "pnpm cypress run",
-		"start:test:dev-container": "ncp ./.config/playwright-devcontainer.yml ./.config/test.yml && cd packages/backend && cross-env NODE_ENV=test node ./built/boot/entry.js",
+		"start:test:dev-container": "ncp ./.config/playwright-devcontainer.yml ./.config/test.yml && cd packages/backend && cross-env NODE_ENV=test pnpm run test:e2e",
 		"migrate:test:dev-container": "ncp ./.config/playwright-devcontainer.yml ./.config/test.yml && cd packages/backend && cross-env NODE_ENV=test pnpm migrate",
 		"e2e": "pnpm start-server-and-test start:test http://localhost:61812 cy:run",
 		"e2e-dev-container": "pnpm migrate:test:dev-container && pnpm start-server-and-test start:test:dev-container http://localhost:61812 cy:run",
