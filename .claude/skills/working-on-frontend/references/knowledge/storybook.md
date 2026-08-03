@@ -2,6 +2,8 @@
 
 共有 `Mk*` コンポーネントには `Mk<Name>.stories.impl.ts` を **同階層** に併設するのが慣習。
 
+> **検証コマンドの実行環境**: pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ## 配置と命名
 
 - **ファイル名は `.stories.impl.ts` 固定** (`.stories.ts` は `packages/frontend/.storybook/generate.tsx` による生成物で手編集・コミット不可)

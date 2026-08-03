@@ -189,6 +189,20 @@ pnpm migrate
 
 After finishing the migration, you can proceed.
 
+#### Use `scripts/docker-run.sh` (Docker container, recommended)
+Instead of running `pnpm` on the host OS (supply-chain attack risk), you can run any command inside a clean Docker container without touching the host Node/pnpm toolchain:
+
+```bash
+./scripts/docker-run.sh -- pnpm lint
+./scripts/docker-run.sh -- pnpm --filter backend test
+./scripts/docker-run.sh -- pnpm build-misskey-js-with-types
+./scripts/docker-run.sh -- bash          # interactive shell
+```
+
+- Node / pnpm versions are pinned by `.node-version` and `package.json#packageManager`. The `misskey-dev-env` image is built once and cached (`--clean-image` to rebuild).
+- The repository root is bind-mounted to `/misskey`, so file changes are shared immediately in both directions.
+- `pnpm dev` inside the container needs extra `-p` (port mapping) options and DB host settings (e.g. `host.docker.internal`). See the header comment of `scripts/docker-run.sh` for details.
+
 #### Cloudflare tunnel
 Cloudflare tunnelを使うとローカルのMisskeyサーバーをインターネットに公開できます。
 HTTPSでしか動作しない機能を検証したい時や、スマホなど別のデバイスからローカルのMisskeyサーバーを検証したい時に便利です。

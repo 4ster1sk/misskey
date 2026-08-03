@@ -2,6 +2,8 @@
 
 `packages/backend/src/server/api/endpoints/<category>/<name>.ts` に新規エンドポイントを追加するための手順。**配線フェーズの `endpoint-list.ts` 登録を忘れると 404** になるので、まずそこを念頭に置く。
 
+> **検証コマンドの実行環境**: pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ## 最重要事実 (見落とすと CI / 本番が壊れる)
 
 1. **エンドポイントは glob 自動収集されない**。[endpoint-list.ts](../../../../../packages/backend/src/server/api/endpoint-list.ts) への 1 行追加が必須 → [knowledge/endpoint-list.md](../knowledge/endpoint-list.md)

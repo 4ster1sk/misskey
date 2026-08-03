@@ -71,6 +71,8 @@
 
 変更範囲に応じて最も近いコマンドから優先して検証し、必要なら全体コマンドに広げること。
 
+**推奨:** ホスト OS の Node/pnpm はサプライチェーン攻撃のリスクがあるため、pnpm コマンドは `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行することを推奨する (`docker-run.sh` は `.node-version` と `package.json#packageManager` でバージョンを固定し、ホストのツールチェーンに触れない)。ホストの pnpm を直接使う場合は自己責任。
+
 ## Editing hints
 
 - Backend の API / migration / TypeORM 変更は `packages/backend` を見る

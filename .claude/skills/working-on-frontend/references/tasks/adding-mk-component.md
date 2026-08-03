@@ -2,6 +2,8 @@
 
 `packages/frontend/src/components/` 配下に新規の共有 Vue 3 SFC を追加する、または既存コンポーネントを大きく改修する時の手順。同じ規約をレビュー側からチェックする agent が [.claude/agents/vue-component-reviewer.md](../../../../agents/vue-component-reviewer.md)。
 
+> **検証コマンドの実行環境**: pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ## 大前提 (事故直結 / Critical)
 
 1. **SPDX ヘッダー** — `.vue` は HTML コメント形式 `<!-- ... -->`、`.stories.impl.ts` は TS コメント形式 `/* ... */`。欠落すると CI (`spdx` ジョブ) が落ちる

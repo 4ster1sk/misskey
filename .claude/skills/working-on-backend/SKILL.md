@@ -28,6 +28,8 @@ SKILL.md 本体は references への索引だけ。具体的な手順や規約�
 - `endpoint-list.ts` への登録方法 (★ 漏れると 404) → [references/knowledge/endpoint-list.md](references/knowledge/endpoint-list.md)
 - backend テストの前提 (`.config/test.yml`) と書き方 / e2e ヘルパー一覧 → [references/knowledge/backend-testing.md](references/knowledge/backend-testing.md)
 
+**検証コマンドの実行環境**: セキュリティのため、pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ## 必ず最後に通る場所
 
 backend の変更を commit / PR にする前に、必ず [shipping-misskey-change](../shipping-misskey-change/SKILL.md) の最終チェックリストに従う。`pnpm lint` / misskey-js 再生成 / `check-migrations` / SPDX / CHANGELOG をまとめて確認する。

@@ -2,6 +2,8 @@
 
 UI 文言の追加・変更を行う際の手順。**手動編集して良いのは `locales/ja-JP.yml` のみ**。
 
+> **検証コマンドの実行環境**: pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ## 大前提 (絶対 NG)
 
 - **`locales/<lang>.yml` (ja-JP.yml 以外) の編集は禁止**。これらは Crowdin の自動配信先で、手動編集すると次の同期で上書き喪失する ([locales/README.md](../../../../../locales/README.md), [crowdin.yml](../../../../../crowdin.yml))

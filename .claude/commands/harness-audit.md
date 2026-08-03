@@ -41,6 +41,8 @@ Misskey リポジトリの `.claude/` 構成を 7 カテゴリで採点し、改
 
 ## Misskey 固有の確認項目 (採点根拠コマンド)
 
+> **検証コマンドの実行環境**: 採点コマンドのうち pnpm を使うものは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../AGENTS.md) §検証コマンドの実行環境 参照)。`git` / `grep` / `find` はホストのままでもよい。
+
 採点時に以下を実コマンドで確認する。各項目の **属するカテゴリ** は項目内に明記する (#1-#3 は Security Guardrails、#4 は Tool Coverage、#5 は Quality Gates):
 
 ```bash

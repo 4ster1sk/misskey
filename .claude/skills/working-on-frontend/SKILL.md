@@ -29,6 +29,8 @@ SKILL.md 本体は references への索引だけ。具体的な手順や規約�
 - `*.stories.impl.ts` 併設規則 + 複数 story / argTypes / layout / action パターン → [references/knowledge/storybook.md](references/knowledge/storybook.md)
 - frontend Vitest / Playwright E2E の書き方と前提 → [references/knowledge/frontend-testing.md](references/knowledge/frontend-testing.md)
 
+**検証コマンドの実行環境**: セキュリティのため、pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ## 必ず最後に通る場所
 
 frontend の変更を commit / PR にする前に、必ず [shipping-misskey-change](../shipping-misskey-change/SKILL.md) の最終チェックリストに従う。`pnpm lint` / SPDX / `ja-JP.yml` のみ編集確認 / CHANGELOG をまとめて確認する。

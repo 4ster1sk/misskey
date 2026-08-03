@@ -17,6 +17,8 @@ backend の API endpoint やスキーマ (`meta` / `paramDef` / `res`) を変更
 
 ## 実行コマンド
 
+> **検証コマンドの実行環境**: pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ```bash
 # リポジトリルートから実行する
 pnpm build-misskey-js-with-types

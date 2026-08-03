@@ -2,6 +2,8 @@
 
 Misskey backend のテスト構成、`.config/test.yml` の前提、e2e テストのヘルパー関数集を 1 つにまとめたページ。
 
+> **検証コマンドの実行環境**: pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../../../AGENTS.md) §検証コマンドの実行環境 参照)。Docker 内からホストの DB / Redis へ接続する場合は `--add-host host.docker.internal:host-gateway` を付けるか、接続先を `host.docker.internal` に設定すること。ホストの pnpm を直接使う場合は自己責任。
+
 ## 目次
 
 - [前提: `.config/test.yml`](#前提-configtestyml)

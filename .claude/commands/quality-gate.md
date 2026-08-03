@@ -23,6 +23,8 @@ note: 元 ECC 版は言語自動判定 + format/lint/type のジェネリック�
 
 完了前の **軽量** 品質チェック。重い E2E / 連合テスト (test:e2e / test:fed / Playwright) は CI 側で実行されるため、本コマンドには含めない。
 
+> **検証コマンドの実行環境**: セキュリティのため、pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+
 ## Scope
 
 - `repo` (default) — 全パッケージ

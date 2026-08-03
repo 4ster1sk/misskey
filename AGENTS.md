@@ -76,6 +76,16 @@
 
 ---
 
+## 検証コマンドの実行環境 (Docker 推奨)
+
+ホスト OS にインストールされた Node / pnpm / npm はサプライチェーン攻撃 (改ざんされたバイナリやグローバルパッケージの混入) のリスクがある。**pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行すること** を推奨する。
+
+- `scripts/docker-run.sh` は `.node-version` と `package.json#packageManager` から Node / pnpm バージョンを固定し、ビルド済みの `misskey-dev-env` イメージをキャッシュして使う。ホストのツールチェーンには一切触れない
+- リポジトリルートを `/misskey` に bind mount するため、ファイル変更はホスト・コンテナ間で即時共有される (ビルド産物はホスト側に残る)
+- イメージを再ビルドしたい場合は `./scripts/docker-run.sh --clean-image -- pnpm <cmd>` を実行する
+- ホストの pnpm を直接使うことも可能だが、自己責任となる (特に `npm install -g` したパッケージに注意)
+- `pnpm dev` など長時間実行するサーバーは、DB 接続先を `host.docker.internal` に変える等の設定が必要になる場合がある (詳細は `scripts/docker-run.sh` のヘッダーコメント参照)
+
 ## 変更を出す前の最低チェック
 
 各エージェントは [shipping-misskey-change スキル](.claude/skills/shipping-misskey-change/SKILL.md) を参照すること。スキルが利用できない環境でも、以下のチェックは必ず実施すること:
@@ -89,7 +99,12 @@
 
 ### Validation commands
 
-各チェックで使う pnpm コマンド一覧。状況に応じて最も近いコマンドから検証する。
+各チェックで使う pnpm コマンド一覧。状況に応じて最も近いコマンドから検証する。Docker で実行する場合は `./scripts/docker-run.sh --` を前置する:
+
+```bash
+# 例: Docker 内で lint を実行
+./scripts/docker-run.sh -- pnpm lint
+```
 
 | 用途 | コマンド |
 | --- | --- |

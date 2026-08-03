@@ -119,7 +119,7 @@ BASE=$(git merge-base origin/develop HEAD)
 git diff --name-only "$BASE"...HEAD -- packages/misskey-js/src/autogen/
 ```
 
-差分ゼロなら `pnpm build-misskey-js-with-types` の実行漏れ。CI の `check-misskey-js-autogen` ワークフローで必ず落ちるため Critical 扱い。
+差分ゼロなら `pnpm build-misskey-js-with-types` の実行漏れ。CI の `check-misskey-js-autogen` ワークフローで必ず落ちるため Critical 扱い。実行する場合は原則 `./scripts/docker-run.sh -- pnpm build-misskey-js-with-types` で Docker コンテナ内で行うこと (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../AGENTS.md) §検証コマンドの実行環境 参照)。
 
 ### 8. e2e テスト (Major)
 
