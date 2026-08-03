@@ -18,61 +18,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${REPO_ROOT}"
+export REPO_ROOT
 
-NODE_VERSION="$(cat "${REPO_ROOT}/.node-version")"
-export NODE_VERSION
+source "${REPO_ROOT}/scripts/docker-common.sh"
 
-# Pin the pnpm version to the one declared in packageManager so the lockfile
-# is not rewritten just because the image has a newer pnpm.
-PNPM_VERSION="$(sed -n 's/.*"packageManager": "pnpm@\([^"]*\)".*/\1/p' "${REPO_ROOT}/package.json")"
-if [[ -z "${PNPM_VERSION}" ]]; then
-    PNPM_VERSION="latest"
-fi
+load_misskey_versions
 
 BUILD_IMAGE_TAG="misskey-dev-env:${NODE_VERSION}-pnpm${PNPM_VERSION}"
-
-ensure_runtime_image() {
-    if docker image inspect "${BUILD_IMAGE_TAG}" >/dev/null 2>&1; then
-        return 0
-    fi
-    echo "==> Building runtime image ${BUILD_IMAGE_TAG} (pnpm ${PNPM_VERSION})…"
-    # Pass the Dockerfile via stdin instead of writing a temp file —
-    # no mktemp/trap/cleanup needed.
-    docker build \
-        --build-arg NODE_VERSION="${NODE_VERSION}" \
-        -t "${BUILD_IMAGE_TAG}" \
-        -f - \
-        "${SCRIPT_DIR}" <<EOF
-ARG NODE_VERSION=${NODE_VERSION}
-FROM node:\${NODE_VERSION}-trixie
-RUN apt-get update \\
-    && apt-get install -y --no-install-recommends ffmpeg \\
-    && rm -rf /var/lib/apt/lists/*
-RUN npm install -g pnpm@${PNPM_VERSION}
-WORKDIR /misskey
-EOF
-}
-
-# Ensure build output directories are owned by the host user. Previous
-# container runs may have created them as root, causing EACCES when a
-# command (which runs as the host user) tries to write there.
-ensure_ownership() {
-    local repo_id
-    repo_id="$(printf '%s' "${REPO_ROOT}" | sha256sum | cut -d' ' -f1)"
-    local marker="/tmp/misskey-docker-own-$(id -u)-${repo_id}"
-    if [[ -f "${marker}" ]]; then
-        return 0
-    fi
-    echo "==> Ensuring build directories are owned by uid=$(id -u)…"
-    docker run --rm \
-        --user root \
-        -e HOST_UID="$(id -u)" \
-        -e HOST_GID="$(id -g)" \
-        -v "${REPO_ROOT}:/misskey" \
-        alpine:3 \
-        sh -c 'mkdir -p /misskey/built /misskey/node_modules; chown -R "$HOST_UID:$HOST_GID" /misskey/built /misskey/node_modules; for d in /misskey/packages/*/ /misskey/packages-private/*/; do [ -d "$d" ] || continue; mkdir -p "${d}node_modules" "${d}built"; chown -R "$HOST_UID:$HOST_GID" "${d}node_modules" "${d}built"; done'
-    touch "${marker}"
-}
 
 # ──────────────────────────────────────────────
 # Argument parsing: options before "--" are passed
@@ -112,8 +64,31 @@ if [[ ${#CMD[@]} -eq 0 ]]; then
     exit 1
 fi
 
-ensure_runtime_image
-ensure_ownership
+ensure_runtime_image "${BUILD_IMAGE_TAG}" "${SCRIPT_DIR}"
+
+# Repo-specific marker: only run the ownership fix once per repo/uid.
+OWN_MARKER="/tmp/misskey-docker-own-$(id -u)-$(printf '%s' "${REPO_ROOT}" | sha256sum | cut -d' ' -f1)"
+if [[ ! -f "${OWN_MARKER}" ]]; then
+    ensure_output_ownership "$(id -u)" "$(id -g)" \
+        built \
+        node_modules \
+        packages/backend/built packages/backend/node_modules \
+        packages/frontend/built packages/frontend/node_modules \
+        packages/frontend-shared/built packages/frontend-shared/node_modules \
+        packages/frontend-builder/built packages/frontend-builder/node_modules \
+        packages/frontend-embed/built packages/frontend-embed/node_modules \
+        packages/i18n/built packages/i18n/node_modules \
+        packages/icons-subsetter/built packages/icons-subsetter/node_modules \
+        packages/misskey-js/built packages/misskey-js/node_modules \
+        packages/misskey-reversi/built packages/misskey-reversi/node_modules \
+        packages/misskey-bubble-game/built packages/misskey-bubble-game/node_modules \
+        packages/sw/built packages/sw/node_modules \
+        packages-private/diagnostics-backend/built packages-private/diagnostics-backend/node_modules \
+        packages-private/diagnostics-frontend/built packages-private/diagnostics-frontend/node_modules \
+        packages-private/diagnostics-shared/built packages-private/diagnostics-shared/node_modules \
+        packages-private/changelog-checker/built packages-private/changelog-checker/node_modules
+    touch "${OWN_MARKER}"
+fi
 
 # Attach a TTY only when both stdin and stdout are interactive; piping the
 # output (e.g. `docker-run.sh -- pnpm lint | tee log`) must stay TTY-less.

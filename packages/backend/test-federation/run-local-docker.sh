@@ -14,39 +14,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
-NODE_VERSION="$(cat "${SCRIPT_DIR}/../../../.node-version")"
-export NODE_VERSION
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+export REPO_ROOT
 
-# Pin the pnpm version to the one declared in packageManager so the lockfile
-# is not rewritten just because the image has a newer pnpm.
-PNPM_VERSION="$(sed -n 's/.*"packageManager": "pnpm@\([^"]*\)".*/\1/p' "${SCRIPT_DIR}/../../../package.json")"
-if [[ -z "${PNPM_VERSION}" ]]; then
-    PNPM_VERSION="latest"
-fi
+source "${REPO_ROOT}/scripts/docker-common.sh"
+
+load_misskey_versions
 
 BUILD_IMAGE_TAG="misskey-build-env:${NODE_VERSION}-pnpm${PNPM_VERSION}"
-
-ensure_runtime_image() {
-    if docker image inspect "${BUILD_IMAGE_TAG}" >/dev/null 2>&1; then
-        return 0
-    fi
-    echo "==> Building runtime image ${BUILD_IMAGE_TAG} (pnpm ${PNPM_VERSION})…"
-    # Pass the Dockerfile via stdin instead of writing a temp file —
-    # no mktemp/trap/cleanup needed.
-    docker build \
-        --build-arg NODE_VERSION="${NODE_VERSION}" \
-        -t "${BUILD_IMAGE_TAG}" \
-        -f - \
-        "${SCRIPT_DIR}" <<EOF
-ARG NODE_VERSION=${NODE_VERSION}
-FROM node:\${NODE_VERSION}-trixie
-RUN apt-get update \\
-    && apt-get install -y --no-install-recommends ffmpeg \\
-    && rm -rf /var/lib/apt/lists/*
-RUN npm install -g pnpm@${PNPM_VERSION}
-WORKDIR /misskey
-EOF
-}
 
 CLEAN=0
 TEST_FILTER=""
@@ -110,38 +85,17 @@ fi
 #    we run the container as — we use the host user's, to avoid
 #    root-owned files.
 # ──────────────────────────────────────────────
-ensure_runtime_image
-
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+ensure_runtime_image "${BUILD_IMAGE_TAG}" "${SCRIPT_DIR}"
 
 # Ensure build output directories are owned by the host user. Previous
 # container runs may have created them as root, causing EACCES when the
 # build step (which runs as the host user) tries to write meta.json etc.
-echo "==> Ensuring build directories are owned by uid=$(id -u)…"
-docker run --rm \
-    --user root \
-    -e HOST_UID="$(id -u)" \
-    -e HOST_GID="$(id -g)" \
-    -v "${REPO_ROOT}:/misskey" \
-    alpine:3 \
-    sh -c 'mkdir -p \
-        /misskey/built \
-        /misskey/node_modules \
-        /misskey/packages/backend/built \
-        /misskey/packages/backend/node_modules \
-        /misskey/packages/misskey-js/built \
-        /misskey/packages/misskey-js/node_modules \
-        /misskey/packages/misskey-reversi/built \
-        /misskey/packages/misskey-reversi/node_modules \
-      && chown -R "$HOST_UID:$HOST_GID" \
-        /misskey/built \
-        /misskey/node_modules \
-        /misskey/packages/backend/built \
-        /misskey/packages/backend/node_modules \
-        /misskey/packages/misskey-js/built \
-        /misskey/packages/misskey-js/node_modules \
-        /misskey/packages/misskey-reversi/built \
-        /misskey/packages/misskey-reversi/node_modules'
+ensure_output_ownership "$(id -u)" "$(id -g)" \
+    built \
+    node_modules \
+    packages/backend/built packages/backend/node_modules \
+    packages/misskey-js/built packages/misskey-js/node_modules \
+    packages/misskey-reversi/built packages/misskey-reversi/node_modules
 
 if [[ "${SKIP_BUILD:-}" != "1" ]]; then
     HOST_UID="$(id -u)"
