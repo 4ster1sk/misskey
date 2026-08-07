@@ -3181,6 +3181,14 @@ export interface Locale extends ILocale {
      */
     "disableShowingAnimatedImages_caption": string;
     /**
+     * アイコンのみアニメーション画像を再生しない
+     */
+    "disableShowingAnimatedAvatarImages": string;
+    /**
+     * アバターアイコンのみアニメーションの再生を停止します。バナー・添付画像等には影響しません。
+     */
+    "disableShowingAnimatedAvatarImages_caption": string;
+    /**
      * メディアがセンシティブであることを分かりやすく表示
      */
     "highlightSensitiveMedia": string;
