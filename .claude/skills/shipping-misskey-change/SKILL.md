@@ -16,7 +16,7 @@ Misskey の変更を commit / PR / merge する直前、または未commitでユ
 | 2 | 実装・挙動を変更 | 最も近い unit test を実行。型・生成物・DB に関係するときは対応する専用検証も実行 |
 | 3 (任意) | 明示依頼、広域変更、切り分けに必要 | package / repo 全体の lint、build、広域 test |
 
-**検証コマンドの実行環境**: セキュリティのため、pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使う場合は自己責任。
+**検証コマンドの実行環境**: セキュリティのため、pnpm コマンドは原則 `./scripts/docker-run.sh -- pnpm <cmd>` で Docker コンテナ内で実行する (サプライチェーン攻撃対策。詳細は [AGENTS.md](../../../AGENTS.md) §検証コマンドの実行環境 参照)。ホストの pnpm を直接使うのは絶対にしてはいけない。
 
 ## 最終チェックリスト
 段 1 は docs-only など対象が空なら `SKIPPED`。
