@@ -9314,6 +9314,18 @@ export interface Locale extends ILocale {
          * 音声が読み込めませんでした。設定を変更してください
          */
         "driveFileError": string;
+        /**
+         * 通知種別ごとの音
+         */
+        "notificationSoundOverrides": string;
+        /**
+         * この種別はカスタム音を使う
+         */
+        "notificationSoundOverrideEnabled": string;
+        /**
+         * 既定の通知音を使う
+         */
+        "inheritDefaultNotificationSound": string;
     };
     "_ago": {
         /**

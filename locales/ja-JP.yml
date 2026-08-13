@@ -2444,6 +2444,9 @@ _soundSettings:
   driveFileDurationWarn: "音声が長すぎます"
   driveFileDurationWarnDescription: "長い音声を使用するとMisskeyの使用に支障をきたす可能性があります。それでも続行しますか？"
   driveFileError: "音声が読み込めませんでした。設定を変更してください"
+  notificationSoundOverrides: "通知種別ごとの音"
+  notificationSoundOverrideEnabled: "この種別はカスタム音を使う"
+  inheritDefaultNotificationSound: "既定の通知音を使う"
 
 _ago:
   future: "未来"

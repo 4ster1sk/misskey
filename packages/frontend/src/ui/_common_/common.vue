@@ -149,7 +149,7 @@ function onNotification(notification: Misskey.entities.Notification, isClient = 
 		}, 6000);
 	}
 
-	sound.playMisskeySfx('notification');
+	sound.playNotificationSfx(notification.type);
 }
 
 function exitSafeMode() {
