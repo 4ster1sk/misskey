@@ -499,6 +499,42 @@ export const PREF_DEF = definePreferences({
 	'sound.on.notification': {
 		default: { type: 'syuilo/n-ea', volume: 1 } as SoundStore,
 	},
+	'sound.on.notification.note': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.follow': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.mention': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.reply': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.renote': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.quote': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.reaction': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.pollEnded': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.receiveFollowRequest': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.followRequestAccepted': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.scheduledNotePosted': {
+		default: null as SoundStore | null,
+	},
+	'sound.on.notification.scheduledNotePostFailed': {
+		default: null as SoundStore | null,
+	},
 	'sound.on.reaction': {
 		default: { type: 'syuilo/bubble2', volume: 1 } as SoundStore,
 	},

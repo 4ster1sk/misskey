@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type * as Misskey from 'misskey-js';
 import type { SoundStore } from '@/preferences/def.js';
 import { prefer } from '@/preferences.js';
 import { PREF_DEF } from '@/preferences/def.js';
@@ -81,6 +82,33 @@ export const operationTypes = [
 	'chatMessage',
 ] as const;
 
+/**
+ * 通知種別ごとに個別の効果音を設定できる種別
+ */
+export const majorNotificationSoundTypes = [
+	'note',
+	'follow',
+	'mention',
+	'reply',
+	'renote',
+	'quote',
+	'reaction',
+	'pollEnded',
+	'receiveFollowRequest',
+	'followRequestAccepted',
+	'scheduledNotePosted',
+	'scheduledNotePostFailed',
+] as const;
+
+// すべてが Misskey の通知種別であることを型で確認する
+const _checkMajorNotificationSoundTypes: readonly Misskey.entities.Notification['type'][] = majorNotificationSoundTypes;
+
+export type MajorNotificationSoundType = typeof majorNotificationSoundTypes[number];
+
+function isMajorNotificationSoundType(type: Misskey.entities.Notification['type']): type is typeof majorNotificationSoundTypes[number] {
+	return (majorNotificationSoundTypes as readonly Misskey.entities.Notification['type'][]).includes(type);
+}
+
 /** サウンドの種類 */
 export type SoundType = typeof soundsTypes[number];
 
@@ -127,16 +155,35 @@ export async function loadAudio(url: string, options?: { useCache?: boolean; }) 
 
 /**
  * 既定のスプライトを再生する
- * @param type スプライトの種類を指定
+ * @param operationType スプライトの種類を指定
  */
 export function playMisskeySfx(operationType: OperationType) {
 	const sound = prefer.s[`sound.on.${operationType}`];
+	playSfx(sound, getInitialPrefValue(`sound.on.${operationType}`));
+}
+
+/**
+ * 通知種別ごとの効果音を再生する
+ * 種別ごとに設定されたサウンドが無い場合は既定の通知音を再生する
+ * @param notificationType 通知の種別
+ */
+export function playNotificationSfx(notificationType: Misskey.entities.Notification['type']) {
+	if (isMajorNotificationSoundType(notificationType)) {
+		const override = prefer.s[`sound.on.notification.${notificationType}`];
+		if (override != null) {
+			playSfx(override, getInitialPrefValue('sound.on.notification'));
+			return;
+		}
+	}
+	playSfx(prefer.s['sound.on.notification'], getInitialPrefValue('sound.on.notification'));
+}
+
+function playSfx(sound: SoundStore, fallbackSound: SoundStore) {
 	playMisskeySfxFile(sound).then((succeed) => {
 		if (!succeed && sound.type === '_driveFile_') {
-			// ドライブファイルが存在しない場合はデフォルトのサウンドを再生する
-			const default_ = getInitialPrefValue(`sound.on.${operationType}`);
-			const soundName = default_.type as Exclude<SoundType, '_driveFile_'>;
-			if (_DEV_) console.log(`Failed to play sound: ${sound.fileUrl}, so play default sound: ${soundName}`);
+			// ドライブファイルが存在しない場合はフォールバックのサウンドを再生する
+			const soundName = fallbackSound.type as Exclude<SoundType, '_driveFile_'>;
+			if (_DEV_) console.log(`Failed to play sound: ${sound.fileUrl}, so play fallback sound: ${soundName}`);
 			playMisskeySfxFileInternal({
 				type: soundName,
 				volume: sound.volume,
