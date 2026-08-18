@@ -50,7 +50,7 @@ import { onMounted, ref } from 'vue';
 import XPie from './overview.pie.vue';
 import type { InstanceForPie } from './overview.pie.vue';
 import * as os from '@/os.js';
-import { misskeyApiGet } from '@/utility/misskey-api.js';
+import { misskeyApi, misskeyApiGet } from '@/utility/misskey-api.js';
 import number from '@/filters/number.js';
 import MkNumberDiff from '@/components/MkNumberDiff.vue';
 import { i18n } from '@/i18n.js';
@@ -67,7 +67,7 @@ const fetching = ref(true);
 const { handler: externalTooltipHandler } = useChartTooltip();
 
 onMounted(async () => {
-	const chart = await misskeyApiGet('charts/federation', { limit: 2, span: 'day' });
+	const chart = await misskeyApi('charts/federation', { limit: 2, span: 'day' });
 	federationPubActive.value = chart.pubActive[0];
 	federationPubActiveDiff.value = chart.pubActive[0] - chart.pubActive[1];
 	federationSubActive.value = chart.subActive[0];
