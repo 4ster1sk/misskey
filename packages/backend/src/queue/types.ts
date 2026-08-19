@@ -40,9 +40,18 @@ export type RelationshipJobData = {
 	withReplies?: boolean;
 };
 
+export type CleanChartRowsJobData = {
+	tableName: string;
+	cutoff: number;
+	batchSize: number;
+	// 前回ジョブで削除した最大の id (keyset ページネーションのカーソル)
+	lastId?: number;
+};
+
 export type DbJobData<T extends keyof DbJobMap> = DbJobMap[T];
 
 export type DbJobMap = {
+	cleanChartRows: CleanChartRowsJobData;
 	deleteDriveFiles: DbJobDataWithUser;
 	exportCustomEmojis: DbJobDataWithUser;
 	exportAntennas: DBExportAntennasData;

@@ -281,6 +281,14 @@ export default abstract class Chart<T extends Schema> {
 	}
 
 	@bindThis
+	public getTableNames(): { hour: string; day: string } {
+		return {
+			hour: this.repositoryForHour.metadata.tableName,
+			day: this.repositoryForDay.metadata.tableName,
+		};
+	}
+
+	@bindThis
 	private convertRawRecord(x: RawRecord<T>): KVs<T> {
 		const kvs = {} as Record<string, number>;
 		for (const k of Object.keys(x).filter((k) => k.startsWith(COLUMN_PREFIX)) as (keyof Columns<T>)[]) {

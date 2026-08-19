@@ -6,8 +6,7 @@
 process.env.NODE_ENV = 'test';
 
 import * as assert from 'assert';
-import { describe, beforeEach, afterEach, afterAll, test } from 'vitest';
-import type { Mocked } from 'vitest';
+import { describe, beforeEach, afterEach, afterAll, test, vi } from 'vitest';
 import * as lolex from '@sinonjs/fake-timers';
 import { DataSource } from 'typeorm';
 import * as Redis from 'ioredis';
@@ -21,12 +20,51 @@ import { entity as TestUniqueChartEntity } from '@/core/chart/charts/entities/te
 import { entity as TestIntersectionChartEntity } from '@/core/chart/charts/entities/test-intersection.js';
 import { loadConfig } from '@/config.js';
 import Logger from '@/logger.js';
+import { buildChartRetentionJobs } from '@/queue/chart-retention.js';
+import { CleanChartRowsProcessorService } from '@/queue/processors/CleanChartRowsProcessorService.js';
+import type { DbQueue } from '@/core/QueueModule.js';
+import type { QueueLoggerService } from '@/queue/QueueLoggerService.js';
+import type { CleanChartRowsJobData } from '@/queue/types.js';
+import type * as Bull from 'bullmq';
+import type { Mocked } from 'vitest';
 
 describe('Chart', () => {
 	const config = loadConfig();
 
+	const queueLoggerServiceMock = {
+		logger: {
+			createSubLogger: () => ({
+				info: () => {},
+				warn: () => {},
+				succ: () => {},
+			}),
+		},
+	} as unknown as QueueLoggerService;
+
+	const makeJob = (data: CleanChartRowsJobData) => ({ data }) as unknown as Bull.Job<CleanChartRowsJobData>;
+
+	const insertChartRows = async (n: number, dateOf: (i: number) => number): Promise<void> => {
+		await db!.getRepository(TestChartEntity.hour)
+			.createQueryBuilder()
+			.insert()
+			.values(Array.from({ length: n }, (_, i) => ({
+				date: dateOf(i),
+				___foo_total: 1,
+				___foo_inc: 1,
+				___foo_dec: 0,
+			})))
+			.execute();
+	};
+
+	const countChartRows = async (cutoff: number, which: 'old' | 'recent'): Promise<number> => {
+		return db!.getRepository(TestChartEntity.hour)
+			.createQueryBuilder()
+			.where(which === 'old' ? 'date < :cutoff' : 'date >= :cutoff', { cutoff })
+			.getCount();
+	};
+
 	let db: DataSource | undefined;
-	let redisClient = {
+	const redisClient = {
 		set: () => Promise.resolve('OK'),
 		get: () => Promise.resolve(null),
 	} as unknown as Mocked<Redis.Redis>;
@@ -580,6 +618,116 @@ describe('Chart', () => {
 					total: [100, 0, 0],
 				},
 			});
+		});
+
+		test('getTableNames returns correct table names', () => {
+			const names = testChart.getTableNames();
+			assert.strictEqual(names.hour, '__chart__test');
+			assert.strictEqual(names.day, '__chart_day__test');
+		});
+
+		test('buildChartRetentionJobs builds jobs for both spans', () => {
+			const nowSec = 946684800;
+			const jobs = buildChartRetentionJobs(
+				{ hour: 90, day: 365, batchSize: 2000 },
+				[{ hour: '__chart__test', day: '__chart_day__test' }],
+				nowSec,
+			);
+
+			assert.strictEqual(jobs.length, 2);
+			assert.deepStrictEqual(jobs[0], {
+				tableName: '__chart__test',
+				cutoff: nowSec - (90 * 24 * 60 * 60),
+				batchSize: 2000,
+				lastId: 0,
+			});
+			assert.deepStrictEqual(jobs[1], {
+				tableName: '__chart_day__test',
+				cutoff: nowSec - (365 * 24 * 60 * 60),
+				batchSize: 2000,
+				lastId: 0,
+			});
+		});
+
+		test('buildChartRetentionJobs skips disabled spans', () => {
+			const nowSec = 946684800;
+			const tables = [{ hour: '__chart__test', day: '__chart_day__test' }];
+
+			assert.strictEqual(buildChartRetentionJobs({ hour: 0, day: 365, batchSize: 2000 }, tables, nowSec).length, 1);
+			assert.strictEqual(buildChartRetentionJobs({ hour: 90, day: 0, batchSize: 2000 }, tables, nowSec).length, 1);
+			assert.strictEqual(buildChartRetentionJobs({ hour: 0, day: 0, batchSize: 2000 }, tables, nowSec).length, 0);
+		});
+
+		test('buildChartRetentionJobs returns no jobs when batchSize is 0', () => {
+			const jobs = buildChartRetentionJobs(
+				{ hour: 90, day: 365, batchSize: 0 },
+				[{ hour: '__chart__test', day: '__chart_day__test' }],
+				946684800,
+			);
+
+			assert.strictEqual(jobs.length, 0);
+		});
+
+		test('cleanChartRows deletes old rows in batches and re-enqueues with next cursor', async () => {
+			const nowSec = Math.floor(Date.now() / 1000);
+			const cutoff = nowSec - (90 * 24 * 60 * 60);
+			const tableName = '__chart__test';
+			const batchSize = 2000;
+
+			// 古い行 2500 件 (id 昇順に日付降順) + 保持対象の新しい行 3 件
+			await insertChartRows(2500, (i) => cutoff - 1 - i);
+			await insertChartRows(3, (i) => nowSec - i);
+
+			const dbQueueAddMock = vi.fn().mockResolvedValue(undefined);
+			const dbQueueMock = { add: dbQueueAddMock } as unknown as DbQueue;
+			const processor = new CleanChartRowsProcessorService(db!, dbQueueMock, queueLoggerServiceMock);
+
+			// 1 回目: 2000 行だけ削除され、残り 500 + 3
+			await processor.process(makeJob({ tableName, cutoff, batchSize, lastId: 0 }));
+
+			assert.strictEqual(await countChartRows(cutoff, 'old'), 500);
+			assert.strictEqual(await countChartRows(cutoff, 'recent'), 3);
+
+			// 再投入されたジョブは次のカーソル (削除した最大 id) を持っている
+			assert.strictEqual(dbQueueAddMock.mock.calls.length, 1);
+			const [jobName, jobData] = dbQueueAddMock.mock.calls[0];
+			assert.strictEqual(jobName, 'cleanChartRows');
+			assert.strictEqual(jobData.tableName, tableName);
+			assert.strictEqual(jobData.cutoff, cutoff);
+			assert.strictEqual(jobData.batchSize, batchSize);
+			assert.ok(jobData.lastId > 0);
+
+			// keyset が正しい: 残存する古い行の最小 id は次カーソルより大きい
+			const minRemainingId = await db!.getRepository(TestChartEntity.hour)
+				.createQueryBuilder()
+				.select('MIN(id)', 'min')
+				.where('date < :cutoff', { cutoff })
+				.getRawOne<{ min: number }>();
+			assert.ok(minRemainingId!.min > jobData.lastId);
+
+			// 2 回目: 残り 500 行を削除し、バッチが満杯でないため再投入しない
+			dbQueueAddMock.mockClear();
+			await processor.process(makeJob({ tableName, cutoff, batchSize, lastId: jobData.lastId }));
+
+			assert.strictEqual(await countChartRows(cutoff, 'old'), 0);
+			assert.strictEqual(await countChartRows(cutoff, 'recent'), 3);
+			assert.strictEqual(dbQueueAddMock.mock.calls.length, 0);
+		});
+
+		test('cleanChartRows with batchSize 0 does nothing and does not re-enqueue', async () => {
+			const nowSec = Math.floor(Date.now() / 1000);
+			const cutoff = nowSec - (90 * 24 * 60 * 60);
+
+			await insertChartRows(10, (i) => cutoff - 1 - i);
+
+			const dbQueueAddMock = vi.fn().mockResolvedValue(undefined);
+			const dbQueueMock = { add: dbQueueAddMock } as unknown as DbQueue;
+			const processor = new CleanChartRowsProcessorService(db!, dbQueueMock, queueLoggerServiceMock);
+
+			await processor.process(makeJob({ tableName: '__chart__test', cutoff, batchSize: 0, lastId: 0 }));
+
+			assert.strictEqual(await countChartRows(cutoff, 'old'), 10);
+			assert.strictEqual(dbQueueAddMock.mock.calls.length, 0);
 		});
 	});
 });

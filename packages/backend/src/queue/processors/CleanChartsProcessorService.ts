@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { DI } from '@/di-symbols.js';
+import type { Config } from '@/config.js';
+import type { DbQueue } from '@/core/QueueModule.js';
 import type Logger from '@/logger.js';
 import FederationChart from '@/core/chart/charts/federation.js';
 import NotesChart from '@/core/chart/charts/notes.js';
@@ -18,8 +21,8 @@ import PerUserFollowingChart from '@/core/chart/charts/per-user-following.js';
 import PerUserDriveChart from '@/core/chart/charts/per-user-drive.js';
 import ApRequestChart from '@/core/chart/charts/ap-request.js';
 import { bindThis } from '@/decorators.js';
+import { buildChartRetentionJobs } from '../chart-retention.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
-import type * as Bull from 'bullmq';
 
 @Injectable()
 export class CleanChartsProcessorService {
@@ -38,6 +41,12 @@ export class CleanChartsProcessorService {
 		private perUserFollowingChart: PerUserFollowingChart,
 		private perUserDriveChart: PerUserDriveChart,
 		private apRequestChart: ApRequestChart,
+
+		@Inject(DI.config)
+		private config: Config,
+
+		@Inject('queue:db')
+		private dbQueue: DbQueue,
 
 		private queueLoggerService: QueueLoggerService,
 	) {
@@ -62,6 +71,35 @@ export class CleanChartsProcessorService {
 		await this.perUserDriveChart.clean();
 		await this.apRequestChart.clean();
 
+		await this.enqueueRetentionCleanups();
+
 		this.logger.succ('All charts successfully cleaned.');
+	}
+
+	@bindThis
+	private async enqueueRetentionCleanups(): Promise<void> {
+		const charts = [
+			this.perUserNotesChart,
+			this.perUserReactionsChart,
+			this.instanceChart,
+		];
+
+		const jobs = buildChartRetentionJobs(
+			this.config.chartRetention,
+			charts.map(chart => chart.getTableNames()),
+		);
+
+		for (const job of jobs) {
+			await this.dbQueue.add('cleanChartRows', job, {
+				removeOnComplete: {
+					age: 3600 * 24 * 7,
+					count: 30,
+				},
+				removeOnFail: {
+					age: 3600 * 24 * 7,
+					count: 100,
+				},
+			});
+		}
 	}
 }

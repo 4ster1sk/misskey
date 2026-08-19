@@ -118,6 +118,12 @@ type Source = {
 
 	hashtagTrendExcludeBotUsers?: boolean;
 
+	chartRetention?: {
+		hour?: number;
+		day?: number;
+		batchSize?: number;
+	};
+
 	logging?: {
 		format?: LogFormat;
 		level?: LogLevelSetting;
@@ -230,6 +236,11 @@ export type Config = {
 	deactivateAntennaThreshold: number;
 	pidFile: string;
 	hashtagTrendExcludeBotUsers: boolean | undefined;
+	chartRetention: {
+		hour: number;
+		day: number;
+		batchSize: number;
+	};
 };
 
 export type FulltextSearchProvider = 'sqlLike' | 'sqlPgroonga' | 'meilisearch';
@@ -358,6 +369,12 @@ export function loadConfig(): Config {
 		deactivateAntennaThreshold: config.deactivateAntennaThreshold ?? (1000 * 60 * 60 * 24 * 7),
 		pidFile: config.pidFile,
 		hashtagTrendExcludeBotUsers: config.hashtagTrendExcludeBotUsers,
+		chartRetention: {
+			// デフォルトは無効 (0)。設定しない限り既存のチャートデータは削除されない
+			hour: config.chartRetention?.hour === undefined ? 0 : config.chartRetention.hour,
+			day: config.chartRetention?.day === undefined ? 0 : config.chartRetention.day,
+			batchSize: config.chartRetention?.batchSize === undefined ? 2000 : config.chartRetention.batchSize,
+		},
 		logging: config.logging,
 	};
 }

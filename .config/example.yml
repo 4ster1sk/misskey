@@ -412,6 +412,17 @@ proxyBypassHosts:
 # Upload or download file size limits (bytes)
 #maxFileSize: 262144000
 
+# Chart data retention settings
+# Controls how long chart (statistics) data is retained.
+# "hour" applies to hourly tables (__chart__*), "day" applies to daily tables (__chart_day__*).
+# "batchSize" is the number of rows deleted per queued cleanup job.
+# Both "hour" and "day" are disabled (0) by default: existing chart data is never deleted
+# unless you explicitly configure this. Set any value to 0 to disable deletion for that span.
+#chartRetention:
+#  hour: 90
+#  day: 730
+#  batchSize: 2000
+
 # PID File of master process
 #pidFile: /tmp/misskey.pid
 
