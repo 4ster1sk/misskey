@@ -82,6 +82,9 @@ export class CleanChartsProcessorService {
 			this.perUserNotesChart,
 			this.perUserReactionsChart,
 			this.instanceChart,
+			this.perUserPvChart,
+			this.perUserDriveChart,
+			this.perUserFollowingChart,
 		];
 
 		const jobs = buildChartRetentionJobs(

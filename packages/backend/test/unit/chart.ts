@@ -6,7 +6,7 @@
 process.env.NODE_ENV = 'test';
 
 import * as assert from 'assert';
-import { describe, beforeEach, afterEach, afterAll, test, vi } from 'vitest';
+import { describe, beforeEach, afterEach, afterAll, test } from 'vitest';
 import * as lolex from '@sinonjs/fake-timers';
 import { DataSource } from 'typeorm';
 import * as Redis from 'ioredis';
@@ -22,7 +22,6 @@ import { loadConfig } from '@/config.js';
 import Logger from '@/logger.js';
 import { buildChartRetentionJobs } from '@/queue/chart-retention.js';
 import { CleanChartRowsProcessorService } from '@/queue/processors/CleanChartRowsProcessorService.js';
-import type { DbQueue } from '@/core/QueueModule.js';
 import type { QueueLoggerService } from '@/queue/QueueLoggerService.js';
 import type { CleanChartRowsJobData } from '@/queue/types.js';
 import type * as Bull from 'bullmq';
@@ -668,66 +667,42 @@ describe('Chart', () => {
 			assert.strictEqual(jobs.length, 0);
 		});
 
-		test('cleanChartRows deletes old rows in batches and re-enqueues with next cursor', async () => {
+		test('cleanChartRows deletes at most batchSize rows per job and does not re-enqueue', async () => {
 			const nowSec = Math.floor(Date.now() / 1000);
 			const cutoff = nowSec - (90 * 24 * 60 * 60);
 			const tableName = '__chart__test';
 			const batchSize = 2000;
 
-			// 古い行 2500 件 (id 昇順に日付降順) + 保持対象の新しい行 3 件
+			// 古い行 2500 件 + 保持対象の新しい行 3 件
 			await insertChartRows(2500, (i) => cutoff - 1 - i);
 			await insertChartRows(3, (i) => nowSec - i);
 
-			const dbQueueAddMock = vi.fn().mockResolvedValue(undefined);
-			const dbQueueMock = { add: dbQueueAddMock } as unknown as DbQueue;
-			const processor = new CleanChartRowsProcessorService(db!, dbQueueMock, queueLoggerServiceMock);
+			const processor = new CleanChartRowsProcessorService(db!, queueLoggerServiceMock);
 
-			// 1 回目: 2000 行だけ削除され、残り 500 + 3
+			// 1 回目: 2000 行だけ削除され、残り 500 + 3。1日あたり batchSize のため再投入しない
 			await processor.process(makeJob({ tableName, cutoff, batchSize, lastId: 0 }));
 
 			assert.strictEqual(await countChartRows(cutoff, 'old'), 500);
 			assert.strictEqual(await countChartRows(cutoff, 'recent'), 3);
 
-			// 再投入されたジョブは次のカーソル (削除した最大 id) を持っている
-			assert.strictEqual(dbQueueAddMock.mock.calls.length, 1);
-			const [jobName, jobData] = dbQueueAddMock.mock.calls[0];
-			assert.strictEqual(jobName, 'cleanChartRows');
-			assert.strictEqual(jobData.tableName, tableName);
-			assert.strictEqual(jobData.cutoff, cutoff);
-			assert.strictEqual(jobData.batchSize, batchSize);
-			assert.ok(jobData.lastId > 0);
-
-			// keyset が正しい: 残存する古い行の最小 id は次カーソルより大きい
-			const minRemainingId = await db!.getRepository(TestChartEntity.hour)
-				.createQueryBuilder()
-				.select('MIN(id)', 'min')
-				.where('date < :cutoff', { cutoff })
-				.getRawOne<{ min: number }>();
-			assert.ok(minRemainingId!.min > jobData.lastId);
-
-			// 2 回目: 残り 500 行を削除し、バッチが満杯でないため再投入しない
-			dbQueueAddMock.mockClear();
-			await processor.process(makeJob({ tableName, cutoff, batchSize, lastId: jobData.lastId }));
+			// 翌日の cleanCharts を想定した 2 回目: 残り 500 行を削除
+			await processor.process(makeJob({ tableName, cutoff, batchSize, lastId: 0 }));
 
 			assert.strictEqual(await countChartRows(cutoff, 'old'), 0);
 			assert.strictEqual(await countChartRows(cutoff, 'recent'), 3);
-			assert.strictEqual(dbQueueAddMock.mock.calls.length, 0);
 		});
 
-		test('cleanChartRows with batchSize 0 does nothing and does not re-enqueue', async () => {
+		test('cleanChartRows with batchSize 0 does nothing', async () => {
 			const nowSec = Math.floor(Date.now() / 1000);
 			const cutoff = nowSec - (90 * 24 * 60 * 60);
 
 			await insertChartRows(10, (i) => cutoff - 1 - i);
 
-			const dbQueueAddMock = vi.fn().mockResolvedValue(undefined);
-			const dbQueueMock = { add: dbQueueAddMock } as unknown as DbQueue;
-			const processor = new CleanChartRowsProcessorService(db!, dbQueueMock, queueLoggerServiceMock);
+			const processor = new CleanChartRowsProcessorService(db!, queueLoggerServiceMock);
 
 			await processor.process(makeJob({ tableName: '__chart__test', cutoff, batchSize: 0, lastId: 0 }));
 
 			assert.strictEqual(await countChartRows(cutoff, 'old'), 10);
-			assert.strictEqual(dbQueueAddMock.mock.calls.length, 0);
 		});
 	});
 });
