@@ -48,6 +48,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<div class="title">Pub</div>
 					<canvas ref="pubDoughnutEl"></canvas>
 				</div>
+				<div class="soft">
+					<div class="title">Software</div>
+					<canvas ref="softwareDoughnutEl"></canvas>
+				</div>
 			</div>
 		</div>
 	</MkFoldableSection>
@@ -166,9 +170,11 @@ const {
 
 const subDoughnutEl = useTemplateRef('subDoughnutEl');
 const pubDoughnutEl = useTemplateRef('pubDoughnutEl');
+const softwareDoughnutEl = useTemplateRef('softwareDoughnutEl');
 
 let subDoughnutChartInstance: Chart | null = null;
 let pubDoughnutChartInstance: Chart | null = null;
+let softwareDoughnutChartInstance: Chart | null = null;
 
 const { handler: externalTooltipHandler1 } = useChartTooltip({
 	position: 'middle',
@@ -234,6 +240,22 @@ function createDoughnut(chartEl: HTMLCanvasElement, tooltip: ReturnType<typeof u
 }
 
 onMounted(() => {
+	misskeyApiGet('federation/remote-software', {}).then(response => {
+		const softwareData: ChartData = response.map(x => ({
+			name: x.softwareName,
+			color: x.color ?? '#888888',
+			value: x.count,
+			onClick: () => {},
+		}));
+		const sortedData = softwareData.sort((a, b) => a.value > b.value ? -1 : 1);
+		const total = response.reduce((sum, a) => sum + a.count, 0);
+		// update tooltip total
+		const { handler } = useChartTooltip({ position: 'middle', total });
+		if (softwareDoughnutEl.value != null) {
+			softwareDoughnutChartInstance = createDoughnut(softwareDoughnutEl.value, handler, sortedData);
+		}
+	});
+
 	misskeyApiGet('federation/stats', { limit: 30 }).then(fedStats => {
 		const subs: ChartData = fedStats.topSubInstances.map(x => ({
 			name: x.host,
@@ -278,6 +300,7 @@ onMounted(() => {
 onUnmounted(() => {
 	subDoughnutChartInstance?.destroy();
 	pubDoughnutChartInstance?.destroy();
+	softwareDoughnutChartInstance?.destroy();
 });
 </script>
 
@@ -324,7 +347,7 @@ onUnmounted(() => {
 			display: flex;
 			gap: 16px;
 
-			> .sub, > .pub {
+			> .sub, > .pub, > .soft {
 				flex: 1;
 				min-width: 0;
 				position: relative;
