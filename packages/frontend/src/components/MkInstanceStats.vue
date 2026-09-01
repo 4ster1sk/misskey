@@ -248,9 +248,7 @@ onMounted(() => {
 			onClick: () => {},
 		}));
 		const sortedData = softwareData.sort((a, b) => a.value > b.value ? -1 : 1);
-		const total = response.reduce((sum, a) => sum + a.count, 0);
-		// update tooltip total
-		const { handler } = useChartTooltip({ position: 'middle', total });
+		const { handler } = useChartTooltip({ position: 'middle' });
 		if (softwareDoughnutEl.value != null) {
 			softwareDoughnutChartInstance = createDoughnut(softwareDoughnutEl.value, handler, sortedData);
 		}
