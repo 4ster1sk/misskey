@@ -241,10 +241,10 @@ export class MiUser {
 	public chatScope: 'everyone' | 'followers' | 'following' | 'mutual' | 'none';
 
 	@Column('varchar', {
-		length: 16, default: 'all',
+		length: 32, default: 'all',
 		comment: 'The inbox acceptance policy for this user.',
 	})
-	public inboxAcceptance: 'all' | 'noRenotes' | 'none';
+	public inboxAcceptance: 'all' | 'noRenotes' | 'noSensitiveRenote' | 'none';
 
 	@Index()
 	@Column('varchar', {

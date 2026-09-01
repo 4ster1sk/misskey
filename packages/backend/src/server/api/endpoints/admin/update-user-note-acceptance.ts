@@ -22,7 +22,7 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		userId: { type: 'string', format: 'misskey:id' },
-		value: { type: 'string', enum: ['all', 'noRenotes', 'none'] },
+		value: { type: 'string', enum: ['all', 'noRenotes', 'noSensitiveRenote', 'none'] },
 	},
 	required: ['userId', 'value'],
 } as const;

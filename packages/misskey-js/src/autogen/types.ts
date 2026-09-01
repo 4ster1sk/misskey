@@ -12055,7 +12055,7 @@ export interface operations {
                         isSuspended: boolean;
                         isHibernated: boolean;
                         /** @enum {string} */
-                        inboxAcceptance: 'all' | 'noRenotes' | 'none';
+                        inboxAcceptance: 'all' | 'noRenotes' | 'noSensitiveRenote' | 'none';
                         lastActiveDate: string | null;
                         moderationNote: string;
                         signins: components['schemas']['Signin'][];
@@ -13340,7 +13340,7 @@ export interface operations {
                     /** Format: misskey:id */
                     userId: string;
                     /** @enum {string} */
-                    value: 'all' | 'noRenotes' | 'none';
+                    value: 'all' | 'noRenotes' | 'noSensitiveRenote' | 'none';
                 };
             };
         };
