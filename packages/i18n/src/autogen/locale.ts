@@ -637,6 +637,10 @@ export interface Locale extends ILocale {
      */
     "inboxAcceptanceNoRenotes": string;
     /**
+     * センシティブな添付ファイルがあるリノートを拒否
+     */
+    "inboxAcceptanceNoSensitiveRenote": string;
+    /**
      * すべて拒否する
      */
     "inboxAcceptanceNone": string;

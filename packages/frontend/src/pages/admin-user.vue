@@ -268,10 +268,11 @@ const silenced = ref(info.value.isSilenced);
 	const suspended = ref(info.value.isSuspended);
 	const isSystem = ref(user.value.host == null && user.value.username.includes('.'));
 
-	const inboxAcceptance = ref<'all' | 'noRenotes' | 'none'>(info.value.inboxAcceptance ?? 'all');
+	const inboxAcceptance = ref<'all' | 'noRenotes' | 'noSensitiveRenote' | 'none'>(info.value.inboxAcceptance ?? 'all');
 	const inboxAcceptanceItems = [
 		{ label: i18n.ts.inboxAcceptanceAll, value: 'all' as const },
 		{ label: i18n.ts.inboxAcceptanceNoRenotes, value: 'noRenotes' as const },
+		{ label: i18n.ts.inboxAcceptanceNoSensitiveRenote, value: 'noSensitiveRenote' as const },
 		{ label: i18n.ts.inboxAcceptanceNone, value: 'none' as const },
 	];
 const moderationNote = ref(info.value.moderationNote);

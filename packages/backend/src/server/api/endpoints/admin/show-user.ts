@@ -133,7 +133,7 @@ export const meta = {
 			inboxAcceptance: {
 				type: 'string',
 				optional: false, nullable: false,
-				enum: ['all', 'noRenotes', 'none'],
+				enum: ['all', 'noRenotes', 'noSensitiveRenote', 'none'],
 			},
 			lastActiveDate: {
 				type: 'string',

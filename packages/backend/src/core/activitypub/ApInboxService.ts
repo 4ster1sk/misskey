@@ -24,7 +24,7 @@ import { UtilityService } from '@/core/UtilityService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { QueueService } from '@/core/QueueService.js';
-import type { UsersRepository, NotesRepository, FollowingsRepository, AbuseUserReportsRepository, FollowRequestsRepository, MiMeta } from '@/models/_.js';
+import type { UsersRepository, NotesRepository, FollowingsRepository, AbuseUserReportsRepository, FollowRequestsRepository, DriveFilesRepository, MiMeta } from '@/models/_.js';
 import { bindThis } from '@/decorators.js';
 import type { MiRemoteUser } from '@/models/User.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
@@ -63,6 +63,9 @@ export class ApInboxService {
 
 		@Inject(DI.followRequestsRepository)
 		private followRequestsRepository: FollowRequestsRepository,
+
+		@Inject(DI.driveFilesRepository)
+		private driveFilesRepository: DriveFilesRepository,
 
 		private userEntityService: UserEntityService,
 		private noteEntityService: NoteEntityService,
@@ -298,7 +301,16 @@ export class ApInboxService {
 			throw e;
 		});
 
-		if (isPost(target)) return await this.announceNote(actor, activity, target);
+		if (isPost(target)) {
+			// noSensitiveRenote: 照会前にAPオブジェクトの sensitive で早期中断（取得自体をしない）
+			if (actor.inboxAcceptance === 'noSensitiveRenote') {
+				const hasSensitiveAttachment = toArray((target as any).attachment).some((a: any) => a && a.sensitive) || !!(target as any).sensitive;
+				if (hasSensitiveAttachment) {
+					return;
+				}
+			}
+			return await this.announceNote(actor, activity, target);
+		}
 
 		return `skip: unknown object type ${getApType(target)}`;
 	}
@@ -345,6 +357,14 @@ export class ApInboxService {
 					return `Error in announce target ${target.id} - ${err.statusCode}`;
 				}
 				throw err;
+			}
+
+			// noSensitiveRenote: 取得済みでも添付がセンシティブなら破棄
+			if (actor.inboxAcceptance === 'noSensitiveRenote' && renote.fileIds.length > 0) {
+				const files = await this.driveFilesRepository.findBy({ id: In(renote.fileIds) });
+				if (files.some(f => f.isSensitive)) {
+					return;
+				}
 			}
 
 			// リレーからのAnnounceはリノートを作成せず、ノートを直接公開する
