@@ -9622,6 +9622,9 @@ export interface operations {
                         enableRemoteNotesCleaning: boolean;
                         remoteNotesCleaningExpiryDaysForEachNotes: number;
                         remoteNotesCleaningMaxProcessingDurationInMinutes: number;
+                        enableRemoteDriveFilesCleaning: boolean;
+                        remoteDriveFilesCleaningExpiryDaysForEachFiles: number;
+                        remoteDriveFilesCleaningMaxProcessingDurationInMinutes: number;
                         showRoleBadgesOfRemoteUsers: boolean;
                     };
                 };
@@ -13146,6 +13149,9 @@ export interface operations {
                     enableRemoteNotesCleaning?: boolean;
                     remoteNotesCleaningExpiryDaysForEachNotes?: number;
                     remoteNotesCleaningMaxProcessingDurationInMinutes?: number;
+                    enableRemoteDriveFilesCleaning?: boolean;
+                    remoteDriveFilesCleaningExpiryDaysForEachFiles?: number;
+                    remoteDriveFilesCleaningMaxProcessingDurationInMinutes?: number;
                     showRoleBadgesOfRemoteUsers?: boolean;
                 };
             };

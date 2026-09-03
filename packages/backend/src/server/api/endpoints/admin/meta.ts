@@ -624,6 +624,18 @@ export const meta = {
 				type: 'number',
 				optional: false, nullable: false,
 			},
+			enableRemoteDriveFilesCleaning: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
+			remoteDriveFilesCleaningExpiryDaysForEachFiles: {
+				type: 'number',
+				optional: false, nullable: false,
+			},
+			remoteDriveFilesCleaningMaxProcessingDurationInMinutes: {
+				type: 'number',
+				optional: false, nullable: false,
+			},
 			showRoleBadgesOfRemoteUsers: {
 				type: 'boolean',
 				optional: false, nullable: false,
@@ -790,6 +802,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				enableRemoteNotesCleaning: instance.enableRemoteNotesCleaning,
 				remoteNotesCleaningExpiryDaysForEachNotes: instance.remoteNotesCleaningExpiryDaysForEachNotes,
 				remoteNotesCleaningMaxProcessingDurationInMinutes: instance.remoteNotesCleaningMaxProcessingDurationInMinutes,
+				enableRemoteDriveFilesCleaning: instance.enableRemoteDriveFilesCleaning,
+				remoteDriveFilesCleaningExpiryDaysForEachFiles: instance.remoteDriveFilesCleaningExpiryDaysForEachFiles,
+				remoteDriveFilesCleaningMaxProcessingDurationInMinutes: instance.remoteDriveFilesCleaningMaxProcessingDurationInMinutes,
 				showRoleBadgesOfRemoteUsers: instance.showRoleBadgesOfRemoteUsers,
 			};
 		});
