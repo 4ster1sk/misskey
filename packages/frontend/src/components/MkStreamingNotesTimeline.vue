@@ -20,7 +20,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	/>
 	<MkLoading v-if="paginator.fetching.value"/>
 
-	<MkError v-else-if="paginator.error.value" @retry="paginator.init()"/>
+	<MkError v-else-if="paginator.error.value" @retry="retryTimeline()"/>
 
 	<div v-else-if="paginator.items.value.length === 0" key="_empty_">
 		<slot name="empty"><MkResult type="empty" :text="i18n.ts.noNotes"/></slot>
@@ -538,6 +538,8 @@ async function startReplay() {
 
 	const target = getReplayTarget();
 	if (target == null) {
+		// mentions/directs 等の未対応タイムラインでは空のままにせず終了状態を示す
+		replayEnded.value = true;
 		paginator.fetching.value = false;
 		return;
 	}
@@ -595,7 +597,14 @@ async function fetchMoreReplay(runId: number) {
 		}
 	} catch {
 		if (runId !== replayRunId) return;
-		replayEnded.value = true;
+		// 一過性の取得失敗を「末尾到達」と誤表示しない。再生状態を維持し、少し待って再取得する
+		if (replayPlaying.value) {
+			stopReplayTimer();
+			replayTimer = window.setTimeout(() => {
+				void fetchMoreReplay(runId);
+			}, 5000);
+		}
+		return;
 	} finally {
 		replayFetching = false;
 	}
@@ -622,10 +631,10 @@ function scheduleNextReplay(runId: number) {
 	}, delay);
 }
 
-async function showNextReplayNote(runId: number) {
+async function showNextReplayNote(runId: number, force = false) {
 	replayTimer = null;
 	if (runId !== replayRunId) return;
-	if (!replayPlaying.value) return;
+	if (!replayPlaying.value && !force) return;
 	const next = replayBuffer.shift();
 	if (next == null) {
 		void fetchMoreReplay(runId);
@@ -637,7 +646,7 @@ async function showNextReplayNote(runId: number) {
 	replayPendingCount.value = replayBuffer.length;
 	if (replayBuffer.length === 0) {
 		await fetchMoreReplay(runId);
-	} else {
+	} else if (replayPlaying.value) {
 		scheduleNextReplay(runId);
 	}
 }
@@ -665,7 +674,8 @@ function changeReplaySpeed(speed: number) {
 function skipReplayGap() {
 	const runId = replayRunId;
 	stopReplayTimer();
-	void showNextReplayNote(runId);
+	// 一時停止中でも次の1件は表示する（自動再生は再開しない）
+	void showNextReplayNote(runId, true);
 }
 
 watch(visibility, () => {
@@ -679,6 +689,14 @@ watch(visibility, () => {
 		scheduleNextReplay(replayRunId);
 	}
 });
+
+function retryTimeline() {
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		paginator.init();
+	}
+}
 
 function reloadTimeline() {
 	if (isReplay.value) {

@@ -52,6 +52,10 @@ export function toYmd(ms: number): string {
 }
 
 export function fromYmd(ymd: string): number | null {
-	const t = Date.parse(ymd);
+	// toYmd（ローカル日付）と往復させるため、ローカル深夜として解釈する
+	// Date.parse("YYYY-MM-DD") はUTC深夜になるため使わない
+	const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd);
+	if (m == null) return null;
+	const t = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime();
 	return Number.isFinite(t) ? t : null;
 }
