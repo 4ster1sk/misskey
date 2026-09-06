@@ -534,6 +534,7 @@ async function startReplay() {
 	paginator.fetching.value = true;
 	paginator.error.value = false;
 	paginator.items.value = [];
+	paginator.clearQueue();
 	paginator.canFetchOlder.value = false;
 
 	const anchor = props.replayAnchor;

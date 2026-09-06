@@ -64,6 +64,7 @@ export interface IPaginator<T = unknown, _T = T & MisskeyEntity> {
 	pushItems(oldItems: (_T)[]): void;
 	prepend(item: _T): void;
 	enqueue(item: _T): void;
+	clearQueue(): void;
 	releaseQueue(): void;
 	removeItem(id: string): void;
 	updateItem(id: string, updater: (item: _T) => _T): void;
@@ -172,6 +173,7 @@ export class Paginator<
 		this.pushItems = this.pushItems.bind(this);
 		this.prepend = this.prepend.bind(this);
 		this.enqueue = this.enqueue.bind(this);
+		this.clearQueue = this.clearQueue.bind(this);
 		this.releaseQueue = this.releaseQueue.bind(this);
 		this.removeItem = this.removeItem.bind(this);
 		this.updateItem = this.updateItem.bind(this);
@@ -395,6 +397,11 @@ export class Paginator<
 			this.aheadQueue.pop();
 		}
 		this.queuedAheadItemsCount.value = this.aheadQueue.length;
+	}
+
+	public clearQueue(): void {
+		this.aheadQueue = [];
+		this.queuedAheadItemsCount.value = 0;
 	}
 
 	public releaseQueue(): void {
