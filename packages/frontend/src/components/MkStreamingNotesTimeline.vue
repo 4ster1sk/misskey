@@ -5,6 +5,19 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <component :is="prefer.s.enablePullToRefresh ? MkPullToRefresh : 'div'" :refresher="() => reloadTimeline()">
+	<MkTimelineReplayControl
+		v-if="isReplay"
+		:playing="replayPlaying"
+		:speed="replaySpeed"
+		:currentTime="replayCurrentTime"
+		:pendingCount="replayPendingCount"
+		:ended="replayEnded"
+		:anchor="props.replayAnchor!"
+		@togglePlay="toggleReplayPlay"
+		@changeSpeed="changeReplaySpeed"
+		@skipGap="skipReplayGap"
+		@close="emit('replayClose')"
+	/>
 	<MkLoading v-if="paginator.fetching.value"/>
 
 	<MkError v-else-if="paginator.error.value" @retry="paginator.init()"/>
@@ -47,7 +60,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<MkNote v-else :class="$style.note" :note="note" :withHardMute="true" :data-scroll-anchor="note.id"/>
 			</template>
 		</component>
-		<button v-show="paginator.canFetchOlder.value" key="_more_" v-appear="prefer.s.enableInfiniteScroll ? paginator.fetchOlder : null" :disabled="paginator.fetchingOlder.value" class="_button" :class="$style.more" @click="paginator.fetchOlder">
+		<button v-if="!isReplay" v-show="paginator.canFetchOlder.value" key="_more_" v-appear="prefer.s.enableInfiniteScroll ? paginator.fetchOlder : null" :disabled="paginator.fetchingOlder.value" class="_button" :class="$style.more" @click="paginator.fetchOlder">
 			<div v-if="!paginator.fetchingOlder.value">{{ i18n.ts.loadMore }}</div>
 			<MkLoading v-else :inline="true"/>
 		</button>
@@ -78,6 +91,19 @@ import { DI } from '@/di.js';
 import { globalEvents, useGlobalEvent } from '@/events.js';
 import { isSeparatorNeeded, getSeparatorInfo } from '@/utility/timeline-date-separate.js';
 import { Paginator } from '@/utility/paginator.js';
+import MkTimelineReplayControl from '@/components/MkTimelineReplayControl.vue';
+import { misskeyApi } from '@/utility/misskey-api.js';
+import {
+	REPLAY_FETCH_LIMIT,
+	REPLAY_INITIAL_VISIBLE_COUNT,
+	REPLAY_MAX_GAP_MS,
+	nextReplayDelay,
+	sortOldestFirst,
+} from '@/utility/timeline-replay.js';
+
+const emit = defineEmits<{
+	(ev: 'replayClose'): void;
+}>();
 
 const props = withDefaults(defineProps<{
 	src: BasicTimelineType | 'mentions' | 'directs' | 'list' | 'antenna' | 'channel' | 'role';
@@ -91,6 +117,7 @@ const props = withDefaults(defineProps<{
 	withReplies?: boolean;
 	withSensitive?: boolean;
 	onlyFiles?: boolean;
+	replayAnchor?: number | null;
 }>(), {
 	withRenotes: true,
 	withReplies: false,
@@ -98,7 +125,10 @@ const props = withDefaults(defineProps<{
 	onlyFiles: false,
 	sound: false,
 	customSound: null,
+	replayAnchor: null,
 });
+
+const isReplay = computed(() => props.replayAnchor != null);
 
 provide('inTimeline', true);
 provide('tl_withSensitive', computed(() => props.withSensitive));
@@ -186,12 +216,29 @@ if (props.src === 'antenna') {
 }
 
 onMounted(() => {
-	paginator.init();
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		paginator.init();
+	}
 
 	if (paginator.computedParams) {
 		watch(paginator.computedParams, () => {
-			paginator.reload();
+			if (isReplay.value) {
+				startReplay();
+			} else {
+				paginator.reload();
+			}
 		}, { immediate: false, deep: true });
+	}
+});
+
+watch(() => props.replayAnchor, () => {
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		stopReplayTimer();
+		paginator.reload();
 	}
 });
 
@@ -249,7 +296,7 @@ const POLLING_INTERVAL =
 	prefer.s.pollingInterval === 3 ? MIN_POLLING_INTERVAL :
 	MIN_POLLING_INTERVAL;
 
-if (!store.s.realtimeMode) {
+if (!store.s.realtimeMode && !isReplay.value) {
 	// TODO: 先頭のノートの作成日時が1日以上前であれば流速が遅いTLと見做してインターバルを通常より延ばす
 	useInterval(async () => {
 		paginator.fetchNewer({
@@ -295,7 +342,7 @@ function prepend(note: Misskey.entities.Note & MisskeyEntity) {
 		paginator.enqueue(note);
 	}
 
-	if (props.sound) {
+	if (props.sound && !isReplay.value) {
 		if (props.customSound) {
 			sound.playMisskeySfxFile(props.customSound);
 		} else {
@@ -396,23 +443,248 @@ function disconnectChannel() {
 	}
 }
 
-if (store.s.realtimeMode) {
+if (store.s.realtimeMode && !isReplay.value) {
 	connectChannel();
 }
 
 watch(() => [props.list, props.antenna, props.channel, props.role, props.withRenotes], () => {
+	if (isReplay.value) {
+		startReplay();
+		return;
+	}
 	if (store.s.realtimeMode) {
 		disconnectChannel();
 		connectChannel();
 	}
 });
-watch(() => props.withSensitive, reloadTimeline);
+watch(() => props.withSensitive, () => {
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		reloadTimeline();
+	}
+});
 
 onUnmounted(() => {
+	stopReplayTimer();
 	disconnectChannel();
 });
 
+type ReplayNote = Misskey.entities.Note & MisskeyEntity;
+
+const replayPlaying = ref(true);
+const replaySpeed = ref(1);
+const replayCurrentTime = ref<number | null>(null);
+const replayPendingCount = ref(0);
+const replayEnded = ref(false);
+let replayBuffer: ReplayNote[] = [];
+let replayTimer: number | null = null;
+let replayLastShownMs: number | null = null;
+let replayFetching = false;
+let replayRunId = 0;
+
+function getReplayTarget(): { endpoint: keyof Misskey.Endpoints; baseParams: Record<string, unknown> } | null {
+	if (props.src === 'home') {
+		return { endpoint: 'notes/timeline', baseParams: { withRenotes: props.withRenotes, withFiles: props.onlyFiles ? true : undefined } };
+	} else if (props.src === 'local') {
+		return { endpoint: 'notes/local-timeline', baseParams: { withRenotes: props.withRenotes, withReplies: props.withReplies, withFiles: props.onlyFiles ? true : undefined } };
+	} else if (props.src === 'social') {
+		return { endpoint: 'notes/hybrid-timeline', baseParams: { withRenotes: props.withRenotes, withReplies: props.withReplies, withFiles: props.onlyFiles ? true : undefined } };
+	} else if (props.src === 'global') {
+		return { endpoint: 'notes/global-timeline', baseParams: { withRenotes: props.withRenotes, withFiles: props.onlyFiles ? true : undefined } };
+	} else if (props.src === 'list') {
+		if (props.list == null) return null;
+		return { endpoint: 'notes/user-list-timeline', baseParams: { withRenotes: props.withRenotes, withFiles: props.onlyFiles ? true : undefined, listId: props.list } };
+	} else if (props.src === 'antenna') {
+		if (props.antenna == null) return null;
+		return { endpoint: 'antennas/notes', baseParams: { antennaId: props.antenna } };
+	} else if (props.src === 'channel') {
+		if (props.channel == null) return null;
+		return { endpoint: 'channels/timeline', baseParams: { channelId: props.channel } };
+	} else if (props.src === 'role') {
+		if (props.role == null) return null;
+		return { endpoint: 'roles/notes', baseParams: { roleId: props.role } };
+	}
+	return null;
+}
+
+function stopReplayTimer() {
+	if (replayTimer != null) {
+		window.clearTimeout(replayTimer);
+		replayTimer = null;
+	}
+}
+
+async function startReplay() {
+	const runId = ++replayRunId;
+	stopReplayTimer();
+	disconnectChannel();
+	replayBuffer = [];
+	replayEnded.value = false;
+	replayFetching = false;
+	replayLastShownMs = null;
+	replayCurrentTime.value = props.replayAnchor ?? null;
+	replayPendingCount.value = 0;
+	paginator.fetching.value = true;
+	paginator.error.value = false;
+	paginator.items.value = [];
+	paginator.canFetchOlder.value = false;
+
+	const anchor = props.replayAnchor;
+	if (anchor == null) {
+		paginator.fetching.value = false;
+		return;
+	}
+
+	const target = getReplayTarget();
+	if (target == null) {
+		paginator.fetching.value = false;
+		return;
+	}
+
+	try {
+		const res = await misskeyApi(target.endpoint, { ...target.baseParams, sinceDate: anchor, limit: REPLAY_FETCH_LIMIT } as any) as ReplayNote[];
+		if (runId !== replayRunId) return;
+		const sorted = sortOldestFirst(res ?? []);
+		const visible = sorted.slice(0, REPLAY_INITIAL_VISIBLE_COUNT);
+		replayBuffer = sorted.slice(REPLAY_INITIAL_VISIBLE_COUNT);
+		const visibleDesc = [...visible].reverse();
+		if (visibleDesc.length > 0) {
+			paginator.pushItems(visibleDesc);
+			replayLastShownMs = Date.parse(visibleDesc[0]!.createdAt);
+			replayCurrentTime.value = replayLastShownMs;
+		} else if (sorted.length === 0) {
+			replayEnded.value = true;
+		}
+		replayPendingCount.value = replayBuffer.length;
+	} catch {
+		if (runId !== replayRunId) return;
+		paginator.error.value = true;
+		paginator.fetching.value = false;
+		return;
+	}
+	paginator.fetching.value = false;
+
+	if (runId !== replayRunId) return;
+	if (replayBuffer.length === 0 && !replayEnded.value) {
+		void fetchMoreReplay(runId);
+	} else {
+		scheduleNextReplay(runId);
+	}
+}
+
+async function fetchMoreReplay(runId: number) {
+	if (replayFetching || replayEnded.value) return;
+	if (runId !== replayRunId) return;
+	const target = getReplayTarget();
+	const sinceMs = replayLastShownMs ?? props.replayAnchor;
+	if (target == null || sinceMs == null) return;
+	replayFetching = true;
+	try {
+		const res = await misskeyApi(target.endpoint, { ...target.baseParams, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT } as any) as ReplayNote[];
+		if (runId !== replayRunId) return;
+		const shownIds = new Set((paginator.items.value as ReplayNote[]).map(x => x.id));
+		const sorted = sortOldestFirst(res ?? []).filter(x => !shownIds.has(x.id) && !replayBuffer.some(b => b.id === x.id));
+		const lastShown = replayLastShownMs;
+		const fresh = lastShown == null ? sorted : sorted.filter(x => Date.parse(x.createdAt) > lastShown || (Date.parse(x.createdAt) === lastShown && !shownIds.has(x.id)));
+		if (fresh.length === 0) {
+			replayEnded.value = true;
+		} else {
+			replayBuffer.push(...fresh);
+			replayPendingCount.value = replayBuffer.length;
+		}
+	} catch {
+		if (runId !== replayRunId) return;
+		replayEnded.value = true;
+	} finally {
+		replayFetching = false;
+	}
+	if (runId !== replayRunId) return;
+	scheduleNextReplay(runId);
+}
+
+function scheduleNextReplay(runId: number) {
+	stopReplayTimer();
+	if (runId !== replayRunId) return;
+	if (!replayPlaying.value || isPausingUpdate) return;
+	if (replayBuffer.length === 0) {
+		if (!replayEnded.value && !replayFetching) {
+			void fetchMoreReplay(runId);
+		}
+		return;
+	}
+	const next = replayBuffer[0]!;
+	const nextMs = Date.parse(next.createdAt);
+	const prevMs = replayLastShownMs ?? nextMs;
+	const delay = nextReplayDelay(prevMs, nextMs, replaySpeed.value, REPLAY_MAX_GAP_MS);
+	replayTimer = window.setTimeout(() => {
+		void showNextReplayNote(runId);
+	}, delay);
+}
+
+async function showNextReplayNote(runId: number) {
+	replayTimer = null;
+	if (runId !== replayRunId) return;
+	if (!replayPlaying.value) return;
+	const next = replayBuffer.shift();
+	if (next == null) {
+		void fetchMoreReplay(runId);
+		return;
+	}
+	prepend(next);
+	replayLastShownMs = Date.parse(next.createdAt);
+	replayCurrentTime.value = replayLastShownMs;
+	replayPendingCount.value = replayBuffer.length;
+	if (replayBuffer.length === 0) {
+		await fetchMoreReplay(runId);
+	} else {
+		scheduleNextReplay(runId);
+	}
+}
+
+function toggleReplayPlay() {
+	if (replayEnded.value) return;
+	replayPlaying.value = !replayPlaying.value;
+	if (replayPlaying.value) {
+		if (isTop()) {
+			paginator.releaseQueue();
+		}
+		scheduleNextReplay(replayRunId);
+	} else {
+		stopReplayTimer();
+	}
+}
+
+function changeReplaySpeed(speed: number) {
+	replaySpeed.value = speed > 0 ? speed : 1;
+	if (replayPlaying.value) {
+		scheduleNextReplay(replayRunId);
+	}
+}
+
+function skipReplayGap() {
+	const runId = replayRunId;
+	stopReplayTimer();
+	void showNextReplayNote(runId);
+}
+
+watch(visibility, () => {
+	if (!isReplay.value) return;
+	if (visibility.value === 'hidden') {
+		stopReplayTimer();
+	} else if (replayPlaying.value) {
+		if (isTop()) {
+			paginator.releaseQueue();
+		}
+		scheduleNextReplay(replayRunId);
+	}
+});
+
 function reloadTimeline() {
+	if (isReplay.value) {
+		startReplay();
+		return Promise.resolve();
+	}
 	return new Promise<void>((res) => {
 		adInsertionCounter = 0;
 

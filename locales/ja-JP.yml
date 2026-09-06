@@ -2833,6 +2833,20 @@ _timelines:
   social: "ソーシャル"
   global: "グローバル"
 
+_timelineReplay:
+  replayTimeline: "過去のタイムラインをリプレイ"
+  daysAgo: "何日前"
+  date: "日付"
+  start: "リプレイ開始"
+  stop: "リプレイ終了"
+  pause: "一時停止"
+  play: "再生"
+  skipGap: "間隔をスキップ"
+  speed: "速度"
+  replayingFrom: "{date}頃のタイムラインをリプレイ中"
+  replayEnded: "リプレイ可能な範囲の末尾に到達しました"
+  homeTimelineNote: "ホームは現在のフォロー関係で再取得するため、当時と厳密には一致しません"
+
 _play:
   new: "Playの作成"
   edit: "Playの編集"

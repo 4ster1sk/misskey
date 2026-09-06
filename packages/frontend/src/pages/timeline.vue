@@ -10,9 +10,28 @@ SPDX-License-Identifier: AGPL-3.0-only
 			{{ i18n.ts._timelineDescription[src] }}
 		</MkTip>
 		<MkPostForm v-if="prefer.r.showFixedPostForm.value" :class="$style.postForm" class="_panel" fixed style="margin-bottom: var(--MI-margin);"/>
+		<div v-if="showReplaySetup" class="_panel" :class="$style.replaySetup">
+			<div :class="$style.replaySetupRow">
+				<MkInput v-model="replayDaysAgo" type="number" :min="1" :max="1095" :step="1">
+					<template #label>{{ i18n.ts._timelineReplay.daysAgo }}</template>
+				</MkInput>
+				<MkInput v-model="replayDate" type="date">
+					<template #label>{{ i18n.ts._timelineReplay.date }}</template>
+				</MkInput>
+			</div>
+			<div :class="$style.replaySetupRow">
+				<MkButton small rounded :disabled="false" @click="replayDaysAgo = 7">7</MkButton>
+				<MkButton small rounded @click="replayDaysAgo = 30">30</MkButton>
+				<MkButton small rounded @click="replayDaysAgo = 100">100</MkButton>
+				<MkButton small rounded @click="replayDaysAgo = 365">365</MkButton>
+				<MkButton primary rounded style="margin-left: auto;" @click="startReplay">{{ i18n.ts._timelineReplay.start }}</MkButton>
+				<MkButton rounded @click="showReplaySetup = false">{{ i18n.ts.cancel }}</MkButton>
+			</div>
+			<div v-if="isBasicTimeline(src) && src === 'home'" :class="$style.replayNote">{{ i18n.ts._timelineReplay.homeTimelineNote }}</div>
+		</div>
 		<MkStreamingNotesTimeline
 			ref="tlComponent"
-			:key="src + withRenotes + withReplies + onlyFiles + withSensitive"
+			:key="src + withRenotes + withReplies + onlyFiles + withSensitive + String(replayAnchor)"
 			:class="$style.tl"
 			:src="(src.split(':')[0] as (BasicTimelineType | 'list'))"
 			:list="src.split(':')[1]"
@@ -21,6 +40,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 			:withSensitive="withSensitive"
 			:onlyFiles="onlyFiles"
 			:sound="true"
+			:replayAnchor="replayAnchor"
+			@replayClose="stopReplay"
 		/>
 	</div>
 </PageWithHeader>
@@ -34,6 +55,8 @@ import type { BasicTimelineType } from '@/timelines.js';
 import type { PageHeaderItem } from '@/types/page-header.js';
 import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
 import MkPostForm from '@/components/MkPostForm.vue';
+import MkInput from '@/components/MkInput.vue';
+import MkButton from '@/components/MkButton.vue';
 import * as os from '@/os.js';
 import { store } from '@/store.js';
 import { i18n } from '@/i18n.js';
@@ -45,8 +68,42 @@ import { deepMerge } from '@/utility/merge.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { availableBasicTimelines, hasWithReplies, isAvailableBasicTimeline, isBasicTimeline, basicTimelineIconClass } from '@/timelines.js';
 import { prefer } from '@/preferences.js';
+import { REPLAY_DEFAULT_DAYS_AGO, clampDaysAgo, daysAgoToAnchor, anchorToDaysAgo, toYmd, fromYmd } from '@/utility/timeline-replay.js';
 
 const tlComponent = useTemplateRef('tlComponent');
+
+const replayAnchor = ref<number | null>(null);
+const replayDaysAgo = ref<number>(REPLAY_DEFAULT_DAYS_AGO);
+const replayDate = ref<string>(toYmd(daysAgoToAnchor(REPLAY_DEFAULT_DAYS_AGO)));
+const showReplaySetup = ref(false);
+
+watch(replayDaysAgo, (v) => {
+	replayDaysAgo.value = clampDaysAgo(v);
+	replayDate.value = toYmd(daysAgoToAnchor(replayDaysAgo.value));
+});
+
+watch(replayDate, (v) => {
+	const t = fromYmd(v);
+	if (t != null && t <= Date.now()) {
+		replayDaysAgo.value = anchorToDaysAgo(t);
+	}
+});
+
+function startReplay() {
+	if (replayAnchor.value != null) {
+		replayAnchor.value = null;
+	}
+	const fromDate = fromYmd(replayDate.value);
+	const anchor = fromDate != null && fromDate <= Date.now()
+		? fromDate
+		: daysAgoToAnchor(replayDaysAgo.value);
+	replayAnchor.value = anchor;
+	showReplaySetup.value = false;
+}
+
+function stopReplay() {
+	replayAnchor.value = null;
+}
 
 type TimelinePageSrc = BasicTimelineType | `list:${string}`;
 
@@ -261,6 +318,18 @@ const headerActions = computed<PageHeaderItem[]>(() => {
 		});
 	}
 
+	items.unshift({
+		icon: 'ti ti-history',
+		text: i18n.ts._timelineReplay.replayTimeline,
+		handler: () => {
+			if (replayAnchor.value != null) {
+				stopReplay();
+			} else {
+				showReplaySetup.value = !showReplaySetup.value;
+			}
+		},
+	});
+
 	return items;
 });
 
@@ -332,5 +401,28 @@ definePage(() => ({
 	background: var(--MI_THEME-bg);
 	border-radius: var(--MI-radius);
 	overflow: clip;
+}
+
+.replaySetup {
+	padding: 12px 14px;
+	margin-bottom: var(--MI-margin);
+	border-radius: var(--MI-radius);
+}
+
+.replaySetupRow {
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-bottom: 8px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.replayNote {
+	font-size: 85%;
+	color: var(--MI_THEME-fgTransparentWeak);
 }
 </style>
