@@ -19,6 +19,12 @@ export function clampDaysAgo(value: number): number {
 	return Math.min(REPLAY_MAX_DAYS_AGO, Math.max(REPLAY_MIN_DAYS_AGO, Math.floor(value)));
 }
 
+export function clampAnchor(anchor: number, now: number = Date.now()): number {
+	const minAnchor = now - REPLAY_MAX_DAYS_AGO * DAY_MS;
+	if (!Number.isFinite(anchor)) return daysAgoToAnchor(REPLAY_DEFAULT_DAYS_AGO, now);
+	return Math.min(now, Math.max(minAnchor, anchor));
+}
+
 export function daysAgoToAnchor(daysAgo: number, now: number = Date.now()): number {
 	return now - clampDaysAgo(daysAgo) * DAY_MS;
 }

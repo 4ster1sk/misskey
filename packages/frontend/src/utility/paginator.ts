@@ -60,7 +60,7 @@ export interface IPaginator<T = unknown, _T = T & MisskeyEntity> {
 	fetchOlder(): Promise<void>;
 	fetchNewer(options?: { toQueue?: boolean }): Promise<void>;
 	trim(trigger?: boolean): void;
-	unshiftItems(newItems: (_T)[]): void;
+	unshiftItems(newItems: (_T)[], trim?: boolean): void;
 	pushItems(oldItems: (_T)[]): void;
 	prepend(item: _T): void;
 	enqueue(item: _T): void;

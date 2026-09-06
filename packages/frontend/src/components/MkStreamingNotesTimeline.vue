@@ -337,7 +337,13 @@ function prepend(note: Misskey.entities.Note & MisskeyEntity) {
 	}
 
 	if (isTop() && !isPausingUpdate) {
-		paginator.prepend(note);
+		if (isReplay.value) {
+			// リプレイ中は履歴を切り詰めない。prepend() は MAX_ITEMS=30 で trim するため、
+			// 30件超の再生で最古ノートが失われ再取得手段がない（loadMore は非表示）
+			paginator.unshiftItems([note], false);
+		} else {
+			paginator.prepend(note);
+		}
 	} else {
 		paginator.enqueue(note);
 	}

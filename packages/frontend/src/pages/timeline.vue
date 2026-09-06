@@ -65,7 +65,7 @@ import { deepMerge } from '@/utility/merge.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { availableBasicTimelines, hasWithReplies, isAvailableBasicTimeline, isBasicTimeline, basicTimelineIconClass } from '@/timelines.js';
 import { prefer } from '@/preferences.js';
-import { REPLAY_DEFAULT_DAYS_AGO, clampDaysAgo, daysAgoToAnchor, anchorToDaysAgo, toYmd, fromYmd } from '@/utility/timeline-replay.js';
+import { REPLAY_DEFAULT_DAYS_AGO, clampDaysAgo, clampAnchor, daysAgoToAnchor, anchorToDaysAgo, toYmd, fromYmd } from '@/utility/timeline-replay.js';
 
 const tlComponent = useTemplateRef('tlComponent');
 
@@ -97,8 +97,10 @@ watch(replayDate, (v) => {
 function startReplay() {
 	const fromDate = fromYmd(replayDate.value);
 	const anchor = fromDate != null && fromDate <= Date.now()
-		? fromDate
+		? clampAnchor(fromDate)
 		: daysAgoToAnchor(replayDaysAgo.value);
+	// 日付入力で範囲外が丸められた場合に表示と一致させる
+	replayDaysAgo.value = anchorToDaysAgo(anchor);
 	replayAnchor.value = anchor;
 	replayNonce.value++;
 	showReplaySetup.value = false;
