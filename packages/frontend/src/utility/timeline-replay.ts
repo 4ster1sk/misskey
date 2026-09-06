@@ -24,7 +24,8 @@ export function daysAgoToAnchor(daysAgo: number, now: number = Date.now()): numb
 }
 
 export function anchorToDaysAgo(anchor: number, now: number = Date.now()): number {
-	const diffDays = Math.round((now - anchor) / DAY_MS);
+	// toYmd/fromYmd（暦日・ローカル深夜）との往復でずれないよう暦日差分にする
+	const diffDays = Math.floor((now - anchor) / DAY_MS);
 	return clampDaysAgo(diffDays);
 }
 
@@ -56,6 +57,12 @@ export function fromYmd(ymd: string): number | null {
 	// Date.parse("YYYY-MM-DD") はUTC深夜になるため使わない
 	const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd);
 	if (m == null) return null;
-	const t = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime();
+	const y = Number(m[1]);
+	const mo = Number(m[2]) - 1;
+	const d = Number(m[3]);
+	const date = new Date(y, mo, d);
+	// 存在しない日付（例: 2026-02-30）は翌月に繰り上がるため拒否する
+	if (date.getFullYear() !== y || date.getMonth() !== mo || date.getDate() !== d) return null;
+	const t = date.getTime();
 	return Number.isFinite(t) ? t : null;
 }

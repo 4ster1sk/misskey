@@ -78,7 +78,8 @@ const replayAnchor = ref<number | null>(null);
 const replayDaysAgo = ref<number>(REPLAY_DEFAULT_DAYS_AGO);
 
 watch(replayDaysAgo, (v) => {
-	replayDaysAgo.value = clampDaysAgo(v);
+	const clamped = clampDaysAgo(v);
+	if (clamped !== v) replayDaysAgo.value = clamped;
 });
 
 function startReplay() {

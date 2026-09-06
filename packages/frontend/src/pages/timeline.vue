@@ -20,10 +20,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				</MkInput>
 			</div>
 			<div :class="$style.replaySetupRow">
-				<MkButton small rounded :disabled="false" @click="replayDaysAgo = 7">7</MkButton>
-				<MkButton small rounded @click="replayDaysAgo = 30">30</MkButton>
-				<MkButton small rounded @click="replayDaysAgo = 100">100</MkButton>
-				<MkButton small rounded @click="replayDaysAgo = 365">365</MkButton>
+				<MkButton v-for="d in [7, 30, 100, 365]" :key="d" small rounded @click="replayDaysAgo = d">{{ d }}</MkButton>
 				<MkButton primary rounded style="margin-left: auto;" @click="startReplay">{{ i18n.ts._timelineReplay.start }}</MkButton>
 				<MkButton rounded @click="showReplaySetup = false">{{ i18n.ts.cancel }}</MkButton>
 			</div>
@@ -31,7 +28,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 		<MkStreamingNotesTimeline
 			ref="tlComponent"
-			:key="src + withRenotes + withReplies + onlyFiles + withSensitive + String(replayAnchor)"
+			:key="src + withRenotes + withReplies + onlyFiles + withSensitive + String(replayAnchor) + ':' + replayNonce"
 			:class="$style.tl"
 			:src="(src.split(':')[0] as (BasicTimelineType | 'list'))"
 			:list="src.split(':')[1]"
@@ -73,31 +70,37 @@ import { REPLAY_DEFAULT_DAYS_AGO, clampDaysAgo, daysAgoToAnchor, anchorToDaysAgo
 const tlComponent = useTemplateRef('tlComponent');
 
 const replayAnchor = ref<number | null>(null);
+const replayNonce = ref(0);
 const replayDaysAgo = ref<number>(REPLAY_DEFAULT_DAYS_AGO);
 const replayDate = ref<string>(toYmd(daysAgoToAnchor(REPLAY_DEFAULT_DAYS_AGO)));
 const showReplaySetup = ref(false);
 
 watch(replayDaysAgo, (v) => {
-	replayDaysAgo.value = clampDaysAgo(v);
-	replayDate.value = toYmd(daysAgoToAnchor(replayDaysAgo.value));
+	const clamped = clampDaysAgo(v);
+	if (clamped !== v) {
+		replayDaysAgo.value = clamped;
+		return;
+	}
+	const ymd = toYmd(daysAgoToAnchor(clamped));
+	if (ymd !== replayDate.value) replayDate.value = ymd;
 });
 
 watch(replayDate, (v) => {
 	const t = fromYmd(v);
-	if (t != null && t <= Date.now()) {
-		replayDaysAgo.value = anchorToDaysAgo(t);
+	if (t == null || t > Date.now()) return;
+	const days = anchorToDaysAgo(t);
+	if (days !== replayDaysAgo.value) {
+		replayDaysAgo.value = days;
 	}
 });
 
 function startReplay() {
-	if (replayAnchor.value != null) {
-		replayAnchor.value = null;
-	}
 	const fromDate = fromYmd(replayDate.value);
 	const anchor = fromDate != null && fromDate <= Date.now()
 		? fromDate
 		: daysAgoToAnchor(replayDaysAgo.value);
 	replayAnchor.value = anchor;
+	replayNonce.value++;
 	showReplaySetup.value = false;
 }
 
