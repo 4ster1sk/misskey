@@ -101,6 +101,7 @@ function startReplay() {
 		: daysAgoToAnchor(replayDaysAgo.value);
 	// 日付入力で範囲外が丸められた場合に表示と一致させる
 	replayDaysAgo.value = anchorToDaysAgo(anchor);
+	replayDate.value = toYmd(anchor);
 	replayAnchor.value = anchor;
 	replayNonce.value++;
 	showReplaySetup.value = false;
