@@ -85,6 +85,7 @@ import { getProxiedImageUrl } from '@/utility/media-proxy.js';
 import { i18n } from '@/i18n.js';
 import { importEmojiMeta } from '@/utility/import-emoji.js';
 import MkCustomEmojiDetailedDialog from '@/components/MkCustomEmojiDetailedDialog.vue';
+import { iAmAdmin } from '@/i.js';
 import { definePage } from '@/page.js';
 import { Paginator } from '@/utility/paginator.js';
 
@@ -215,7 +216,7 @@ const menu = (ev: PointerEvent) => {
 					});
 				});
 		},
-	}, {
+	}, ...(iAmAdmin ? [{
 		icon: 'ti ti-upload',
 		text: i18n.ts.import,
 		action: async () => {
@@ -238,7 +239,7 @@ const menu = (ev: PointerEvent) => {
 					});
 				});
 		},
-	}], ev.currentTarget ?? ev.target);
+	}] : [])], ev.currentTarget ?? ev.target);
 };
 
 const setCategoryBulk = async () => {
