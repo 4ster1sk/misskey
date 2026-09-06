@@ -65,7 +65,7 @@ export interface IPaginator<T = unknown, _T = T & MisskeyEntity> {
 	prepend(item: _T): void;
 	enqueue(item: _T): void;
 	clearQueue(): void;
-	releaseQueue(): void;
+	releaseQueue(trim?: boolean): void;
 	removeItem(id: string): void;
 	updateItem(id: string, updater: (item: _T) => _T): void;
 }
@@ -404,9 +404,9 @@ export class Paginator<
 		this.queuedAheadItemsCount.value = 0;
 	}
 
-	public releaseQueue(): void {
+	public releaseQueue(trim = true): void {
 		if (this.aheadQueue.length === 0) return; // これやらないと余計なre-renderが走る
-		this.unshiftItems(this.aheadQueue);
+		this.unshiftItems(this.aheadQueue, trim);
 		this.aheadQueue = [];
 		this.queuedAheadItemsCount.value = 0;
 	}

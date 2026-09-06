@@ -9,6 +9,7 @@ export const REPLAY_DEFAULT_DAYS_AGO = 365;
 export const REPLAY_FETCH_LIMIT = 30;
 export const REPLAY_INITIAL_VISIBLE_COUNT = 10;
 export const REPLAY_MAX_GAP_MS = 30 * 1000;
+export const REPLAY_MAX_RENDER_ITEMS = 200;
 export const REPLAY_SPEEDS = [1, 10, 60] as const;
 export type ReplaySpeed = typeof REPLAY_SPEEDS[number];
 
