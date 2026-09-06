@@ -80,11 +80,8 @@ const emit = defineEmits<{
 const speeds = REPLAY_SPEEDS;
 
 const replayLabel = computed(() => {
-	const date = new Date(props.anchor);
-	const y = date.getFullYear();
-	const m = date.getMonth() + 1;
-	const d = date.getDate();
-	return i18n.tsx._timelineReplay.replayingFrom({ date: `${y}/${m}/${d}` });
+	const date = new Date(props.anchor).toLocaleDateString();
+	return i18n.tsx._timelineReplay.replayingFrom({ date });
 });
 
 const formattedTime = computed(() => {
