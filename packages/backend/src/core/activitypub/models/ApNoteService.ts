@@ -38,6 +38,8 @@ import { ApImageService } from './ApImageService.js';
 import type { Resolver } from '../ApResolverService.js';
 import type { IObject, IPost } from '../type.js';
 
+const MAX_NOTE_ATTACHMENTS = 16;
+
 @Injectable()
 export class ApNoteService {
 	private logger: Logger;
@@ -232,7 +234,7 @@ export class ApNoteService {
 		// 添付ファイル
 		const files: MiDriveFile[] = [];
 
-		for (const attach of toArray(note.attachment)) {
+		for (const attach of toArray(note.attachment).slice(0, MAX_NOTE_ATTACHMENTS)) {
 			attach.sensitive ??= note.sensitive;
 			const file = await this.apImageService.resolveImage(actor, attach);
 			if (file) files.push(file);
