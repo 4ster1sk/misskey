@@ -10739,6 +10739,56 @@ export interface Locale extends ILocale {
          */
         "global": string;
     };
+    "_timelineReplay": {
+        /**
+         * 過去のタイムラインをリプレイ
+         */
+        "replayTimeline": string;
+        /**
+         * 何日前
+         */
+        "daysAgo": string;
+        /**
+         * 日付
+         */
+        "date": string;
+        /**
+         * リプレイ開始
+         */
+        "start": string;
+        /**
+         * リプレイ終了
+         */
+        "stop": string;
+        /**
+         * 一時停止
+         */
+        "pause": string;
+        /**
+         * 再生
+         */
+        "play": string;
+        /**
+         * 間隔をスキップ
+         */
+        "skipGap": string;
+        /**
+         * 速度
+         */
+        "speed": string;
+        /**
+         * {date}頃のタイムラインをリプレイ中
+         */
+        "replayingFrom": ParameterizedString<"date">;
+        /**
+         * リプレイ可能な範囲の末尾に到達しました
+         */
+        "replayEnded": string;
+        /**
+         * ホームは現在のフォロー関係で再取得するため、当時と厳密には一致しません
+         */
+        "homeTimelineNote": string;
+    };
     "_play": {
         /**
          * Playの作成

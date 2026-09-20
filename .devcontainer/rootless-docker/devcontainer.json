@@ -1,5 +1,5 @@
 {
-	"name": "yojo-art (rootless Docker)",
+	"name": "Misskey (rootless Docker)",
 	"dockerComposeFile": "../compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspace",

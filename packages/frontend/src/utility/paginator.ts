@@ -60,11 +60,12 @@ export interface IPaginator<T = unknown, _T = T & MisskeyEntity> {
 	fetchOlder(): Promise<void>;
 	fetchNewer(options?: { toQueue?: boolean }): Promise<void>;
 	trim(trigger?: boolean): void;
-	unshiftItems(newItems: (_T)[]): void;
+	unshiftItems(newItems: (_T)[], trim?: boolean): void;
 	pushItems(oldItems: (_T)[]): void;
 	prepend(item: _T): void;
 	enqueue(item: _T): void;
-	releaseQueue(): void;
+	clearQueue(): void;
+	releaseQueue(trim?: boolean): void;
 	removeItem(id: string): void;
 	updateItem(id: string, updater: (item: _T) => _T): void;
 }
@@ -172,6 +173,7 @@ export class Paginator<
 		this.pushItems = this.pushItems.bind(this);
 		this.prepend = this.prepend.bind(this);
 		this.enqueue = this.enqueue.bind(this);
+		this.clearQueue = this.clearQueue.bind(this);
 		this.releaseQueue = this.releaseQueue.bind(this);
 		this.removeItem = this.removeItem.bind(this);
 		this.updateItem = this.updateItem.bind(this);
@@ -397,9 +399,14 @@ export class Paginator<
 		this.queuedAheadItemsCount.value = this.aheadQueue.length;
 	}
 
-	public releaseQueue(): void {
+	public clearQueue(): void {
+		this.aheadQueue = [];
+		this.queuedAheadItemsCount.value = 0;
+	}
+
+	public releaseQueue(trim = true): void {
 		if (this.aheadQueue.length === 0) return; // これやらないと余計なre-renderが走る
-		this.unshiftItems(this.aheadQueue);
+		this.unshiftItems(this.aheadQueue, trim);
 		this.aheadQueue = [];
 		this.queuedAheadItemsCount.value = 0;
 	}

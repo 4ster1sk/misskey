@@ -5,9 +5,22 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <component :is="prefer.s.enablePullToRefresh ? MkPullToRefresh : 'div'" :refresher="() => reloadTimeline()">
+	<MkTimelineReplayControl
+		v-if="isReplay"
+		:playing="replayPlaying"
+		:speed="replaySpeed"
+		:currentTime="replayCurrentTime"
+		:pendingCount="replayPendingCount"
+		:ended="replayEnded"
+		:anchor="props.replayAnchor!"
+		@togglePlay="toggleReplayPlay"
+		@changeSpeed="changeReplaySpeed"
+		@skipGap="skipReplayGap"
+		@close="emit('replayClose')"
+	/>
 	<MkLoading v-if="paginator.fetching.value"/>
 
-	<MkError v-else-if="paginator.error.value" @retry="paginator.init()"/>
+	<MkError v-else-if="paginator.error.value" @retry="retryTimeline()"/>
 
 	<div v-else-if="paginator.items.value.length === 0" key="_empty_">
 		<slot name="empty"><MkResult type="empty" :text="i18n.ts.noNotes"/></slot>
@@ -47,7 +60,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<MkNote v-else :class="$style.note" :note="note" :withHardMute="true" :data-scroll-anchor="note.id"/>
 			</template>
 		</component>
-		<button v-show="paginator.canFetchOlder.value" key="_more_" v-appear="prefer.s.enableInfiniteScroll ? paginator.fetchOlder : null" :disabled="paginator.fetchingOlder.value" class="_button" :class="$style.more" @click="paginator.fetchOlder">
+		<button v-if="!isReplay" v-show="paginator.canFetchOlder.value" key="_more_" v-appear="prefer.s.enableInfiniteScroll ? paginator.fetchOlder : null" :disabled="paginator.fetchingOlder.value" class="_button" :class="$style.more" @click="paginator.fetchOlder">
 			<div v-if="!paginator.fetchingOlder.value">{{ i18n.ts.loadMore }}</div>
 			<MkLoading v-else :inline="true"/>
 		</button>
@@ -78,6 +91,20 @@ import { DI } from '@/di.js';
 import { globalEvents, useGlobalEvent } from '@/events.js';
 import { isSeparatorNeeded, getSeparatorInfo } from '@/utility/timeline-date-separate.js';
 import { Paginator } from '@/utility/paginator.js';
+import MkTimelineReplayControl from '@/components/MkTimelineReplayControl.vue';
+import { misskeyApi } from '@/utility/misskey-api.js';
+import {
+	REPLAY_FETCH_LIMIT,
+	REPLAY_INITIAL_VISIBLE_COUNT,
+	REPLAY_MAX_GAP_MS,
+	REPLAY_MAX_RENDER_ITEMS,
+	nextReplayDelay,
+	sortOldestFirst,
+} from '@/utility/timeline-replay.js';
+
+const emit = defineEmits<{
+	(ev: 'replayClose'): void;
+}>();
 
 const props = withDefaults(defineProps<{
 	src: BasicTimelineType | 'mentions' | 'directs' | 'list' | 'antenna' | 'channel' | 'role';
@@ -91,6 +118,7 @@ const props = withDefaults(defineProps<{
 	withReplies?: boolean;
 	withSensitive?: boolean;
 	onlyFiles?: boolean;
+	replayAnchor?: number | null;
 }>(), {
 	withRenotes: true,
 	withReplies: false,
@@ -98,7 +126,10 @@ const props = withDefaults(defineProps<{
 	onlyFiles: false,
 	sound: false,
 	customSound: null,
+	replayAnchor: null,
 });
+
+const isReplay = computed(() => props.replayAnchor != null);
 
 provide('inTimeline', true);
 provide('tl_withSensitive', computed(() => props.withSensitive));
@@ -186,12 +217,29 @@ if (props.src === 'antenna') {
 }
 
 onMounted(() => {
-	paginator.init();
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		paginator.init();
+	}
 
 	if (paginator.computedParams) {
 		watch(paginator.computedParams, () => {
-			paginator.reload();
+			if (isReplay.value) {
+				startReplay();
+			} else {
+				paginator.reload();
+			}
 		}, { immediate: false, deep: true });
+	}
+});
+
+watch(() => props.replayAnchor, () => {
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		stopReplayTimer();
+		paginator.reload();
 	}
 });
 
@@ -207,7 +255,7 @@ let scrollContainer: HTMLElement | null = null;
 
 function onScrollContainerScroll() {
 	if (isTop()) {
-		paginator.releaseQueue();
+		releaseAheadQueue();
 	}
 }
 
@@ -249,7 +297,7 @@ const POLLING_INTERVAL =
 	prefer.s.pollingInterval === 3 ? MIN_POLLING_INTERVAL :
 	MIN_POLLING_INTERVAL;
 
-if (!store.s.realtimeMode) {
+if (!store.s.realtimeMode && !isReplay.value) {
 	// TODO: 先頭のノートの作成日時が1日以上前であれば流速が遅いTLと見做してインターバルを通常より延ばす
 	useInterval(async () => {
 		paginator.fetchNewer({
@@ -277,8 +325,19 @@ useGlobalEvent('noteRemovedFromAntenna', (antennaId, noteId) => {
 	}
 });
 
+function releaseAheadQueue() {
+	if (isReplay.value) {
+		paginator.releaseQueue(false);
+		if (paginator.items.value.length > REPLAY_MAX_RENDER_ITEMS) {
+			paginator.items.value = paginator.items.value.slice(0, REPLAY_MAX_RENDER_ITEMS);
+		}
+	} else {
+		paginator.releaseQueue();
+	}
+}
+
 function releaseQueue() {
-	paginator.releaseQueue();
+	releaseAheadQueue();
 	scrollToTop(rootEl.value!);
 }
 
@@ -290,12 +349,22 @@ function prepend(note: Misskey.entities.Note & MisskeyEntity) {
 	}
 
 	if (isTop() && !isPausingUpdate) {
-		paginator.prepend(note);
+		if (isReplay.value) {
+			// リプレイ中は履歴を切り詰めない。prepend() は MAX_ITEMS=30 で trim するため、
+			// 30件超の再生で最古ノートが失われ再取得手段がない（loadMore は非表示）
+			paginator.unshiftItems([note], false);
+			if (paginator.items.value.length > REPLAY_MAX_RENDER_ITEMS) {
+				// 長時間再生でのDOM肥大を防ぐ。末尾（最古側）のみ捨てるため再取得ループは起きない
+				paginator.items.value = paginator.items.value.slice(0, REPLAY_MAX_RENDER_ITEMS);
+			}
+		} else {
+			paginator.prepend(note);
+		}
 	} else {
 		paginator.enqueue(note);
 	}
 
-	if (props.sound) {
+	if (props.sound && !isReplay.value) {
 		if (props.customSound) {
 			sound.playMisskeySfxFile(props.customSound);
 		} else {
@@ -396,23 +465,266 @@ function disconnectChannel() {
 	}
 }
 
-if (store.s.realtimeMode) {
+if (store.s.realtimeMode && !isReplay.value) {
 	connectChannel();
 }
 
 watch(() => [props.list, props.antenna, props.channel, props.role, props.withRenotes], () => {
+	if (isReplay.value) {
+		startReplay();
+		return;
+	}
 	if (store.s.realtimeMode) {
 		disconnectChannel();
 		connectChannel();
 	}
 });
-watch(() => props.withSensitive, reloadTimeline);
+watch(() => props.withSensitive, () => {
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		reloadTimeline();
+	}
+});
 
 onUnmounted(() => {
+	stopReplayTimer();
 	disconnectChannel();
 });
 
+type ReplayNote = Misskey.entities.Note & MisskeyEntity;
+
+const replayPlaying = ref(true);
+const replaySpeed = ref(1);
+const replayCurrentTime = ref<number | null>(null);
+const replayPendingCount = ref(0);
+const replayEnded = ref(false);
+let replayBuffer: ReplayNote[] = [];
+let replayTimer: number | null = null;
+let replayLastShownMs: number | null = null;
+let replayFetching = false;
+let replayRunId = 0;
+
+async function fetchReplayNotes(sinceMs: number): Promise<ReplayNote[] | null> {
+	if (props.src === 'home') {
+		return await misskeyApi('notes/timeline', { withRenotes: props.withRenotes, withFiles: props.onlyFiles ? true : undefined, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	} else if (props.src === 'local') {
+		return await misskeyApi('notes/local-timeline', { withRenotes: props.withRenotes, withReplies: props.withReplies, withFiles: props.onlyFiles ? true : undefined, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	} else if (props.src === 'social') {
+		return await misskeyApi('notes/hybrid-timeline', { withRenotes: props.withRenotes, withReplies: props.withReplies, withFiles: props.onlyFiles ? true : undefined, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	} else if (props.src === 'global') {
+		return await misskeyApi('notes/global-timeline', { withRenotes: props.withRenotes, withFiles: props.onlyFiles ? true : undefined, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	} else if (props.src === 'list') {
+		if (props.list == null) return null;
+		return await misskeyApi('notes/user-list-timeline', { withRenotes: props.withRenotes, withFiles: props.onlyFiles ? true : undefined, listId: props.list, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	} else if (props.src === 'antenna') {
+		if (props.antenna == null) return null;
+		return await misskeyApi('antennas/notes', { antennaId: props.antenna, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	} else if (props.src === 'channel') {
+		if (props.channel == null) return null;
+		return await misskeyApi('channels/timeline', { channelId: props.channel, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	} else if (props.src === 'role') {
+		if (props.role == null) return null;
+		return await misskeyApi('roles/notes', { roleId: props.role, sinceDate: sinceMs, limit: REPLAY_FETCH_LIMIT }) as ReplayNote[];
+	}
+	return null;
+}
+
+function stopReplayTimer() {
+	if (replayTimer != null) {
+		window.clearTimeout(replayTimer);
+		replayTimer = null;
+	}
+}
+
+async function startReplay() {
+	const runId = ++replayRunId;
+	stopReplayTimer();
+	disconnectChannel();
+	replayBuffer = [];
+	replayEnded.value = false;
+	replayFetching = false;
+	replayLastShownMs = null;
+	replayCurrentTime.value = props.replayAnchor ?? null;
+	replayPendingCount.value = 0;
+	paginator.fetching.value = true;
+	paginator.error.value = false;
+	paginator.items.value = [];
+	paginator.clearQueue();
+	paginator.canFetchOlder.value = false;
+
+	const anchor = props.replayAnchor;
+	if (anchor == null) {
+		paginator.fetching.value = false;
+		return;
+	}
+
+	try {
+		const res = await fetchReplayNotes(anchor);
+		if (runId !== replayRunId) return;
+		if (res == null) {
+			// mentions/directs 等の未対応タイムラインでは空のままにせず終了状態を示す
+			replayEnded.value = true;
+			paginator.fetching.value = false;
+			return;
+		}
+		const sorted = sortOldestFirst(res ?? []);
+		const visible = sorted.slice(0, REPLAY_INITIAL_VISIBLE_COUNT);
+		replayBuffer = sorted.slice(REPLAY_INITIAL_VISIBLE_COUNT);
+		const visibleDesc = [...visible].reverse();
+		if (visibleDesc.length > 0) {
+			paginator.pushItems(visibleDesc);
+			replayLastShownMs = Date.parse(visibleDesc[0]!.createdAt);
+			replayCurrentTime.value = replayLastShownMs;
+		} else if (sorted.length === 0) {
+			replayEnded.value = true;
+		}
+		replayPendingCount.value = replayBuffer.length;
+	} catch {
+		if (runId !== replayRunId) return;
+		paginator.error.value = true;
+		paginator.fetching.value = false;
+		return;
+	}
+	paginator.fetching.value = false;
+
+	if (runId !== replayRunId) return;
+	if (replayBuffer.length === 0 && !replayEnded.value) {
+		void fetchMoreReplay(runId);
+	} else {
+		scheduleNextReplay(runId);
+	}
+}
+
+async function fetchMoreReplay(runId: number) {
+	if (replayFetching || replayEnded.value) return;
+	if (runId !== replayRunId) return;
+	const sinceMs = replayLastShownMs ?? props.replayAnchor;
+	if (sinceMs == null) return;
+	replayFetching = true;
+	try {
+		const res = await fetchReplayNotes(sinceMs);
+		if (runId !== replayRunId) return;
+		if (res == null) return;
+		if (runId !== replayRunId) return;
+		const shownIds = new Set((paginator.items.value as ReplayNote[]).map(x => x.id));
+		const sorted = sortOldestFirst(res ?? []).filter(x => !shownIds.has(x.id) && !replayBuffer.some(b => b.id === x.id));
+		const lastShown = replayLastShownMs;
+		const fresh = lastShown == null ? sorted : sorted.filter(x => Date.parse(x.createdAt) > lastShown || (Date.parse(x.createdAt) === lastShown && !shownIds.has(x.id)));
+		if (fresh.length === 0) {
+			replayEnded.value = true;
+		} else {
+			replayBuffer.push(...fresh);
+			replayPendingCount.value = replayBuffer.length;
+		}
+	} catch {
+		if (runId !== replayRunId) return;
+		// 一過性の取得失敗を「末尾到達」と誤表示しない。再生状態を維持し、少し待って再取得する
+		if (replayPlaying.value) {
+			stopReplayTimer();
+			replayTimer = window.setTimeout(() => {
+				void fetchMoreReplay(runId);
+			}, 5000);
+		}
+		return;
+	} finally {
+		replayFetching = false;
+	}
+	if (runId !== replayRunId) return;
+	scheduleNextReplay(runId);
+}
+
+function scheduleNextReplay(runId: number) {
+	stopReplayTimer();
+	if (runId !== replayRunId) return;
+	if (!replayPlaying.value || isPausingUpdate) return;
+	if (replayBuffer.length === 0) {
+		if (!replayEnded.value && !replayFetching) {
+			void fetchMoreReplay(runId);
+		}
+		return;
+	}
+	const next = replayBuffer[0]!;
+	const nextMs = Date.parse(next.createdAt);
+	const prevMs = replayLastShownMs ?? nextMs;
+	const delay = nextReplayDelay(prevMs, nextMs, replaySpeed.value, REPLAY_MAX_GAP_MS);
+	replayTimer = window.setTimeout(() => {
+		void showNextReplayNote(runId);
+	}, delay);
+}
+
+async function showNextReplayNote(runId: number, force = false) {
+	replayTimer = null;
+	if (runId !== replayRunId) return;
+	if (!replayPlaying.value && !force) return;
+	const next = replayBuffer.shift();
+	if (next == null) {
+		void fetchMoreReplay(runId);
+		return;
+	}
+	prepend(next);
+	replayLastShownMs = Date.parse(next.createdAt);
+	replayCurrentTime.value = replayLastShownMs;
+	replayPendingCount.value = replayBuffer.length;
+	if (replayBuffer.length === 0) {
+		await fetchMoreReplay(runId);
+	} else if (replayPlaying.value) {
+		scheduleNextReplay(runId);
+	}
+}
+
+function toggleReplayPlay() {
+	if (replayEnded.value) return;
+	replayPlaying.value = !replayPlaying.value;
+	if (replayPlaying.value) {
+		if (isTop()) {
+			releaseAheadQueue();
+		}
+		scheduleNextReplay(replayRunId);
+	} else {
+		stopReplayTimer();
+	}
+}
+
+function changeReplaySpeed(speed: number) {
+	replaySpeed.value = speed > 0 ? speed : 1;
+	if (replayPlaying.value) {
+		scheduleNextReplay(replayRunId);
+	}
+}
+
+function skipReplayGap() {
+	const runId = replayRunId;
+	stopReplayTimer();
+	// 一時停止中でも次の1件は表示する（自動再生は再開しない）
+	void showNextReplayNote(runId, true);
+}
+
+watch(visibility, () => {
+	if (!isReplay.value) return;
+	if (visibility.value === 'hidden') {
+		stopReplayTimer();
+	} else if (replayPlaying.value) {
+		if (isTop()) {
+			releaseAheadQueue();
+		}
+		scheduleNextReplay(replayRunId);
+	}
+});
+
+function retryTimeline() {
+	if (isReplay.value) {
+		startReplay();
+	} else {
+		paginator.init();
+	}
+}
+
 function reloadTimeline() {
+	if (isReplay.value) {
+		startReplay();
+		return Promise.resolve();
+	}
 	return new Promise<void>((res) => {
 		adInsertionCounter = 0;
 
