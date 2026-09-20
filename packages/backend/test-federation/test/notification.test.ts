@@ -1,6 +1,6 @@
 import { describe, test, beforeAll, afterAll } from 'vitest';
 import * as Misskey from 'misskey-js';
-import { assertNotificationReceived, createAccount, type LoginUser, resolveRemoteNote, resolveRemoteUser, waitForFollowing, waitForFollowRelation } from './utils.js';
+import { assertNotificationReceived, createAccount, type LoginUser, resolveRemoteNote, resolveRemoteUser, waitForFollowing, waitForFollowRelation, sleep } from './utils.js';
 
 describe('Notification', () => {
 	let alice: LoginUser, bob: LoginUser;
