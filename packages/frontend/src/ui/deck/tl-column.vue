@@ -17,21 +17,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</p>
 		<p :class="$style.disabledDescription">{{ i18n.ts._disabledTimeline.description }}</p>
 	</div>
-	<div v-if="replayAnchor == null && isAvailableBasicTimeline(column.tl)" :class="$style.replaySetup">
-		<MkInput v-model="replayDaysAgo" type="number" :min="1" :max="1095" :step="1" small>
-			<template #label>{{ i18n.ts._timelineReplay.daysAgo }}</template>
-		</MkInput>
-		<div :class="$style.replaySetupRow">
-			<MkButton small rounded @click="replayDaysAgo = 7">7</MkButton>
-			<MkButton small rounded @click="replayDaysAgo = 30">30</MkButton>
-			<MkButton small rounded @click="replayDaysAgo = 365">365</MkButton>
-			<MkButton small primary rounded @click="startReplay">{{ i18n.ts._timelineReplay.start }}</MkButton>
-		</div>
-	</div>
 	<MkStreamingNotesTimeline
 		v-else-if="column.tl"
 		ref="timeline"
-		:key="column.tl + withRenotes + withReplies + onlyFiles + String(replayAnchor)"
+		:key="column.tl + withRenotes + withReplies + onlyFiles"
 		:src="column.tl"
 		:withRenotes="withRenotes"
 		:withReplies="withReplies"
@@ -39,8 +28,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 		:onlyFiles="onlyFiles"
 		:sound="true"
 		:customSound="soundSetting"
-		:replayAnchor="replayAnchor"
-		@replayClose="replayAnchor = null"
 	/>
 </XColumn>
 </template>
@@ -53,13 +40,10 @@ import type { MenuItem } from '@/types/menu.js';
 import type { SoundStore } from '@/preferences/def.js';
 import { removeColumn, updateColumn } from '@/deck.js';
 import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
-import MkInput from '@/components/MkInput.vue';
-import MkButton from '@/components/MkButton.vue';
 import * as os from '@/os.js';
 import { i18n } from '@/i18n.js';
 import { hasWithReplies, isAvailableBasicTimeline, basicTimelineIconClass } from '@/timelines.js';
 import { soundSettingsButton } from '@/ui/deck/tl-note-notification.js';
-import { REPLAY_DEFAULT_DAYS_AGO, clampDaysAgo, daysAgoToAnchor } from '@/utility/timeline-replay.js';
 
 const props = defineProps<{
 	column: Column;
@@ -73,18 +57,6 @@ const withRenotes = ref(props.column.withRenotes ?? true);
 const withReplies = ref(props.column.withReplies ?? false);
 const withSensitive = ref(props.column.withSensitive ?? true);
 const onlyFiles = ref(props.column.onlyFiles ?? false);
-
-const replayAnchor = ref<number | null>(null);
-const replayDaysAgo = ref<number>(REPLAY_DEFAULT_DAYS_AGO);
-
-watch(replayDaysAgo, (v) => {
-	const clamped = clampDaysAgo(v);
-	if (clamped !== v) replayDaysAgo.value = clamped;
-});
-
-function startReplay() {
-	replayAnchor.value = daysAgoToAnchor(replayDaysAgo.value);
-}
 
 watch(withRenotes, v => {
 	updateColumn(props.column.id, {
@@ -183,16 +155,6 @@ const menu = computed<MenuItem[]>(() => {
 		ref: withSensitive,
 	});
 
-	if (replayAnchor.value != null) {
-		menuItems.push({
-			icon: 'ti ti-history-off',
-			text: i18n.ts._timelineReplay.stop,
-			action: () => {
-				replayAnchor.value = null;
-			},
-		});
-	}
-
 	return menuItems;
 });
 </script>
@@ -208,19 +170,5 @@ const menu = computed<MenuItem[]>(() => {
 
 .disabledDescription {
 	font-size: 90%;
-}
-
-.replaySetup {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	padding: 12px;
-}
-
-.replaySetupRow {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	flex-wrap: wrap;
 }
 </style>

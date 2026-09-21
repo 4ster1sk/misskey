@@ -73,3 +73,28 @@ export function fromYmd(ymd: string): number | null {
 	const t = date.getTime();
 	return Number.isFinite(t) ? t : null;
 }
+
+export function toLocalDatetime(ms: number): string {
+	const d = new Date(ms);
+	const y = d.getFullYear();
+	const mo = String(d.getMonth() + 1).padStart(2, '0');
+	const day = String(d.getDate()).padStart(2, '0');
+	const h = String(d.getHours()).padStart(2, '0');
+	const min = String(d.getMinutes()).padStart(2, '0');
+	return `${y}-${mo}-${day}T${h}:${min}`;
+}
+
+export function fromLocalDatetime(s: string): number | null {
+	const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(s);
+	if (m == null) return null;
+	const y = Number(m[1]);
+	const mo = Number(m[2]) - 1;
+	const d = Number(m[3]);
+	const h = Number(m[4]);
+	const min = Number(m[5]);
+	if (h > 23 || min > 59) return null;
+	const date = new Date(y, mo, d, h, min);
+	if (date.getFullYear() !== y || date.getMonth() !== mo || date.getDate() !== d || date.getHours() !== h || date.getMinutes() !== min) return null;
+	const t = date.getTime();
+	return Number.isFinite(t) ? t : null;
+}

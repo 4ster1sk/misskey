@@ -2838,6 +2838,7 @@ _timelineReplay:
   replayTimeline: "過去のタイムラインをリプレイ"
   daysAgo: "何日前"
   date: "日付"
+  datetime: "日時"
   start: "リプレイ開始"
   stop: "リプレイ終了"
   pause: "一時停止"
@@ -2847,6 +2848,10 @@ _timelineReplay:
   replayingFrom: "{date}頃のタイムラインをリプレイ中"
   replayEnded: "リプレイ可能な範囲の末尾に到達しました"
   homeTimelineNote: "ホームは現在のフォロー関係で再取得するため、当時と厳密には一致しません"
+  selectTimeline: "タイムラインを選択"
+  selectList: "リストを選択"
+  changeTimeline: "タイムラインを変更"
+  setupTitle: "再現する時刻とタイムラインを選択"
 
 _play:
   new: "Playの作成"
@@ -3028,6 +3033,7 @@ _deck:
     direct: "指名"
     roleTimeline: "ロールタイムライン"
     chat: "ダイレクトメッセージ"
+    replay: "タイムマシン"
 
 _dialog:
   charactersExceeded: "最大文字数を超えています！ 現在 {current} / 制限 {max}"

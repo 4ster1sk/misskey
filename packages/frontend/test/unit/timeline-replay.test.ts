@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, test } from 'vitest';
-import { anchorToDaysAgo, clampAnchor, clampDaysAgo, daysAgoToAnchor, fromYmd, nextReplayDelay, sortOldestFirst, toYmd } from '@/utility/timeline-replay.js';
+import { anchorToDaysAgo, clampAnchor, clampDaysAgo, daysAgoToAnchor, fromLocalDatetime, fromYmd, nextReplayDelay, sortOldestFirst, toLocalDatetime, toYmd } from '@/utility/timeline-replay.js';
 
 describe('clampDaysAgo', () => {
 	test('clamps to 1..1095', () => {
@@ -53,5 +53,20 @@ describe('toYmd / fromYmd', () => {
 		const anchor = daysAgoToAnchor(30, now);
 		expect(anchorToDaysAgo(anchor, now)).toBe(30);
 		expect(fromYmd(toYmd(anchor))).not.toBeNull();
+	});
+});
+
+describe('toLocalDatetime / fromLocalDatetime', () => {
+	test('rejects invalid formats and nonexistent dates', () => {
+		expect(fromLocalDatetime('2026-02-30T12:00')).toBeNull();
+		expect(fromLocalDatetime('2026-13-01T00:00')).toBeNull();
+		expect(fromLocalDatetime('2026-01-01T24:00')).toBeNull();
+		expect(fromLocalDatetime('2026-01-01')).toBeNull();
+		expect(fromLocalDatetime('not-a-date')).toBeNull();
+	});
+
+	test('round-trips a valid datetime', () => {
+		const anchor = new Date(2025, 5, 15, 12, 34, 0).getTime();
+		expect(fromLocalDatetime(toLocalDatetime(anchor))).toBe(anchor);
 	});
 });

@@ -12,15 +12,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<MkPostForm v-if="prefer.r.showFixedPostForm.value" :class="$style.postForm" class="_panel" fixed style="margin-bottom: var(--MI-margin);"/>
 		<div v-if="showReplaySetup" class="_panel" :class="$style.replaySetup">
 			<div :class="$style.replaySetupRow">
-				<MkInput v-model="replayDaysAgo" type="number" :min="1" :max="1095" :step="1">
-					<template #label>{{ i18n.ts._timelineReplay.daysAgo }}</template>
-				</MkInput>
-				<MkInput v-model="replayDate" type="date">
-					<template #label>{{ i18n.ts._timelineReplay.date }}</template>
+				<MkInput v-model="replayDatetime" type="datetime-local">
+					<template #label>{{ i18n.ts._timelineReplay.datetime }}</template>
 				</MkInput>
 			</div>
 			<div :class="$style.replaySetupRow">
-				<MkButton v-for="d in [7, 30, 100, 365]" :key="d" small rounded @click="replayDaysAgo = d">{{ d }}</MkButton>
+				<MkButton v-for="d in [7, 30, 100, 365]" :key="d" small rounded @click="applyReplayDaysAgo(d)">{{ d }}</MkButton>
 				<MkButton primary rounded style="margin-left: auto;" @click="startReplay">{{ i18n.ts._timelineReplay.start }}</MkButton>
 				<MkButton rounded @click="showReplaySetup = false">{{ i18n.ts.cancel }}</MkButton>
 			</div>
@@ -65,43 +62,25 @@ import { deepMerge } from '@/utility/merge.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { availableBasicTimelines, hasWithReplies, isAvailableBasicTimeline, isBasicTimeline, basicTimelineIconClass } from '@/timelines.js';
 import { prefer } from '@/preferences.js';
-import { REPLAY_DEFAULT_DAYS_AGO, clampDaysAgo, clampAnchor, daysAgoToAnchor, anchorToDaysAgo, toYmd, fromYmd } from '@/utility/timeline-replay.js';
+import { REPLAY_DEFAULT_DAYS_AGO, clampAnchor, daysAgoToAnchor, fromLocalDatetime, toLocalDatetime } from '@/utility/timeline-replay.js';
 
 const tlComponent = useTemplateRef('tlComponent');
 
 const replayAnchor = ref<number | null>(null);
 const replayNonce = ref(0);
-const replayDaysAgo = ref<number>(REPLAY_DEFAULT_DAYS_AGO);
-const replayDate = ref<string>(toYmd(daysAgoToAnchor(REPLAY_DEFAULT_DAYS_AGO)));
+const replayDatetime = ref<string>(toLocalDatetime(daysAgoToAnchor(REPLAY_DEFAULT_DAYS_AGO)));
 const showReplaySetup = ref(false);
 
-watch(replayDaysAgo, (v) => {
-	const clamped = clampDaysAgo(v);
-	if (clamped !== v) {
-		replayDaysAgo.value = clamped;
-		return;
-	}
-	const ymd = toYmd(daysAgoToAnchor(clamped));
-	if (ymd !== replayDate.value) replayDate.value = ymd;
-});
-
-watch(replayDate, (v) => {
-	const t = fromYmd(v);
-	if (t == null || t > Date.now()) return;
-	const days = anchorToDaysAgo(t);
-	if (days !== replayDaysAgo.value) {
-		replayDaysAgo.value = days;
-	}
-});
+function applyReplayDaysAgo(days: number) {
+	replayDatetime.value = toLocalDatetime(daysAgoToAnchor(days));
+}
 
 function startReplay() {
-	const fromDate = fromYmd(replayDate.value);
-	const anchor = fromDate != null && fromDate <= Date.now()
-		? clampAnchor(fromDate)
-		: daysAgoToAnchor(replayDaysAgo.value);
-	// 日付入力で範囲外が丸められた場合に表示と一致させる
-	replayDaysAgo.value = anchorToDaysAgo(anchor);
-	replayDate.value = toYmd(anchor);
+	const fromDatetime = fromLocalDatetime(replayDatetime.value);
+	if (fromDatetime == null || fromDatetime > Date.now()) return;
+	const anchor = clampAnchor(fromDatetime);
+	// 日時入力で範囲外が丸められた場合に表示と一致させる
+	replayDatetime.value = toLocalDatetime(anchor);
 	replayAnchor.value = anchor;
 	replayNonce.value++;
 	showReplaySetup.value = false;

@@ -10753,6 +10753,10 @@ export interface Locale extends ILocale {
          */
         "date": string;
         /**
+         * 日時
+         */
+        "datetime": string;
+        /**
          * リプレイ開始
          */
         "start": string;
@@ -10788,6 +10792,22 @@ export interface Locale extends ILocale {
          * ホームは現在のフォロー関係で再取得するため、当時と厳密には一致しません
          */
         "homeTimelineNote": string;
+        /**
+         * タイムラインを選択
+         */
+        "selectTimeline": string;
+        /**
+         * リストを選択
+         */
+        "selectList": string;
+        /**
+         * タイムラインを変更
+         */
+        "changeTimeline": string;
+        /**
+         * 再現する時刻とタイムラインを選択
+         */
+        "setupTitle": string;
     };
     "_play": {
         /**
@@ -11449,6 +11469,10 @@ export interface Locale extends ILocale {
              * ダイレクトメッセージ
              */
             "chat": string;
+            /**
+             * タイムマシン
+             */
+            "replay": string;
         };
     };
     "_dialog": {

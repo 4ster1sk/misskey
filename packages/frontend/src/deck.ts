@@ -47,6 +47,7 @@ export const columnTypes = [
 	'direct',
 	'roleTimeline',
 	'chat',
+	'replay',
 ] as const;
 
 export type ColumnType = typeof columnTypes[number];
@@ -63,6 +64,8 @@ export type Column = {
 	listId?: string;
 	channelId?: string;
 	roleId?: string;
+	replaySrc?: BasicTimelineType | 'list';
+	replayListId?: string;
 	excludeTypes?: typeof notificationTypes[number][];
 	tl?: BasicTimelineType;
 	withRenotes?: boolean;
