@@ -717,6 +717,11 @@ export class MiMeta {
 	})
 	public deliverSuspendedSoftware: SoftwareSuspension[];
 
+	@Column('jsonb', {
+		default: [],
+	})
+	public receiveSuspendedSoftware: SoftwareSuspension[];
+
 	@Column('boolean', {
 		default: false,
 	})

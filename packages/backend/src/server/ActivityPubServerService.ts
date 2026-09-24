@@ -4,6 +4,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import { URL } from 'node:url';
 import { IncomingMessage } from 'node:http';
 import { Inject, Injectable } from '@nestjs/common';
 import fastifyAccepts from '@fastify/accepts';
@@ -25,6 +26,7 @@ import { countIf } from '@/misc/prelude/array.js';
 import type { MiNote } from '@/models/Note.js';
 import { QueryService } from '@/core/QueryService.js';
 import { UtilityService } from '@/core/UtilityService.js';
+import { FederatedInstanceService } from '@/core/FederatedInstanceService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { bindThis } from '@/decorators.js';
 import { IActivity } from '@/core/activitypub/type.js';
@@ -75,6 +77,7 @@ export class ActivityPubServerService {
 		private followRequestsRepository: FollowRequestsRepository,
 
 		private utilityService: UtilityService,
+		private federatedInstanceService: FederatedInstanceService,
 		private userEntityService: UserEntityService,
 		private apRendererService: ApRendererService,
 		private queueService: QueueService,
@@ -112,7 +115,7 @@ export class ActivityPubServerService {
 	}
 
 	@bindThis
-	private inbox(request: FastifyRequest, reply: FastifyReply) {
+	private async inbox(request: FastifyRequest, reply: FastifyReply) {
 		if (this.meta.federation === 'none') {
 			reply.code(403);
 			return;
@@ -194,6 +197,21 @@ export class ActivityPubServerService {
 			const delay = Date.now() - new Date(request.headers.date).getTime();
 			const host = this.utilityService.toPuny(new URL(signature.keyId).hostname);
 			this.logger.info(`Inbox host: ${host}, delay: ${delay}ms`);
+		}
+		
+		// 受信停止中のソフトウェアからのリクエストはキューに入れずに拒否する
+		// (InboxProcessorService 側でも再検査する)
+		if (typeof signature.keyId === 'string') {
+			try {
+				const signerHost = this.utilityService.toPuny(new URL(signature.keyId).hostname);
+				const instance = await this.federatedInstanceService.fetch(signerHost);
+				if (instance != null && this.utilityService.isReceiveSuspendedSoftware(instance)) {
+					reply.code(403);
+					return;
+				}
+			} catch (_) {
+				// keyId が URL として解釈できない場合はキュー側の判定に委ねる
+			}
 		}
 
 		this.queueService.inbox(body as IActivity, signature);

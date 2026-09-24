@@ -219,6 +219,17 @@ export const paramDef = {
 				required: ['software', 'versionRange'],
 			},
 		},
+		receiveSuspendedSoftware: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					software: { type: 'string' },
+					versionRange: { type: 'string' },
+				},
+				required: ['software', 'versionRange'],
+			},
+		},
 		singleUserMode: { type: 'boolean' },
 		ugcVisibilityForVisitor: {
 			type: 'string',
@@ -760,6 +771,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (ps.deliverSuspendedSoftware !== undefined) {
 				set.deliverSuspendedSoftware = ps.deliverSuspendedSoftware;
+			}
+
+			if (ps.receiveSuspendedSoftware !== undefined) {
+				set.receiveSuspendedSoftware = ps.receiveSuspendedSoftware;
 			}
 
 			if (Array.isArray(ps.federationHosts)) {

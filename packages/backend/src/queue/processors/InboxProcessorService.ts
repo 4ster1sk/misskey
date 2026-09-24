@@ -79,6 +79,13 @@ export class InboxProcessorService implements OnApplicationShutdown {
 			return `Blocked request: ${host}`;
 		}
 
+		{
+			const instance = await this.federatedInstanceService.fetch(host);
+			if (instance != null && this.utilityService.isReceiveSuspendedSoftware(instance)) {
+				return `Blocked request (software suspended): ${host}`;
+			}
+		}
+
 		const keyIdLower = signature.keyId.toLowerCase();
 		if (keyIdLower.startsWith('acct:')) {
 			return `Old keyId is no longer supported. ${keyIdLower}`;
@@ -208,6 +215,13 @@ export class InboxProcessorService implements OnApplicationShutdown {
 				const ldHost = this.utilityService.extractDbHost(authUser.user.uri);
 				if (!this.utilityService.isFederationAllowedHost(ldHost)) {
 					throw new Bull.UnrecoverableError(`Blocked request: ${ldHost}`);
+				}
+
+				{
+					const ldInstance = await this.federatedInstanceService.fetch(ldHost);
+					if (ldInstance != null && this.utilityService.isReceiveSuspendedSoftware(ldInstance)) {
+						throw new Bull.UnrecoverableError(`Blocked request (software suspended): ${ldHost}`);
+					}
 				}
 			} else {
 				throw new Bull.UnrecoverableError(`skip: http-signature verification failed and no LD-Signature. keyId=${signature.keyId}`);

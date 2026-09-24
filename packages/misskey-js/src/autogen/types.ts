@@ -9612,6 +9612,10 @@ export interface operations {
                             software: string;
                             versionRange: string;
                         }[];
+                        receiveSuspendedSoftware: {
+                            software: string;
+                            versionRange: string;
+                        }[];
                         singleUserMode: boolean;
                         /** @enum {string} */
                         ugcVisibilityForVisitor: 'all' | 'local' | 'none';
@@ -13133,6 +13137,10 @@ export interface operations {
                     disableSignup?: boolean;
                     serverChartsAuthRequired?: boolean;
                     deliverSuspendedSoftware?: {
+                        software: string;
+                        versionRange: string;
+                    }[];
+                    receiveSuspendedSoftware?: {
                         software: string;
                         versionRange: string;
                     }[];
