@@ -2195,6 +2195,15 @@ export type paths = {
          */
         post: operations['following___requests___list'];
     };
+    '/following/requests/mark-as-read': {
+        /**
+         * following/requests/mark-as-read
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *write:following*
+         */
+        post: operations['following___requests___mark-as-read'];
+    };
     '/following/requests/reject': {
         /**
          * following/requests/reject
@@ -4198,6 +4207,7 @@ export type components = {
             hasUnreadChatMessages: boolean;
             hasUnreadNotification: boolean;
             hasPendingReceivedFollowRequest: boolean;
+            hasUnreadFollowRequest: boolean;
             unreadNotificationsCount: number;
             mutedWords: string[][];
             hardMutedWords: string[][];
@@ -23283,6 +23293,61 @@ export interface operations {
                         follower: components['schemas']['UserLite'];
                         followee: components['schemas']['UserLite'];
                     }[];
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    'following___requests___mark-as-read': {
+        responses: {
+            /** @description OK (without any results) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
                 };
             };
             /** @description Client error */

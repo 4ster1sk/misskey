@@ -371,6 +371,27 @@ export class UserEntityService implements OnModuleInit {
 	}
 
 	@bindThis
+	public async getHasUnreadFollowRequest(userId: MiUser['id']): Promise<boolean> {
+		const card = await this.redisClient.scard(`unreadFollowRequest:${userId}`);
+		if (card > 0) return true;
+
+		const keyExists = await this.redisClient.exists(`unreadFollowRequest:${userId}`);
+		if (keyExists) return false;
+
+		// 明示的に既読にされていれば未読でない
+		const readMarkerExists = await this.redisClient.exists(`readFollowRequest:${userId}`);
+		if (readMarkerExists) return false;
+
+		// fail-closed: キー欠落・失効・flush後で未読マーカーも既読マーカーも無ければDB残件を見る
+		const count = await this.followRequestsRepository.countBy({
+			followeeId: userId,
+		});
+		if (count > 0) return true;
+
+		return false;
+	}
+
+	@bindThis
 	public getOnlineStatus(user: MiUser): 'unknown' | 'online' | 'active' | 'offline' {
 		if (user.hideOnlineStatus) return 'unknown';
 		if (user.lastActiveDate == null) return 'unknown';
@@ -609,6 +630,7 @@ export class UserEntityService implements OnModuleInit {
 				hasUnreadChannel: false, // 後方互換性のため
 				hasUnreadNotification: notificationsInfo?.hasUnread, // 後方互換性のため
 				hasPendingReceivedFollowRequest: this.getHasPendingReceivedFollowRequest(user.id),
+				hasUnreadFollowRequest: this.getHasUnreadFollowRequest(user.id),
 				unreadNotificationsCount: notificationsInfo?.unreadCount,
 				mutedWords: profile!.mutedWords,
 				hardMutedWords: profile!.hardMutedWords,

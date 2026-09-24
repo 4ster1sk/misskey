@@ -227,6 +227,7 @@ export * as 'following/invalidate' from './endpoints/following/invalidate.js';
 export * as 'following/requests/accept' from './endpoints/following/requests/accept.js';
 export * as 'following/requests/cancel' from './endpoints/following/requests/cancel.js';
 export * as 'following/requests/list' from './endpoints/following/requests/list.js';
+export * as 'following/requests/mark-as-read' from './endpoints/following/requests/mark-as-read.js';
 export * as 'following/requests/reject' from './endpoints/following/requests/reject.js';
 export * as 'following/requests/sent' from './endpoints/following/requests/sent.js';
 export * as 'following/update' from './endpoints/following/update.js';

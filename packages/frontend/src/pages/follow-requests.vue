@@ -35,7 +35,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script lang="ts" setup>
 import * as Misskey from 'misskey-js';
-import { computed, markRaw, ref, watch } from 'vue';
+import { computed, markRaw, onMounted, ref, watch } from 'vue';
 import MkPagination from '@/components/MkPagination.vue';
 import MkButton from '@/components/MkButton.vue';
 import { userPage, acct } from '@/filters/user.js';
@@ -44,6 +44,7 @@ import { i18n } from '@/i18n.js';
 import { definePage } from '@/page.js';
 import { $i } from '@/i.js';
 import { Paginator } from '@/utility/paginator.js';
+import { misskeyApi } from '@/utility/misskey-api.js';
 
 const tab = ref($i?.isLocked ? 'list' : 'sent');
 
@@ -56,6 +57,27 @@ watch(tab, (newTab) => {
 		paginator = markRaw(new Paginator('following/requests/sent', { limit: 10 }));
 	}
 }, { immediate: true });
+
+function markAsReadWhenLoaded() {
+	const stop = watch(() => paginator.fetching.value, (fetching) => {
+		if (!fetching) {
+			misskeyApi('following/requests/mark-as-read', {});
+			stop();
+		}
+	}, { immediate: true });
+}
+
+onMounted(() => {
+	if (tab.value === 'list') {
+		markAsReadWhenLoaded();
+	}
+});
+
+watch(tab, (newTab) => {
+	if (newTab === 'list') {
+		markAsReadWhenLoaded();
+	}
+});
 
 function accept(user: Misskey.entities.UserLite) {
 	os.apiWithDialog('following/requests/accept', { userId: user.id }).then(() => {

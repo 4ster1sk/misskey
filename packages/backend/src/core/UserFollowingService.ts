@@ -5,6 +5,7 @@
 
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import * as Redis from 'ioredis';
 import { Brackets, IsNull } from 'typeorm';
 import type { MiLocalUser, MiPartialLocalUser, MiPartialRemoteUser, MiRemoteUser, MiUser } from '@/models/User.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
@@ -72,6 +73,9 @@ export class UserFollowingService implements OnModuleInit {
 
 		@Inject(DI.instancesRepository)
 		private instancesRepository: InstancesRepository,
+
+		@Inject(DI.redis)
+		private redisClient: Redis.Redis,
 
 		private cacheService: CacheService,
 		private utilityService: UtilityService,
@@ -275,6 +279,7 @@ export class UserFollowingService implements OnModuleInit {
 				followeeId: followee.id,
 				followerId: follower.id,
 			});
+			this.redisClient.srem(`unreadFollowRequest:${followee.id}`, follower.id);
 		}
 
 		if (alreadyFollowed) return;
@@ -524,6 +529,8 @@ export class UserFollowingService implements OnModuleInit {
 
 		// Publish receiveRequest event
 		if (this.userEntityService.isLocalUser(followee)) {
+			this.redisClient.sadd(`unreadFollowRequest:${followee.id}`, follower.id);
+
 			this.userEntityService.pack(follower.id, followee).then(packed => this.globalEventService.publishMainStream(followee.id, 'receiveFollowRequest', packed));
 
 			this.userEntityService.pack(followee.id, followee, {
@@ -574,6 +581,8 @@ export class UserFollowingService implements OnModuleInit {
 			followerId: follower.id,
 		});
 
+		this.redisClient.srem(`unreadFollowRequest:${followee.id}`, follower.id);
+
 		this.userEntityService.pack(followee.id, followee, {
 			schema: 'MeDetailed',
 		}).then(packed => this.globalEventService.publishMainStream(followee.id, 'meUpdated', packed));
@@ -600,6 +609,8 @@ export class UserFollowingService implements OnModuleInit {
 		if (this.userEntityService.isRemoteUser(follower) && this.userEntityService.isLocalUser(followee)) {
 			this.deliverAccept(follower, followee as MiPartialLocalUser, request.requestId ?? undefined);
 		}
+
+		this.redisClient.srem(`unreadFollowRequest:${followee.id}`, follower.id);
 
 		this.userEntityService.pack(followee.id, followee, {
 			schema: 'MeDetailed',
@@ -632,6 +643,10 @@ export class UserFollowingService implements OnModuleInit {
 		}
 
 		await this.removeFollowRequest(user, follower);
+
+		this.userEntityService.pack(user.id, user, {
+			schema: 'MeDetailed',
+		}).then(packed => this.globalEventService.publishMainStream(user.id, 'meUpdated', packed));
 
 		if (this.userEntityService.isLocalUser(follower)) {
 			this.publishUnfollow(user, follower);
@@ -677,6 +692,8 @@ export class UserFollowingService implements OnModuleInit {
 		if (!request) return;
 
 		await this.followRequestsRepository.delete(request.id);
+
+		this.redisClient.srem(`unreadFollowRequest:${followee.id}`, follower.id);
 	}
 
 	/**
