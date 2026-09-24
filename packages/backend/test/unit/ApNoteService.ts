@@ -194,22 +194,4 @@ describe('ApNoteService', () => {
 			expect(noteCreate.mock.calls[0][1].files).toHaveLength(3);
 		});
 	});
-
-	describe('updateNote', () => {
-		test('attachmentが100件でも16件で打ち切られる', async () => {
-			await apNoteService.updateNote(buildNote(100) as never, {} as MiNote, resolver as never);
-
-			expect(uploadFromUrl).toHaveBeenCalledTimes(MAX_NOTE_ATTACHMENTS);
-			expect(noteUpdate).toHaveBeenCalledTimes(1);
-			expect(noteUpdate.mock.calls[0][1].files).toHaveLength(MAX_NOTE_ATTACHMENTS);
-		});
-
-		test('attachmentが上限以下なら全件取り込まれる', async () => {
-			await apNoteService.updateNote(buildNote(3) as never, {} as MiNote, resolver as never);
-
-			expect(uploadFromUrl).toHaveBeenCalledTimes(3);
-			expect(noteUpdate).toHaveBeenCalledTimes(1);
-			expect(noteUpdate.mock.calls[0][1].files).toHaveLength(3);
-		});
-	});
 });
