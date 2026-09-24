@@ -134,19 +134,11 @@ describe('ApNoteService', () => {
 					useValue: { extractPollFromQuestion: vi.fn(async () => undefined) },
 				},
 				{
-					provide: ApEventService,
-					useValue: { extractEventFromNote: vi.fn(async () => undefined) },
-				},
-				{
 					provide: NoteCreateService,
 					useValue: {
 						checkProhibitedWordsContain: vi.fn(() => false),
 						create: noteCreate,
 					},
-				},
-				{
-					provide: NoteUpdateService,
-					useValue: { update: noteUpdate },
 				},
 				{
 					provide: ApLoggerService,

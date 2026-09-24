@@ -198,7 +198,7 @@ export class ActivityPubServerService {
 			const host = this.utilityService.toPuny(new URL(signature.keyId).hostname);
 			this.logger.info(`Inbox host: ${host}, delay: ${delay}ms`);
 		}
-		
+
 		// 受信停止中のソフトウェアからのリクエストはキューに入れずに拒否する
 		// (InboxProcessorService 側でも再検査する)
 		if (typeof signature.keyId === 'string') {
