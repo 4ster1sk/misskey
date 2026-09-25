@@ -16,19 +16,11 @@ describe('misc:maskSecretValue', () => {
 		expect(maskSecretValue('')).toBe('');
 	});
 
-	test('表示文字数以下の長さではすべての文字をマスクする', () => {
-		expect(maskSecretValue('abc')).toBe('***');
-		expect(maskSecretValue('abcd')).toBe('****');
-	});
-
-	test('表示文字数より長い場合は先頭の N 文字を残してマスクする', () => {
-		expect(maskSecretValue('abcde')).toBe('abcd*');
-		expect(maskSecretValue('abcdefghij')).toBe('abcd******');
-	});
-
-	test('カスタムの表示文字数を尊重する', () => {
-		expect(maskSecretValue('abcdef', 2)).toBe('ab****');
-		expect(maskSecretValue('ab', 2)).toBe('**');
+	test('長さに関わらず値全体を固定長でマスクする', () => {
+		expect(maskSecretValue('a')).toBe('*'.repeat(32));
+		expect(maskSecretValue('abcd')).toBe('*'.repeat(32));
+		expect(maskSecretValue('abcdefghij')).toBe('*'.repeat(32));
+		expect(maskSecretValue('x'.repeat(100))).toBe('*'.repeat(32));
 	});
 });
 
@@ -47,8 +39,8 @@ describe('misc:maskMetaSecrets', () => {
 			swPrivateKey: undefined,
 		};
 		const masked = maskMetaSecrets(meta) as typeof meta;
-		expect(masked.hcaptchaSecretKey).toBe('very' + '*'.repeat(16));
-		expect(masked.turnstileSecretKey).toBe('*****');
+		expect(masked.hcaptchaSecretKey).toBe('*'.repeat(32));
+		expect(masked.turnstileSecretKey).toBe('*'.repeat(32));
 		expect(masked.smtpPass).toBeNull();
 		expect(masked.swPrivateKey).toBeUndefined();
 	});
@@ -72,7 +64,7 @@ describe('misc:maskMetaSecrets', () => {
 		}
 		const masked = maskMetaSecrets(meta) as Record<string, string>;
 		for (const key of META_SECRET_FIELDS) {
-			expect(masked[key]).toBe('secr' + '*'.repeat(9));
+			expect(masked[key]).toBe('*'.repeat(32));
 		}
 	});
 });

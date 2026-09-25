@@ -122,10 +122,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 							</SearchMarker>
 
 							<SearchMarker>
-							<MkInput v-model="emailValidationForm.state.verifymailAuthKey" type="password" :placeholder="meta.hasVerifymailAuthKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''">
-								<template #prefix><i class="ti ti-key"></i></template>
-								<template #label><SearchLabel>Verifymail.io API Auth Key</SearchLabel></template>
-							</MkInput>
+								<MkInput v-model="emailValidationForm.state.verifymailAuthKey" type="password" :placeholder="meta.hasVerifymailAuthKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''">
+									<template #prefix><i class="ti ti-key"></i></template>
+									<template #label><SearchLabel>Verifymail.io API Auth Key</SearchLabel></template>
+								</MkInput>
 							</SearchMarker>
 
 							<SearchMarker>
@@ -142,10 +142,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 							</SearchMarker>
 
 							<SearchMarker>
-							<MkInput v-model="emailValidationForm.state.truemailAuthKey" type="password" :placeholder="meta.hasTruemailAuthKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''">
-								<template #prefix><i class="ti ti-key"></i></template>
-								<template #label><SearchLabel>TrueMail API Auth Key</SearchLabel></template>
-							</MkInput>
+								<MkInput v-model="emailValidationForm.state.truemailAuthKey" type="password" :placeholder="meta.hasTruemailAuthKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''">
+									<template #prefix><i class="ti ti-key"></i></template>
+									<template #label><SearchLabel>TrueMail API Auth Key</SearchLabel></template>
+								</MkInput>
 							</SearchMarker>
 						</div>
 					</MkFolder>

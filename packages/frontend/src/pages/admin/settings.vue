@@ -136,10 +136,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 								</SearchMarker>
 
 								<SearchMarker>
-								<MkInput v-model="serviceWorkerForm.state.swPrivateKey" type="password" :placeholder="meta.hasSwPrivateKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''">
-									<template #label><SearchLabel>Private key</SearchLabel><span v-if="serviceWorkerForm.modifiedStates.swPrivateKey" class="_modified">{{ i18n.ts.modified }}</span></template>
-									<template #prefix><i class="ti ti-key"></i></template>
-								</MkInput>
+									<MkInput v-model="serviceWorkerForm.state.swPrivateKey" type="password" :placeholder="meta.hasSwPrivateKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''">
+										<template #label><SearchLabel>Private key</SearchLabel><span v-if="serviceWorkerForm.modifiedStates.swPrivateKey" class="_modified">{{ i18n.ts.modified }}</span></template>
+										<template #prefix><i class="ti ti-key"></i></template>
+									</MkInput>
 								</SearchMarker>
 							</template>
 						</div>
