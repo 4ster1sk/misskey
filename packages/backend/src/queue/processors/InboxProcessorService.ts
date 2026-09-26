@@ -79,11 +79,8 @@ export class InboxProcessorService implements OnApplicationShutdown {
 			return `Blocked request: ${host}`;
 		}
 
-		{
-			const instance = await this.federatedInstanceService.fetch(host);
-			if (instance != null && this.utilityService.isReceiveSuspendedSoftware(instance)) {
-				return `Blocked request (software suspended): ${host}`;
-			}
+		if (await this.isReceiveSuspendedHost(host)) {
+			return `Blocked request (software suspended): ${host}`;
 		}
 
 		const keyIdLower = signature.keyId.toLowerCase();
@@ -287,6 +284,14 @@ export class InboxProcessorService implements OnApplicationShutdown {
 			throw e;
 		}
 		return 'ok';
+	}
+
+	@bindThis
+	private async isReceiveSuspendedHost(host: string): Promise<boolean> {
+		// 受信停止設定が無ければインスタンス情報を引かない
+		if (this.meta.receiveSuspendedSoftware.length === 0) return false;
+		const instance = await this.federatedInstanceService.fetch(host);
+		return instance != null && this.utilityService.isReceiveSuspendedSoftware(instance) != null;
 	}
 
 	@bindThis
