@@ -139,6 +139,7 @@ describe('ユーザー', () => {
 			hasUnreadNotification: user.hasUnreadNotification,
 			unreadNotificationsCount: user.unreadNotificationsCount,
 			hasPendingReceivedFollowRequest: user.hasPendingReceivedFollowRequest,
+			hasUnreadFollowRequest: user.hasUnreadFollowRequest,
 			unreadAnnouncements: user.unreadAnnouncements,
 			mutedWords: user.mutedWords,
 			hardMutedWords: user.hardMutedWords,
