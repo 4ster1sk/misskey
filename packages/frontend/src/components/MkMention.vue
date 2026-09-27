@@ -19,9 +19,8 @@ import { computed } from 'vue';
 import { host as localHost } from '@@/js/config.js';
 import type { MkABehavior } from '@/components/global/MkA.vue';
 import { $i } from '@/i.js';
-import { getStaticImageUrl, getProxiedImageUrl } from '@/utility/media-proxy.js';
+import { getStaticImageUrl } from '@/utility/media-proxy.js';
 import { prefer } from '@/preferences.js';
-import { instance } from '@/instance.js';
 
 const props = defineProps<{
 	username: string;
@@ -37,10 +36,10 @@ const isMe = $i && (
 	`@${props.username}@${toUnicode(props.host)}`.toLowerCase() === `@${$i.username}@${toUnicode(localHost)}`.toLowerCase()
 );
 
-const avatarUrl = computed(() => {
-	const v = `${instance.uri}/avatar/@${props.username}@${props.host}`;
-	return prefer.s.disableShowingAnimatedImages || prefer.s.disableShowingAnimatedAvatarImages || prefer.s.dataSaver.avatar ? getStaticImageUrl(v) : getProxiedImageUrl(v);
-});
+const avatarUrl = computed(() => prefer.s.disableShowingAnimatedImages || prefer.s.disableShowingAnimatedAvatarImages || prefer.s.dataSaver.avatar
+	? getStaticImageUrl(`/avatar/@${props.username}@${props.host}`)
+	: `/avatar/@${props.username}@${props.host}`,
+);
 </script>
 
 <style lang="scss" module>

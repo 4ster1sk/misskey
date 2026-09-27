@@ -286,12 +286,12 @@ export class ApPersonService implements OnModuleInit {
 		return {
 			...( avatar ? {
 				avatarId: avatar.id,
-				avatarUrl: avatar.url ? this.driveFileEntityService.getPublicUrl({ file: avatar, mode: 'avatar', allowProxiedUrl: false }) : null,
+				avatarUrl: avatar.url ? this.driveFileEntityService.getPublicUrl(avatar, 'avatar') : null,
 				avatarBlurhash: avatar.blurhash,
 			} : {}),
 			...( banner ? {
 				bannerId: banner.id,
-				bannerUrl: banner.url ? this.driveFileEntityService.getPublicUrl({ file: banner, allowProxiedUrl: false }) : null,
+				bannerUrl: banner.url ? this.driveFileEntityService.getPublicUrl(banner) : null,
 				bannerBlurhash: banner.blurhash,
 			} : {}),
 		};
