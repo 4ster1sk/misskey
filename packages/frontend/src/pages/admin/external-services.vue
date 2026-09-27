@@ -31,7 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 						<div class="_gaps_m">
 							<SearchMarker>
-								<MkInput v-model="deeplAuthKey">
+								<MkInput v-model="deeplAuthKey" type="password" autocomplete="new-password" :placeholder="meta.hasDeeplAuthKey ? i18n.ts.leaveEmptyToKeepCurrent.toString() : ''">
 									<template #prefix><i class="ti ti-key"></i></template>
 									<template #label><SearchLabel>Auth Key</SearchLabel></template>
 								</MkInput>
@@ -67,13 +67,13 @@ import MkFolder from '@/components/MkFolder.vue';
 
 const meta = await misskeyApi('admin/meta');
 
-const deeplAuthKey = ref(meta.deeplAuthKey ?? '');
+const deeplAuthKey = ref('');
 const deeplIsPro = ref(meta.deeplIsPro);
 const googleAnalyticsMeasurementId = ref(meta.googleAnalyticsMeasurementId ?? '');
 
 function save_deepl() {
 	os.apiWithDialog('admin/update-meta', {
-		deeplAuthKey: deeplAuthKey.value,
+		deeplAuthKey: deeplAuthKey.value === '' ? undefined : deeplAuthKey.value,
 		deeplIsPro: deeplIsPro.value,
 	}).then(() => {
 		fetchInstance(true);

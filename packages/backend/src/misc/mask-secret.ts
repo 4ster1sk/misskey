@@ -5,13 +5,12 @@
 
 import { META_SECRET_FIELDS } from './meta-secret-fields.js';
 
-export function maskSecretValue(value: string | null, visibleLength = 4): string | null {
+const MASKED_SECRET = '*'.repeat(32);
+
+export function maskSecretValue(value: string | null): string | null {
 	if (value === null) return null;
 	if (value === '') return '';
-	if (value.length <= visibleLength) {
-		return '*'.repeat(32);
-	}
-	return value.slice(0, visibleLength) + '*'.repeat(32 - visibleLength);
+	return MASKED_SECRET;
 }
 
 export function maskMetaSecrets(meta: unknown): unknown {

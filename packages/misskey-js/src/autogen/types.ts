@@ -9523,10 +9523,10 @@ export interface operations {
                         prohibitedWordsForNameOfUser: string[];
                         bannedEmailDomains?: string[];
                         preservedUsernames: string[];
-                        hcaptchaSecretKey: string | null;
-                        mcaptchaSecretKey: string | null;
-                        recaptchaSecretKey: string | null;
-                        turnstileSecretKey: string | null;
+                        hasHcaptchaSecretKey: boolean;
+                        hasMcaptchaSecretKey: boolean;
+                        hasRecaptchaSecretKey: boolean;
+                        hasTurnstileSecretKey: boolean;
                         /** @enum {string} */
                         sensitiveMediaDetection: 'none' | 'all' | 'local' | 'remote';
                         /** @enum {string} */
@@ -9544,8 +9544,8 @@ export interface operations {
                         smtpHost: string | null;
                         smtpPort: number | null;
                         smtpUser: string | null;
-                        smtpPass: string | null;
-                        swPrivateKey: string | null;
+                        hasSmtpPass: boolean;
+                        hasSwPrivateKey: boolean;
                         useObjectStorage: boolean;
                         objectStorageBaseUrl: string | null;
                         objectStorageBucket: string | null;
@@ -9554,17 +9554,17 @@ export interface operations {
                         objectStorageRegion: string | null;
                         objectStoragePort: number | null;
                         objectStorageAccessKey: string | null;
-                        objectStorageSecretKey: string | null;
+                        hasObjectStorageSecretKey: boolean;
                         objectStorageUseSSL: boolean;
                         objectStorageUseProxy: boolean;
                         objectStorageSetPublicRead: boolean;
                         enableIpLogging: boolean;
                         enableActiveEmailValidation: boolean;
                         enableVerifymailApi: boolean;
-                        verifymailAuthKey: string | null;
+                        hasVerifymailAuthKey: boolean;
                         enableTruemailApi: boolean;
                         truemailInstance: string | null;
-                        truemailAuthKey: string | null;
+                        hasTruemailAuthKey: boolean;
                         enableChartsForRemoteUser: boolean;
                         enableChartsForFederatedInstances: boolean;
                         enableStatsForFederatedInstances: boolean;
@@ -9581,7 +9581,7 @@ export interface operations {
                         enableReactionsBuffering: boolean;
                         notesPerOneAd: number;
                         backgroundImageUrl: string | null;
-                        deeplAuthKey: string | null;
+                        hasDeeplAuthKey: boolean;
                         deeplIsPro: boolean;
                         defaultDarkTheme: string | null;
                         defaultLightTheme: string | null;
