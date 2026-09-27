@@ -9,7 +9,7 @@ import * as assert from 'assert';
 import * as fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { describe, beforeAll, beforeEach, test, vi } from 'vitest';
+import { describe, beforeAll, beforeEach, afterEach, test, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
 
 import { MockResolver } from '../misc/mock-resolver.js';
@@ -26,7 +26,8 @@ import { GlobalModule } from '@/GlobalModule.js';
 import { CoreModule } from '@/core/CoreModule.js';
 import { FederatedInstanceService } from '@/core/FederatedInstanceService.js';
 import { LoggerService } from '@/core/LoggerService.js';
-import { MiMeta, MiNote, UserProfilesRepository } from '@/models/_.js';
+import { MiMeta, MiNote, UserProfilesRepository, UsersRepository, DriveFilesRepository } from '@/models/_.js';
+import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { secureRndstr } from '@/misc/secure-rndstr.js';
 import { DownloadService } from '@/core/DownloadService.js';
@@ -94,6 +95,9 @@ async function createRandomRemoteUser(
 
 describe('ActivityPub', () => {
 	let userProfilesRepository: UserProfilesRepository;
+	let usersRepository: UsersRepository;
+	let driveFilesRepository: DriveFilesRepository;
+	let config: Config;
 	let imageService: ApImageService;
 	let noteService: ApNoteService;
 	let personService: ApPersonService;
@@ -128,7 +132,12 @@ describe('ActivityPub', () => {
 		})
 			.overrideProvider(DownloadService).useValue({
 				async downloadUrl(url: string, path: string): Promise<{ filename: string }> {
-					if (url.endsWith('.png')) {
+					if (url.endsWith('.jpg')) {
+						fs.copyFileSync(
+							_dirname + '/../resources/192.jpg',
+							path,
+						);
+					} else if (url.endsWith('.png')) {
 						fs.copyFileSync(
 							_dirname + '/../resources/hw.png',
 							path,
@@ -146,6 +155,9 @@ describe('ActivityPub', () => {
 		app.enableShutdownHooks();
 
 		userProfilesRepository = app.get(DI.userProfilesRepository);
+		usersRepository = app.get(DI.usersRepository);
+		driveFilesRepository = app.get(DI.driveFilesRepository);
+		config = app.get<Config>(DI.config);
 
 		noteService = app.get<ApNoteService>(ApNoteService);
 		personService = app.get<ApPersonService>(ApPersonService);
@@ -517,6 +529,92 @@ describe('ActivityPub', () => {
 				linkObject,
 			);
 			assert.strictEqual(driveFile, null);
+		});
+	});
+
+	describe('Proxy URL', () => {
+		// DBには元のURLを保存し、APIで返すときにメディアプロキシを付与する方針のため、
+		// 保存時・AP配信時にプロキシURLが混入しないことを確認する
+		let configBackup: Pick<Config, 'externalMediaProxyEnabled'>;
+
+		beforeEach(() => {
+			configBackup = {
+				externalMediaProxyEnabled: config.externalMediaProxyEnabled,
+			};
+		});
+
+		afterEach(() => {
+			Object.assign(config, configBackup);
+		});
+
+		async function createPersonWithAvatarAndBanner(): Promise<MiRemoteUser> {
+			const actor = createRandomActor();
+			actor.icon = { type: 'Image', url: `${host}/icon-${secureRndstr(8)}.png` };
+			// アイコンと同じ内容だとmd5で同じドライブファイルにまとめられるため、別の画像にする
+			actor.image = { type: 'Image', url: `${host}/banner-${secureRndstr(8)}.jpg` };
+			resolver.register(actor.id, actor);
+			return await personService.createPerson(actor.id, resolver);
+		}
+
+		async function assertStoredRawUrls(userId: string): Promise<void> {
+			const user = await usersRepository.findOneByOrFail({ id: userId });
+			assert.ok(user.avatarId, 'avatarIdが設定される');
+			assert.ok(user.bannerId, 'bannerIdが設定される');
+
+			const avatar = await driveFilesRepository.findOneByOrFail({ id: user.avatarId });
+			const banner = await driveFilesRepository.findOneByOrFail({ id: user.bannerId });
+			assert.strictEqual(user.avatarUrl, avatar.webpublicUrl ?? avatar.url);
+			assert.strictEqual(user.bannerUrl, banner.webpublicUrl ?? banner.url);
+			assert.ok(!user.avatarUrl!.startsWith(`${config.mediaProxy}/`), 'avatarUrlにプロキシURLを保存しない');
+			assert.ok(!user.bannerUrl!.startsWith(`${config.mediaProxy}/`), 'bannerUrlにプロキシURLを保存しない');
+		}
+
+		test('リモートユーザーのavatarUrl/bannerUrlは元のURLで保存される', async () => {
+			const user = await createPersonWithAvatarAndBanner();
+			await assertStoredRawUrls(user.id);
+		});
+
+		test('externalMediaProxyEnabledが有効でも元のURLで保存される', async () => {
+			config.externalMediaProxyEnabled = true;
+
+			const user = await createPersonWithAvatarAndBanner();
+			await assertStoredRawUrls(user.id);
+		});
+
+		test('キャッシュしないリモートファイルでも元のURLで保存される', async () => {
+			updateMeta({ ...metaInitial, cacheRemoteFiles: false, proxyRemoteFiles: true });
+			try {
+				const user = await createPersonWithAvatarAndBanner();
+				await assertStoredRawUrls(user.id);
+			} finally {
+				updateMeta(metaInitial);
+			}
+		});
+
+		function localDriveFile(overrides: Partial<MiDriveFile> = {}): MiDriveFile {
+			return {
+				id: genAidx(Date.now()),
+				type: 'image/png',
+				webpublicType: null,
+				url: 'https://example.test/files/image.png',
+				webpublicUrl: null,
+				comment: null,
+				isSensitive: false,
+				properties: {},
+				uri: null,
+				userHost: null,
+				isLink: false,
+				webpublicAccessKey: null,
+				...overrides,
+			} as MiDriveFile;
+		}
+
+		test('renderDocument/renderImageのurlはプロキシを通さない', () => {
+			config.externalMediaProxyEnabled = true;
+			const file = localDriveFile({ webpublicUrl: 'https://example.test/files/webpublic.png' });
+
+			assert.strictEqual(rendererService.renderDocument(file).url, 'https://example.test/files/webpublic.png');
+			assert.strictEqual(rendererService.renderImage(file).url, 'https://example.test/files/webpublic.png');
 		});
 	});
 

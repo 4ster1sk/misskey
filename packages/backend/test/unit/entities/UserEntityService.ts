@@ -13,6 +13,7 @@ import { secureRndstr } from '@/misc/secure-rndstr.js';
 import { genAidx } from '@/misc/id/aidx.js';
 import {
 	BlockingsRepository,
+	MiMeta,
 	FollowingsRepository, FollowRequestsRepository,
 	MiUserProfile, MutingsRepository, RenoteMutingsRepository,
 	UserMemoRepository,
@@ -52,6 +53,7 @@ import { ReactionService } from '@/core/ReactionService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { ReactionsBufferingService } from '@/core/ReactionsBufferingService.js';
 import { ChatService } from '@/core/ChatService.js';
+import type { Config } from '@/config.js';
 
 process.env.NODE_ENV = 'test';
 
@@ -59,6 +61,7 @@ describe('UserEntityService', () => {
 	describe('pack/packMany', () => {
 		let app: TestingModule;
 		let service: UserEntityService;
+		let config: Config;
 		let usersRepository: UsersRepository;
 		let userProfileRepository: UserProfilesRepository;
 		let userMemosRepository: UserMemoRepository;
@@ -188,6 +191,7 @@ describe('UserEntityService', () => {
 			app.enableShutdownHooks();
 
 			service = app.get<UserEntityService>(UserEntityService);
+			config = app.get<Config>(DI.config);
 			usersRepository = app.get<UsersRepository>(DI.usersRepository);
 			userProfileRepository = app.get<UserProfilesRepository>(DI.userProfilesRepository);
 			userMemosRepository = app.get<UserMemoRepository>(DI.userMemosRepository);
@@ -247,6 +251,125 @@ describe('UserEntityService', () => {
 			expect(actual.birthday).toBe('2000-01-01');
 			// is detail and me
 			expect(actual.achievements).toEqual(achievements);
+		});
+
+		describe('アバター/バナーURLのメディアプロキシ付与', () => {
+			function makeUser(data: Partial<MiUser>): MiUser {
+				return {
+					id: genAidx(Date.now()),
+					username: 'alice',
+					usernameLower: 'alice',
+					host: null,
+					avatarId: null,
+					avatarUrl: null,
+					bannerId: null,
+					bannerUrl: null,
+					...data,
+				} as MiUser;
+			}
+
+			test('アバターが設定されている場合はavatarモードのプロキシURLを返す', () => {
+				const user = makeUser({ avatarId: 'file1', avatarUrl: 'https://remote.example.com/files/avatar.png', host: 'remote.example.com' });
+				const actual = new URL(service.getAvatarUrl(user));
+
+				expect(`${actual.origin}${actual.pathname}`).toBe(`${config.mediaProxy}/avatar.webp`);
+				expect(actual.searchParams.get('url')).toBe('https://remote.example.com/files/avatar.png');
+				expect(actual.searchParams.get('avatar')).toBe('1');
+			});
+
+			test('ローカルユーザーのアバターもプロキシURLを返す', () => {
+				const user = makeUser({ avatarId: 'file1', avatarUrl: `${config.url}/files/avatar.png` });
+				const actual = new URL(service.getAvatarUrl(user));
+
+				expect(`${actual.origin}${actual.pathname}`).toBe(`${config.mediaProxy}/avatar.webp`);
+				expect(actual.searchParams.get('url')).toBe(`${config.url}/files/avatar.png`);
+			});
+
+			test('アバター未設定の場合はプロキシを通さないidenticonのURLを返す', () => {
+				const user = makeUser({});
+				expect(service.getAvatarUrl(user)).toBe(service.getIdenticonUrl(user));
+			});
+
+			test('avatarIdがnullならavatarUrlが残っていてもidenticonのURLを返す', () => {
+				const user = makeUser({ avatarUrl: 'https://remote.example.com/files/avatar.png' });
+				expect(service.getAvatarUrl(user)).toBe(service.getIdenticonUrl(user));
+			});
+
+			test('avatarUrlが空文字ならidenticonのURLを返す', () => {
+				const user = makeUser({ avatarId: 'file1', avatarUrl: '' });
+				expect(service.getAvatarUrl(user)).toBe(service.getIdenticonUrl(user));
+			});
+
+			test('リモートユーザーのバナーはプロキシURLを返す', () => {
+				const user = makeUser({ bannerId: 'file2', bannerUrl: 'https://remote.example.com/files/banner.png', host: 'remote.example.com' });
+				const actual = new URL(service.getBannerUrl(user)!);
+
+				expect(`${actual.origin}${actual.pathname}`).toBe(`${config.mediaProxy}/image.webp`);
+				expect(actual.searchParams.get('url')).toBe('https://remote.example.com/files/banner.png');
+			});
+
+			test('ローカルユーザーのバナーもプロキシURLを返す', () => {
+				const user = makeUser({ bannerId: 'file2', bannerUrl: `${config.url}/files/banner.png` });
+				const actual = new URL(service.getBannerUrl(user)!);
+
+				expect(`${actual.origin}${actual.pathname}`).toBe(`${config.mediaProxy}/image.webp`);
+				expect(actual.searchParams.get('url')).toBe(`${config.url}/files/banner.png`);
+			});
+
+			test('リモートのファイルをプロキシしない設定ならローカルユーザーのバナーもそのままのURLを返す', () => {
+				const meta = app.get<MiMeta>(DI.meta);
+				const original = { proxyRemoteFiles: meta.proxyRemoteFiles, externalMediaProxyEnabled: config.externalMediaProxyEnabled };
+				meta.proxyRemoteFiles = false;
+				config.externalMediaProxyEnabled = false;
+				try {
+					const user = makeUser({ bannerId: 'file2', bannerUrl: `${config.url}/files/banner.png` });
+					expect(service.getBannerUrl(user)).toBe(`${config.url}/files/banner.png`);
+				} finally {
+					meta.proxyRemoteFiles = original.proxyRemoteFiles;
+					config.externalMediaProxyEnabled = original.externalMediaProxyEnabled;
+				}
+			});
+
+			test('リモートのファイルをプロキシしない設定ならリモートユーザーのバナーはそのままのURLを返す', () => {
+				const meta = app.get<MiMeta>(DI.meta);
+				const original = { proxyRemoteFiles: meta.proxyRemoteFiles, externalMediaProxyEnabled: config.externalMediaProxyEnabled };
+				meta.proxyRemoteFiles = false;
+				config.externalMediaProxyEnabled = false;
+				try {
+					const user = makeUser({ bannerId: 'file2', bannerUrl: 'https://remote.example.com/files/banner.png', host: 'remote.example.com' });
+					expect(service.getBannerUrl(user)).toBe('https://remote.example.com/files/banner.png');
+				} finally {
+					meta.proxyRemoteFiles = original.proxyRemoteFiles;
+					config.externalMediaProxyEnabled = original.externalMediaProxyEnabled;
+				}
+			});
+
+			test.each([
+				['リモート', 'https://remote.example.com/files/banner.png', 'remote.example.com'],
+				['ローカル', 'https://local.example.com/files/banner.png', null],
+			])('外部メディアプロキシが有効ならproxyRemoteFilesが無効でも%sユーザーのバナーをプロキシする', (_, bannerUrl, host) => {
+				const meta = app.get<MiMeta>(DI.meta);
+				const original = { proxyRemoteFiles: meta.proxyRemoteFiles, externalMediaProxyEnabled: config.externalMediaProxyEnabled };
+				meta.proxyRemoteFiles = false;
+				config.externalMediaProxyEnabled = true;
+				try {
+					const user = makeUser({ bannerId: 'file2', bannerUrl, host });
+					const actual = new URL(service.getBannerUrl(user)!);
+					expect(`${actual.origin}${actual.pathname}`).toBe(`${config.mediaProxy}/image.webp`);
+					expect(actual.searchParams.get('url')).toBe(bannerUrl);
+				} finally {
+					meta.proxyRemoteFiles = original.proxyRemoteFiles;
+					config.externalMediaProxyEnabled = original.externalMediaProxyEnabled;
+				}
+			});
+
+			test('bannerUrlが空文字ならnullを返す', () => {
+				expect(service.getBannerUrl(makeUser({ bannerId: 'file2', bannerUrl: '', host: 'remote.example.com' }))).toBeNull();
+			});
+
+			test('バナー未設定の場合はnullを返す', () => {
+				expect(service.getBannerUrl(makeUser({ bannerUrl: 'https://remote.example.com/files/banner.png', host: 'remote.example.com' }))).toBeNull();
+			});
 		});
 
 		test('alsoKnownAs as string does not throw', async () => {
