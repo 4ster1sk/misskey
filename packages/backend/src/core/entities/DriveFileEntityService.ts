@@ -78,7 +78,7 @@ export class DriveFileEntityService {
 	}
 
 	@bindThis
-	private getProxiedUrl(url: string, mode?: 'static' | 'avatar'): string {
+	public getProxiedUrl(url: string, mode?: 'static' | 'avatar'): string {
 		return appendQuery(
 			`${this.config.mediaProxy}/${mode ?? 'image'}.webp`,
 			query({
@@ -86,6 +86,16 @@ export class DriveFileEntityService {
 				...(mode ? { [mode]: '1' } : {}),
 			}),
 		);
+	}
+
+	/**
+	 * DBに保存したプロキシを通さないバナー (ユーザー・チャンネル) のURLに、APIで返す際のメディアプロキシのURLを付与する
+	 * 外部メディアプロキシが無効で、リモートのファイルをプロキシしない設定の場合は、ローカル・リモートとも元のURLを返す
+	 */
+	@bindThis
+	public getBannerUrl(url: string): string {
+		if (!this.config.externalMediaProxyEnabled && !this.meta.proxyRemoteFiles) return url;
+		return this.getProxiedUrl(url);
 	}
 
 	@bindThis
@@ -112,7 +122,20 @@ export class DriveFileEntityService {
 	}
 
 	@bindThis
-	public getPublicUrl(file: MiDriveFile, mode?: 'avatar'): string { // static = thumbnail
+	public getPublicUrl({
+		file,
+		mode,
+		allowProxiedUrl = true,
+	}: {
+		file: MiDriveFile;
+		mode?: 'avatar';
+		allowProxiedUrl?: boolean;
+	}): string { // static = thumbnail
+		// DBへの保存やAP配信では、プロキシを通さない元のURLを使う
+		if (!allowProxiedUrl) {
+			return file.webpublicUrl ?? file.url;
+		}
+
 		// リモートかつメディアプロキシ
 		if (file.uri != null && file.userHost != null && this.config.externalMediaProxyEnabled) {
 			return this.getProxiedUrl(file.uri, mode);
@@ -209,7 +232,7 @@ export class DriveFileEntityService {
 			isSensitive: file.isSensitive,
 			blurhash: file.blurhash,
 			properties: opts.self ? file.properties : this.getPublicProperties(file),
-			url: opts.self ? file.url : this.getPublicUrl(file),
+			url: opts.self ? file.url : this.getPublicUrl({ file }),
 			thumbnailUrl: this.getThumbnailUrl(file),
 			comment: file.comment,
 			folderId: file.folderId,
@@ -248,7 +271,7 @@ export class DriveFileEntityService {
 			isSensitive: file.isSensitive,
 			blurhash: file.blurhash,
 			properties: opts.self ? file.properties : this.getPublicProperties(file),
-			url: opts.self ? file.url : this.getPublicUrl(file),
+			url: opts.self ? file.url : this.getPublicUrl({ file }),
 			thumbnailUrl: this.getThumbnailUrl(file),
 			comment: file.comment,
 			folderId: file.folderId,

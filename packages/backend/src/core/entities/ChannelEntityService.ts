@@ -110,7 +110,8 @@ export class ChannelEntityService {
 			name: channel.name,
 			description: channel.description,
 			userId: channel.userId,
-			bannerUrl: bannerFile ? this.driveFileEntityService.getPublicUrl(bannerFile) : null,
+			// ユーザーのバナーと同じ判定でメディアプロキシのURLを付与する
+			bannerUrl: bannerFile ? this.driveFileEntityService.getBannerUrl(this.driveFileEntityService.getPublicUrl({ file: bannerFile, allowProxiedUrl: false })) : null,
 			bannerId: channel.bannerId,
 			pinnedNoteIds: channel.pinnedNoteIds,
 			color: channel.color,
