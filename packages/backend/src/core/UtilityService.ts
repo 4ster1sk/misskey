@@ -160,16 +160,16 @@ export class UtilityService {
 	@bindThis
 	public isSoftwareSuspended(suspendedSoftware: SoftwareSuspension[], software: Pick<MiInstance, 'softwareName' | 'softwareVersion'>): SoftwareSuspension | undefined {
 		if (software.softwareName == null) return undefined;
-		if (software.softwareVersion == null) {
-			// software version is null; suspend iff versionRange is *
-			return suspendedSoftware.find(x =>
-				x.software === software.softwareName
-				&& x.versionRange.trim() === '*');
-		} else {
-			const softwareVersion = software.softwareVersion;
-			return suspendedSoftware.find(x =>
-				x.software === software.softwareName
-				&& semver.satisfies(softwareVersion, x.versionRange, { includePrerelease: true }));
-		}
+		// サーバーが申告するバージョンは semver とは限らない (例: 2.90, v1, 1.0.0.0) ので正規化してから比較する
+		const softwareVersion = software.softwareVersion == null
+			? null
+			: semver.valid(software.softwareVersion) ?? semver.coerce(software.softwareVersion, { includePrerelease: true })?.version ?? null;
+		return this.meta.deliverSuspendedSoftware.find(x => {
+			if (x.software !== software.softwareName) return false;
+			// * はバージョンに関係なく (null や解釈できない値でも) 停止する
+			if (x.versionRange.trim() === '*') return true;
+			if (softwareVersion == null) return false;
+			return semver.satisfies(softwareVersion, x.versionRange, { includePrerelease: true });
+		});
 	}
 }
