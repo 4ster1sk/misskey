@@ -10,8 +10,8 @@ import { UtilityService } from '@/core/UtilityService.js';
 import type { Config } from '@/config.js';
 import type { MiMeta, SoftwareSuspension } from '@/models/Meta.js';
 
-function createService(deliverSuspendedSoftware: SoftwareSuspension[]): UtilityService {
-	return new UtilityService({} as Config, { deliverSuspendedSoftware } as MiMeta);
+function createService(deliverSuspendedSoftware: SoftwareSuspension[], receiveSuspendedSoftware: SoftwareSuspension[] = []): UtilityService {
+	return new UtilityService({} as Config, { deliverSuspendedSoftware, receiveSuspendedSoftware } as MiMeta);
 }
 
 describe('UtilityService', () => {
@@ -22,11 +22,15 @@ describe('UtilityService', () => {
 			{ version: 'unknown', range: '*', expected: true },
 			{ version: 'unknown', range: '>= 0.0.0', expected: false },
 			{ version: '', range: '*', expected: true },
-			{ version: '2.90', range: ' * ', expected: true },
-			{ version: '2.90.0', range: '*', expected: true },
-			{ version: '2.90', range: '*', expected: true },
-			{ version: '2.90', range: '>= 2.0.0', expected: true },
-			{ version: '2.90', range: '< 2.0.0', expected: false },
+			{ version: null, range: '', expected: true },
+			{ version: 'unknown', range: '', expected: true },
+			{ version: '3.30', range: '', expected: true },
+			{ version: '3.30', range: '  ', expected: true },
+			{ version: '3.30', range: ' * ', expected: true },
+			{ version: '3.30.0', range: '*', expected: true },
+			{ version: '3.30', range: '*', expected: true },
+			{ version: '3.30', range: '>= 2.0.0', expected: true },
+			{ version: '3.30', range: '< 2.0.0', expected: false },
 			{ version: 'v1', range: '*', expected: true },
 			{ version: 'v1', range: '>= 1.0.0', expected: true },
 			{ version: 'v1.0.0', range: '*', expected: true },
@@ -52,7 +56,7 @@ describe('UtilityService', () => {
 
 		test('ソフトウェア名が null の場合は停止対象にならない', () => {
 			const service = createService([{ software: 'suspended-software', versionRange: '*' }]);
-			const result = service.isDeliverSuspendedSoftware({ softwareName: null, softwareVersion: '2.90' });
+			const result = service.isDeliverSuspendedSoftware({ softwareName: null, softwareVersion: '3.30' });
 			expect(result).toBeUndefined();
 		});
 
@@ -63,8 +67,28 @@ describe('UtilityService', () => {
 				{ software: 'suspended-software', versionRange: '< 2.0.0' },
 				matched,
 			]);
-			const result = service.isDeliverSuspendedSoftware({ softwareName: 'suspended-software', softwareVersion: '2.90' });
+			const result = service.isDeliverSuspendedSoftware({ softwareName: 'suspended-software', softwareVersion: '3.30' });
 			expect(result).toBe(matched);
+		});
+	});
+
+	describe('isReceiveSuspendedSoftware', () => {
+		test('受信停止の設定で判定される', () => {
+			const service = createService([], [{ software: 'suspended-software', versionRange: '' }]);
+			const result = service.isReceiveSuspendedSoftware({ softwareName: 'suspended-software', softwareVersion: '3.30' });
+			expect(result).toEqual({ software: 'suspended-software', versionRange: '' });
+		});
+
+		test('配信停止の設定は受信停止の判定に影響しない', () => {
+			const service = createService([{ software: 'suspended-software', versionRange: '*' }], []);
+			const result = service.isReceiveSuspendedSoftware({ softwareName: 'suspended-software', softwareVersion: '3.30' });
+			expect(result).toBeUndefined();
+		});
+
+		test('受信停止の設定は配信停止の判定に影響しない', () => {
+			const service = createService([], [{ software: 'suspended-software', versionRange: '*' }]);
+			const result = service.isDeliverSuspendedSoftware({ softwareName: 'suspended-software', softwareVersion: '3.30' });
+			expect(result).toBeUndefined();
 		});
 	});
 });
