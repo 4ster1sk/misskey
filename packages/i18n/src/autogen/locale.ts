@@ -1473,6 +1473,10 @@ export interface Locale extends ILocale {
      */
     "hasChildFilesOrFolders": string;
     /**
+     * このフォルダは既定アップロード先に指定されています。削除すると、既定アップロード先は解除され、ファイルはルートにアップロードされます。
+     */
+    "uploadFolderDeletionConfirm": string;
+    /**
      * URLをコピー
      */
     "copyUrl": string;
@@ -4121,6 +4125,10 @@ export interface Locale extends ILocale {
      */
     "cannotUploadBecauseUnallowedFileType": string;
     /**
+     * アップロード先のフォルダが見つかりません。既定アップロード先の設定を確認してください。
+     */
+    "cannotUploadBecauseNoSuchFolder": string;
+    /**
      * ベータ
      */
     "beta": string;
@@ -6396,6 +6404,10 @@ export interface Locale extends ILocale {
          * URLプレビューの埋め込みプレイヤーを自動再生
          */
         "autoplayEmbededPlayerOfUrlPreview": string;
+        /**
+         * URLプレビューを自動展開
+         */
+        "expandUrlPreviewAutomatically": string;
         "_chat": {
             /**
              * 送信者の名前を表示
