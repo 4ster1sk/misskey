@@ -821,6 +821,7 @@ describe('Streaming', () => {
 							caseSensitive: false,
 							withReplies: false,
 							withFile: false,
+							notify: false,
 						}, viewer);
 						assert.strictEqual(antenna.status, 200);
 						const delivered = Promise.withResolvers<misskey.entities.Note>();
